@@ -1,5 +1,8 @@
 <?php
 /**
+ *
+ *
+ *
  * IXR - The Incutio XML-RPC Library
  *
  * Copyright (c) 2010, Incutio Ltd.
@@ -29,15 +32,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @package XMLRPC
- * @since 1.5
  *
- * @copyright  Incutio Ltd 2010 (http://www.incutio.com)
- * @version    1.7.4 7th September 2010
- * @author     Simon Willison
- * @link       http://scripts.incutio.com/xmlrpc/ Site/manual
- *
- * @modification Victor Dramba 2015
+ * This library is based on Incutio XMLRPC library version 1.7.4 7th September 2010
+ * It retains only the client code with some changes
+ * Original author: Simon Willison
+ * Modified by Victor Dramba 2015
  */
 
 
