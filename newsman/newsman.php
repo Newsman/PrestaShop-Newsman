@@ -16,9 +16,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *
-* @copyright 2015 Dazoot Software
-* @author Dramba Victor for Newsman
-* @license http://www.apache.org/licenses/LICENSE-2.0
+*   @copyright 2015 Dazoot Software
+*   @author Dramba Victor for Newsman
+*   @license http://www.apache.org/licenses/LICENSE-2.0
 */
 
 class Newsman extends Module
