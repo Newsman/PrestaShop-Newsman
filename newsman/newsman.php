@@ -442,7 +442,7 @@ class Newsman extends Module
 		foreach ($mapping as $key => $value) {
 			if (!$value) continue;
 			if (Tools::substr($key, 0, 10) !== 'map_group_') continue;
-			$id_group = intval(Tools::substr($key, 10));
+			$id_group = (int) (Tools::substr($key, 10));
 			$q = (new DbQuery())
 				->select('c.email, c.firstname, c.lastname')
 				->from('customer', 'c')
