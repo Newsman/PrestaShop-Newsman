@@ -11,7 +11,7 @@ class Newsman extends Module
 	public function __construct() {
 		$this->name = 'newsman';
 		$this->tab = 'advertising_marketing';
-		$this->version = '1.0';
+		$this->version = '1.0.0';
 		$this->author = 'Victor Dramba for Newsman';
 		$this->need_instance = 0;
 		$this->ps_versions_compliancy = array('min' => '1.4', 'max' => _PS_VERSION_);
@@ -435,14 +435,14 @@ class Newsman extends Module
 			foreach ($ret as $row)
 				$csv .= "{$row['email']},newsletter\n";
 			//upload from newsletter
-			$segment_id = substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? substr($mapping['map_newsletter'], 4) : null;
+			$segment_id = Tools::substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? Tools::substr($mapping['map_newsletter'], 4) : null;
 			$client->query('import.csv', $list_id, array($segment_id), $csv);
 			//$import_id[] = $client->getResponse();
 		}
 		foreach ($mapping as $key => $value) {
 			if (!$value) continue;
-			if (substr($key, 0, 10) !== 'map_group_') continue;
-			$id_group = intval(substr($key, 10));
+			if (Tools::substr($key, 0, 10) !== 'map_group_') continue;
+			$id_group = intval(Tools::substr($key, 10));
 			$q = (new DbQuery())
 				->select('c.email, c.firstname, c.lastname')
 				->from('customer', 'c')
@@ -459,7 +459,7 @@ class Newsman extends Module
 					$csv .= "group_{$id_group}\n";
 				}
 				//upload group
-				$segment_id = substr($value, 0, 4) == 'seg_' ? substr($value, 4) : null;
+				$segment_id = Tools::substr($value, 0, 4) == 'seg_' ? Tools::substr($value, 4) : null;
 				$client->query('import.csv', $list_id, array($segment_id), $csv);
 				//$import_id[] = $client->getResponse();
 			}
