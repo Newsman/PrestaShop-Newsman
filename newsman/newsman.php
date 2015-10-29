@@ -15,6 +15,7 @@ class Newsman extends Module
 		$this->author = 'Victor Dramba for Newsman';
 		$this->need_instance = 0;
 		$this->ps_versions_compliancy = array('min' => '1.4', 'max' => _PS_VERSION_);
+		$this->module_key = 'bb46dd134d42c2936ece1d3322d3a384';
 
 		$this->bootstrap = true;
 		parent::__construct();
@@ -309,7 +310,7 @@ class Newsman extends Module
 		});
 	}
 </script>
-<?
+<?php
 		$out .= ob_get_clean();
 		return $out;
 	}
