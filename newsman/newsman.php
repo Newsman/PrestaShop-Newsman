@@ -21,7 +21,7 @@ class Newsman extends Module
 
 		$this->displayName = $this->l('Newsman');
 		//TODO detailed description (in config.xml too)
-		$this->description = $this->l('Manage your Newsman subscriber lists.');
+		$this->description = $this->l('The official Newsman module for PrestaShop. Manage your Newsman subscriber lists, map your shop groups to the Newsman segments.');
 
 		$this->confirmUninstall = $this->l('Are you sure you want to uninstall Newsman module?');
 	}
@@ -32,7 +32,8 @@ class Newsman extends Module
 			&& Configuration::deleteByName('NEWSMAN_MAPPING')
 			&& Configuration::deleteByName('NEWSMAN_CONNECTED')
 			&& Configuration::deleteByName('NEWSMAN_API_KEY')
-			&& Configuration::deleteByName('NEWSMAN_USER_ID');
+			&& Configuration::deleteByName('NEWSMAN_USER_ID')
+			&& Configuration::deleteByName('NEWSMAN_CRON');
 	}
 
 	public function getContent() {
@@ -63,6 +64,7 @@ class Newsman extends Module
 		$helper->fields_value['api_key'] = Configuration::get('NEWSMAN_API_KEY');
 		$helper->fields_value['user_id'] = Configuration::get('NEWSMAN_USER_ID');
 		$helper->fields_value['cron_url'] = $this->context->shop->getBaseURL() . 'modules/newsman/cron_task.php';
+		$helper->fields_value['cron_option'] = Configuration::get('NEWSMAN_CRON');
 
 		$mappingSection = array(
 			array(
@@ -130,7 +132,7 @@ class Newsman extends Module
 			)),
 			array('form' => array(
 				'legend' => array(
-					'title' => $this->l('Synchronization options')
+					'title' => $this->l('Synchronization mapping')
 				),
 				'input' => $mappingSection,
 				'buttons' => array(
@@ -139,11 +141,6 @@ class Newsman extends Module
 						'class' => 'pull-right',
 						'icon' => 'process-icon-save',
 						'js' => 'saveMapping(this)'
-					),
-					array(
-						'title' => $this->l('Synchronize now'),
-						'icon' => 'process-icon-next',
-						'js' => 'synchronizeNow(this)'
 					),
 					array(
 						'title' => $this->l('Refresh segments'),
@@ -158,10 +155,38 @@ class Newsman extends Module
 				),
 				'input' => array(
 					array(
+						'label' => 'Automatic synchronization',
+						'type' => 'select',
+						'name' => 'cron_option',
+						'options' => array(
+							'query' => array(
+								array('value' => '', 'label' => $this->l('never (disabled)')),
+								array('value' => 'd', 'label' => $this->l('every day')),
+								array('value' => 'w', 'label' => $this->l('every week')),
+							),
+							'id' => 'value',
+							'name' => 'label'
+						)
+					),
+					/*array(
 						'label' => 'Cron URL',
 						'type' => 'text',
 						'name' => 'cron_url'
-					)
+					)*/
+				),
+				'buttons' => array(
+					array(
+						'title' => $this->l('Synchronize now'),
+						'icon' => 'process-icon-next',
+						'js' => 'synchronizeNow(this)'
+					),
+					array(
+						'title' => $this->l('Save option'),
+						'icon' => 'process-icon-save',
+						'class' => 'pull-right',
+						'js' => 'saveCron(this)'
+					),
+
 				)
 			))
 		));
@@ -272,10 +297,26 @@ class Newsman extends Module
 			$('#newsman-msg').html(ret.msg);
 		});
 	}
+
+	function saveCron(btn) {
+		var icn = btn.querySelector('i');
+		icn.className = 'process-icon-loading';
+		ajaxCall('SaveCron', {option:$('#cron_option').val()}, function (ret) {
+			$('#newsman-msg').html(ret.msg);
+			$('body').animate({scrollTop: 0}, 300);
+			icn.className = 'process-icon-ok';
+			if (ret.fail) $('#cron_option').val('');
+		});
+	}
 </script>
 <?
 		$out .= ob_get_clean();
 		return $out;
+	}
+
+	private function jsonOut($output) {
+		header('Content-Type: application/json');
+		echo Tools::jsonEncode($output);
 	}
 
 	public function ajaxProcessConnect() {
@@ -310,15 +351,13 @@ class Newsman extends Module
 					$this->l('Error connecting. Please check your API KEY and user ID.') . "<br>" .
 					$client->getErrorMessage());
 		}
-		header('Content-Type: application/json');
-		echo Tools::jsonEncode($output);
+		$this->jsonOut($output);
 	}
 
 	public function ajaxProcessSaveMapping() {
 		$mapping = Tools::getValue('mapping');
 		Configuration::updateValue('NEWSMAN_MAPPING', $mapping);
-		header('Content-Type: application/json');
-		echo 'true';
+		$this->jsonOut(true);
 	}
 
 	private function getClient($user_id, $api_key) {
@@ -328,8 +367,7 @@ class Newsman extends Module
 
 	public function ajaxProcessSynchronize() {
 		$this->doSynchronize();
-		header('Content-Type: application/json');
-		echo Tools::jsonEncode(array('msg' =>
+		$this->jsonOut(array('msg' =>
 			$this->displayConfirmation($this->l('Users uploaded and scheduled for import. It might take a few minutes until they show up in your Newsman lists.'))));
 	}
 
@@ -339,14 +377,48 @@ class Newsman extends Module
 		$client->query('segment.all', $list_id);
 		$output = array();
 		$output['segments'] = $client->getResponse();
-		header('Content-Type: application/json');
-		echo Tools::jsonEncode($output);
+		$this->jsonOut($output);
+	}
+
+	public function ajaxProcessSaveCron() {
+		$option = Tools::getValue('option');
+		if (!$option || Module::isInstalled('cronjobs') && function_exists('curl_init')) {
+			$this->jsonOut(array('msg' => $this->displayConfirmation($this->l('Automatic synchronization option saved.'))));
+			Configuration::updateValue('NEWSMAN_CRON', $option);
+			if ($option) {
+				$this->registerHook('actionCronJob');
+			} else
+				$this->unregisterHook('actionCronJob');
+		} else {
+			$this->unregisterHook('actionCronJob');
+			Configuration::updateValue('NEWSMAN_CRON', '');
+			$this->jsonOut(array('fail'=>true, 'msg'=>
+				$this->displayError($this->l(
+				'To enable automatic synchronization you need to install and configure "Cron tasks manager" module from PrestaShop.'))));
+		}
+	}
+
+	public function getCronFrequency() {
+		$option = Configuration::get('NEWSMAN_CRON');
+		return array(
+			'hour' => '1',
+			'day' => '-1',
+			'month' => '-1',
+			'day_of_week' => $option == 'd' ? '-1' : '1'
+		);
+	}
+
+	public function actionCronJob() {
+		$this->doSynchronize();
 	}
 
 	public function doSynchronize() {
+		$mappingData = Configuration::get('NEWSMAN_MAPPING');
+		if (!Configuration::get('NEWSMAN_CONNECTED') || !$mappingData) return 0;
+
 		$client = $this->getClient(Configuration::get('NEWSMAN_USER_ID'), Configuration::get('NEWSMAN_API_KEY'));
 
-		$mapping = Tools::jsonDecode(Configuration::get('NEWSMAN_MAPPING'), true);
+		$mapping = Tools::jsonDecode($mappingData, true);
 		$list_id = $mapping['list'];
 		$count = 0;
 		//newsletter

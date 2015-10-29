@@ -8,4 +8,4 @@ if (!Module::isInstalled($module->name))
 	exit;
 
 $ret = $module->doSynchronize();
-print_r($ret);
+echo "$ret accounts added";
