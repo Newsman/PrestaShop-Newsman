@@ -2,7 +2,7 @@
 <module>
 	<name>newsman</name>
 	<displayName><![CDATA[Newsman]]></displayName>
-	<version><![CDATA[1.0]]></version>
+	<version><![CDATA[1.0.0]]></version>
 	<description><![CDATA[The official Newsman module for PrestaShop. Manage your Newsman subscriber lists, map your shop groups to the Newsman segments.]]></description>
 	<author><![CDATA[Victor Dramba for Newsman]]></author>
 	<tab><![CDATA[advertising_marketing]]></tab>
