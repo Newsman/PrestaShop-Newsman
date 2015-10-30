@@ -40,8 +40,7 @@ class Newsman extends Module
         $this->displayName = $this->l('Newsman');
         //TODO detailed description (in config.xml too)
         $this->description = $this->l(
-	        'The official Newsman module for PrestaShop. ' .
-	        'Manage your Newsman subscriber lists, map your shop groups to the Newsman segments.'
+	        'The official Newsman module for PrestaShop. Manage your Newsman subscriber lists, map your shop groups to the Newsman segments.'
         );
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall Newsman module?');
