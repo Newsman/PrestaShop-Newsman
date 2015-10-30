@@ -16,10 +16,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @author Dramba Victor for Newsman
+ *  @author    Dramba Victor for Newsman
  *  @copyright 2015 Dazoot Software
- *  @license http://www.apache.org/licenses/LICENSE-2.0
+ *  @license   http://www.apache.org/licenses/LICENSE-2.0
  */
+
+
 
 require_once(dirname(__FILE__).'/../../config/config.inc.php');
 require_once(dirname(__FILE__) . '/newsman.php');
