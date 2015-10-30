@@ -25,7 +25,8 @@ class Newsman extends Module
 {
     const API_URL = 'https://ssl.newsman.ro/api/1.2/xmlrpc/';
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->name = 'newsman';
         $this->tab = 'advertising_marketing';
         $this->version = '1.0.0';
@@ -40,13 +41,14 @@ class Newsman extends Module
         $this->displayName = $this->l('Newsman');
         //TODO detailed description (in config.xml too)
         $this->description = $this->l(
-	        'The official Newsman module for PrestaShop. Manage your Newsman subscriber lists, map your shop groups to the Newsman segments.'
+               'The official Newsman module for PrestaShop. Manage your Newsman subscriber lists, map your shop groups to the Newsman segments.'
         );
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall Newsman module?');
     }
 
-    public function uninstall() {
+    public function uninstall()
+    {
         return parent::uninstall()
             && Configuration::deleteByName('NEWSMAN_DATA')
             && Configuration::deleteByName('NEWSMAN_MAPPING')
@@ -56,7 +58,8 @@ class Newsman extends Module
             && Configuration::deleteByName('NEWSMAN_CRON');
     }
 
-    public function getContent() {
+    public function getContent()
+    {
         $connected = Configuration::get('NEWSMAN_CONNECTED');
 
         $helper = new HelperForm();
@@ -110,7 +113,7 @@ class Newsman extends Module
         //list groups
         foreach (Group::getGroups($default_lang) as $row) {
             if ($row['id_group'] < 3) {
-	            continue;
+                continue;
             }
             $mappingSection[] = array(
                 'type' => 'select',
@@ -223,142 +226,145 @@ class Newsman extends Module
         $mapping = Configuration::get('NEWSMAN_MAPPING');
         ob_start();
         ?>
-		<script>
-	    var debug = self.console && console.debug ? console.debug.bind(console) : $.noop;
-	    var data = <?=$data ? $data : 'false'?>;
-	    var mapExtra = <?=Tools::jsonEncode($mapExtra)?>;
-	    var mapping = <?=$mapping ? $mapping : 'false'?>;
+        <script>
+        var debug = self.console && console.debug ? console.debug.bind(console) : $.noop;
+        var data = <?=$data ? $data : 'false'?>;
+        var mapExtra = <?=Tools::jsonEncode($mapExtra)?>;
+        var mapping = <?=$mapping ? $mapping : 'false'?>;
 
-	    function updateSelects() {
-	        //list select
-	        $('#sel_list').empty().append(data.lists.map(function (item) {
-	            return $('<option/>').attr('value', item.list_id).text(item.list_name);
-	        }));
+        function updateSelects()
+        {
+            //list select
+            $('#sel_list').empty().append(data.lists.map(function (item) {
+                return $('<option/>').attr('value', item.list_id).text(item.list_name);
+            }));
 
-	        //segment selects
-	        var options = mapExtra.concat(data.segments.map(function (item) {
-	            return ['seg_'+item.segment_id, item.segment_name];
-	        }));
+            //segment selects
+            var options = mapExtra.concat(data.segments.map(function (item) {
+                return ['seg_'+item.segment_id, item.segment_name];
+            }));
 
-	        $('.id-map-select').each(function () {
-	            $(this).empty().append(options.map(function (item) {
-	                return $('<option/>').attr('value', item[0]).text(item[1]);
-	            }))
-	        });
-	        if (mapping) {
-	            $('#sel_list').val(mapping.list);
-	            $('.id-map-select').each(function () {
-	                $(this).val(mapping[$(this).attr('name')]);
-	                if ($(this).val() == null) $(this).val('');
-	            })
-	        }
-	    }
-	    if (data) {
-		    $(updateSelects);
-	    }
+            $('.id-map-select').each(function () {
+                $(this).empty().append(options.map(function (item) {
+                    return $('<option/>').attr('value', item[0]).text(item[1]);
+                }))
+            });
+            if (mapping) {
+                $('#sel_list').val(mapping.list);
+                $('.id-map-select').each(function () {
+                    $(this).val(mapping[$(this).attr('name')]);
+                    if ($(this).val() == null) $(this).val('');
+                })
+            }
+        }
+        if (data) {
+            $(updateSelects);
+        }
 
-	    $(function () {
-	        $('#sel_list').change(function () {
-	            var $me = $(this);
-	            var $ld = $('<i class="process-icon-loading" style="display: inline-block"/>');
-	            $me.css({display:'inline-block'}).after($ld);
-	            mapping.list = $me.val();
-	            ajaxCall('ListChanged', {list_id: mapping.list}, function (ret) {
-	                data.segments = ret.segments;
-	                updateSelects();
-	                $ld.remove();
-	            });
-	        })
-	    });
+        $(function () {
+            $('#sel_list').change(function () {
+                var $me = $(this);
+                var $ld = $('<i class="process-icon-loading" style="display: inline-block"/>');
+                $me.css({display:'inline-block'}).after($ld);
+                mapping.list = $me.val();
+                ajaxCall('ListChanged', {list_id: mapping.list}, function (ret) {
+                    data.segments = ret.segments;
+                    updateSelects();
+                    $ld.remove();
+                });
+            })
+        });
 
-	    function ajaxCall(action, vars, ready) {
-	        $.ajax({
-	            url: '<?=$ajaxURL?>',
-	            data: $.extend({ajax:true, action: action}, vars),
-	            success: ready
-	        });
-	    }
+        function ajaxCall(action, vars, ready) {
+            $.ajax({
+                url: '<?=$ajaxURL?>',
+                data: $.extend({ajax:true, action: action}, vars),
+                success: ready
+            });
+        }
 
-	    function connectAPI(btn) {
-	        var icn = btn.querySelector('i');
-	        icn.className = 'process-icon-loading';
-	        ajaxCall('Connect', {
-	            api_key: $('#api_key').val(),
-	            user_id: $('#user_id').val()
-	        }, function (ret) {
-	            debug(ret);
-	            icn.className = ret.ok ? 'process-icon-ok' : 'process-icon-next';
-	            $('#newsman-msg').html(ret.msg);
-	            data = {lists: ret.lists, segments: ret.segments};
-	            updateSelects();
-	        });
-	    }
+        function connectAPI(btn) {
+            var icn = btn.querySelector('i');
+            icn.className = 'process-icon-loading';
+            ajaxCall('Connect', {
+                api_key: $('#api_key').val(),
+                user_id: $('#user_id').val()
+            }, function (ret) {
+                debug(ret);
+                icn.className = ret.ok ? 'process-icon-ok' : 'process-icon-next';
+                $('#newsman-msg').html(ret.msg);
+                data = {lists: ret.lists, segments: ret.segments};
+                updateSelects();
+            });
+        }
 
-	    function saveMapping(btn) {
-	        if (!data) {
-		        return alert('<?=$this->l('You need to connect to Newsman first!')?>');
-	        }
-	        var icn = btn.querySelector('i');
-	        icn.className = 'process-icon-loading';
-	        mapping = {
-	            list: $('#sel_list').val()
-	        };
-	        $('.id-map-select').each(function () {
-	            mapping[$(this).attr('name')] = $(this).val();
-	        });
-	        ajaxCall('SaveMapping', {mapping: JSON.stringify(mapping)}, function (ret) {
-	            icn.className = 'process-icon-ok';
-	        });
-	    }
+        function saveMapping(btn) {
+            if (!data) {
+                return alert('<?=$this->l('You need to connect to Newsman first!')?>');
+            }
+            var icn = btn.querySelector('i');
+            icn.className = 'process-icon-loading';
+            mapping = {
+                list: $('#sel_list').val()
+            };
+            $('.id-map-select').each(function () {
+                mapping[$(this).attr('name')] = $(this).val();
+            });
+            ajaxCall('SaveMapping', {mapping: JSON.stringify(mapping)}, function (ret) {
+                icn.className = 'process-icon-ok';
+            });
+        }
 
-	    function synchronizeNow(btn) {
-	        if (!mapping) {
-		        return alert('<?=$this->l('You need to save mapping first!')?>');
-	        }
-	        var icn = btn.querySelector('i');
-	        icn.className = 'process-icon-loading';
-	        ajaxCall('Synchronize', {}, function (ret) {
-	            icn.className = 'process-icon-ok';
-	            debug(ret);
-	            $('body').animate({scrollTop: 0}, 300);
-	            $('#newsman-msg').html(ret.msg);
-	        });
-	    }
+        function synchronizeNow(btn) {
+            if (!mapping) {
+                return alert('<?=$this->l('You need to save mapping first!')?>');
+            }
+            var icn = btn.querySelector('i');
+            icn.className = 'process-icon-loading';
+            ajaxCall('Synchronize', {}, function (ret) {
+                icn.className = 'process-icon-ok';
+                debug(ret);
+                $('body').animate({scrollTop: 0}, 300);
+                $('#newsman-msg').html(ret.msg);
+            });
+        }
 
-	    function saveCron(btn) {
-	        var icn = btn.querySelector('i');
-	        icn.className = 'process-icon-loading';
-	        ajaxCall('SaveCron', {option:$('#cron_option').val()}, function (ret) {
-	            $('#newsman-msg').html(ret.msg);
-	            $('body').animate({scrollTop: 0}, 300);
-	            icn.className = 'process-icon-ok';
-	            if (ret.fail) {
-		            $('#cron_option').val('');
-	            }
-	        });
-	    }
-		</script>
+        function saveCron(btn) {
+            var icn = btn.querySelector('i');
+            icn.className = 'process-icon-loading';
+            ajaxCall('SaveCron', {option:$('#cron_option').val()}, function (ret) {
+                $('#newsman-msg').html(ret.msg);
+                $('body').animate({scrollTop: 0}, 300);
+                icn.className = 'process-icon-ok';
+                if (ret.fail) {
+                    $('#cron_option').val('');
+                }
+            });
+        }
+        </script>
 <?php
         $out .= ob_get_clean();
         return $out;
     }
 
-    private function jsonOut($output) {
+    private function jsonOut($output)
+    {
         header('Content-Type: application/json');
         echo Tools::jsonEncode($output);
     }
 
-    public function ajaxProcessConnect() {
+    public function ajaxProcessConnect()
+    {
         $output = array();
         Configuration::updateValue('NEWSMAN_CONNECTED', 0);
         Configuration::deleteByName('NEWSMAN_DATA');
         $api_key = Tools::getValue('api_key');
         $user_id = Tools::getValue('user_id');
         if (!Validate::isGenericName($api_key) || $api_key == '') {
-	        $output['msg'][] = $this->displayError($this->l('Invalid value for API KEY'));
+            $output['msg'][] = $this->displayError($this->l('Invalid value for API KEY'));
         }
         if (!Validate::isInt($user_id)) {
-	        $output['msg'][] = $this->displayError($this->l('Invalid value for UserID'));
+            $output['msg'][] = $this->displayError($this->l('Invalid value for UserID'));
         }
         if (!count($output['msg'])) {
             $client = $this->getClient($user_id, $api_key);
@@ -375,38 +381,42 @@ class Newsman extends Module
                 $output['segments'] = $client->getResponse();
                 //save lists and segments
                 Configuration::updateValue(
-	                'NEWSMAN_DATA',
-	                Tools::jsonEncode(array('lists' => $output['lists'], 'segments' => $output['segments']))
+                    'NEWSMAN_DATA',
+                    Tools::jsonEncode(array('lists' => $output['lists'], 'segments' => $output['segments']))
                 );
                 $output['saved'] = 'saved';
             } else {
-	            $output['msg'][] = $this->displayError(
-		            $this->l('Error connecting. Please check your API KEY and user ID.') . "<br>" .
-		            $client->getErrorMessage()
-	            );
+                $output['msg'][] = $this->displayError(
+                    $this->l('Error connecting. Please check your API KEY and user ID.') . "<br>" .
+                    $client->getErrorMessage()
+                );
             }
         }
         $this->jsonOut($output);
     }
 
-    public function ajaxProcessSaveMapping() {
+    public function ajaxProcessSaveMapping()
+    {
         $mapping = Tools::getValue('mapping');
         Configuration::updateValue('NEWSMAN_MAPPING', $mapping);
         $this->jsonOut(true);
     }
 
-    private function getClient($user_id, $api_key) {
+    private function getClient($user_id, $api_key)
+    {
         require_once dirname(__FILE__) . '/lib/XMLRPC.php';
         return new XMLRPC_Client(self::API_URL . "$user_id/$api_key");
     }
 
-    public function ajaxProcessSynchronize() {
+    public function ajaxProcessSynchronize()
+    {
         $this->doSynchronize();
         $this->jsonOut(array('msg' =>
             $this->displayConfirmation($this->l('Users uploaded and scheduled for import. It might take a few minutes until they show up in your Newsman lists.'))));
     }
 
-    public function ajaxProcessListChanged() {
+    public function ajaxProcessListChanged()
+    {
         $list_id = Tools::getValue('list_id');
         $client = $this->getClient(Configuration::get('NEWSMAN_USER_ID'), Configuration::get('NEWSMAN_API_KEY'));
         $client->query('segment.all', $list_id);
@@ -415,7 +425,8 @@ class Newsman extends Module
         $this->jsonOut($output);
     }
 
-    public function ajaxProcessSaveCron() {
+    public function ajaxProcessSaveCron()
+    {
         $option = Tools::getValue('option');
         if (!$option || Module::isInstalled('cronjobs') && function_exists('curl_init')) {
             $this->jsonOut(array('msg' => $this->displayConfirmation($this->l('Automatic synchronization option saved.'))));
@@ -423,25 +434,27 @@ class Newsman extends Module
             if ($option) {
                 $this->registerHook('actionCronJob');
             } else {
-	            $this->unregisterHook('actionCronJob');
+                $this->unregisterHook('actionCronJob');
             }
         } else {
             $this->unregisterHook('actionCronJob');
             Configuration::updateValue('NEWSMAN_CRON', '');
             $this->jsonOut(
-	            array(
-		            'fail'=>true,
-		            'msg'=> $this->displayError(
-			            $this->l('To enable automatic synchronization you need to install '.
-			                'and configure "Cron tasks manager" module from PrestaShop.'
-			            )
-		            )
-	            )
+                array(
+                    'fail'=>true,
+                    'msg'=> $this->displayError(
+                        $this->l(
+	                        'To enable automatic synchronization you need to install '.
+                            'and configure "Cron tasks manager" module from PrestaShop.'
+                        )
+                    )
+                )
             );
         }
     }
 
-    public function getCronFrequency() {
+    public function getCronFrequency()
+    {
         $option = Configuration::get('NEWSMAN_CRON');
         return array(
             'hour' => '1',
@@ -451,14 +464,16 @@ class Newsman extends Module
         );
     }
 
-    public function actionCronJob() {
+    public function actionCronJob()
+    {
         $this->doSynchronize();
     }
 
-    public function doSynchronize() {
+    public function doSynchronize()
+    {
         $mappingData = Configuration::get('NEWSMAN_MAPPING');
         if (!Configuration::get('NEWSMAN_CONNECTED') || !$mappingData) {
-	        return 0;
+            return 0;
         }
 
         $client = $this->getClient(Configuration::get('NEWSMAN_USER_ID'), Configuration::get('NEWSMAN_API_KEY'));
@@ -477,7 +492,7 @@ class Newsman extends Module
             $count += count($ret);
             $csv = "email,prestashop_source\n";
             foreach ($ret as $row) {
-	            $csv .= "{$row['email']},newsletter\n";
+                $csv .= "{$row['email']},newsletter\n";
             }
             //upload from newsletter
             $segment_id = Tools::substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? Tools::substr($mapping['map_newsletter'], 4) : null;
@@ -486,10 +501,10 @@ class Newsman extends Module
         }
         foreach ($mapping as $key => $value) {
             if (!$value) {
-	            continue;
+                continue;
             }
             if (Tools::substr($key, 0, 10) !== 'map_group_') {
-	            continue;
+                continue;
             }
             $id_group = (int) (Tools::substr($key, 10));
             $q = (new DbQuery())
@@ -504,7 +519,7 @@ class Newsman extends Module
                 $csv = join(',', $cols) . ",prestashop_source\n";
                 foreach ($ret as $row) {
                     foreach ($cols as $col) {
-	                    $csv .= $row[$col] . ',';
+                        $csv .= $row[$col] . ',';
                     }
                     $csv .= "group_{$id_group}\n";
                 }
