@@ -379,14 +379,14 @@ class Newsman extends Module
                 ->where('`active` = 1');
             $ret = Db::getInstance()->executeS($q->build());
             $count += count($ret);
-            $csv = "email,prestashop_source\n";
+            $header = "email,prestashop_source";
+            $lines = array();
             foreach ($ret as $row) {
-                $csv .= "{$row['email']},newsletter\n";
+                $lines[] = "{$row['email']},newsletter";
             }
             //upload from newsletter
             $segment_id = Tools::substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? Tools::substr($mapping['map_newsletter'], 4) : null;
-            $client->query('import.csv', $list_id, array($segment_id), $csv);
-            //$import_id[] = $client->getResponse();
+            $this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
         }
         foreach ($mapping as $key => $value) {
             if (!$value) {
@@ -405,19 +405,31 @@ class Newsman extends Module
             if (count($ret)) {
                 $count += count($ret);
                 $cols = array_keys($ret[0]);
-                $csv = join(',', $cols) . ",prestashop_source\n";
+                $header = join(',', $cols) . ",prestashop_source";
+
+                $lines = array();
                 foreach ($ret as $row) {
+                    $line = '';
                     foreach ($cols as $col) {
-                        $csv .= $row[$col] . ',';
+                        $line .= $row[$col] . ',';
                     }
-                    $csv .= "group_{$id_group}\n";
+                    $lines[] = "$line,group_{$id_group}";
                 }
                 //upload group
                 $segment_id = Tools::substr($value, 0, 4) == 'seg_' ? Tools::substr($value, 4) : null;
-                $client->query('import.csv', $list_id, array($segment_id), $csv);
-                //$import_id[] = $client->getResponse();
+                $this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
             }
         }
         return $count;
+    }
+
+    private function exportCSV($client, $list_id, $segments, $header, $lines)
+    {
+        $max = 10000;
+        for ($i = 0; $i < count($lines); $i += $max) {
+            $a = array_slice($lines, $i, $max);
+            array_unshift($a, $header);
+            $client->query('import.csv', $list_id, $segments, join("\n", $a));
+        }
     }
 }

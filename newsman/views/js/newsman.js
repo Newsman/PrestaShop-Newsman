@@ -22,130 +22,130 @@
 
 (function() {
 
-	//export
-	self.saveCron = saveCron;
-	self.connectAPI = connectAPI;
-	self.saveMapping = saveMapping;
-	self.synchronizeNow = synchronizeNow;
+    //export
+    self.saveCron = saveCron;
+    self.connectAPI = connectAPI;
+    self.saveMapping = saveMapping;
+    self.synchronizeNow = synchronizeNow;
 
-	var data, mapExtra, mapping, ajaxURL, strings;
+    var data, mapExtra, mapping, ajaxURL, strings;
 
-	var debug = self.console && console.debug ? console.debug.bind(console) : $.noop;
+    var debug = self.console && console.debug ? console.debug.bind(console) : $.noop;
 
-	$(function () {
+    $(function () {
 
-		data = newsman.data;
-		mapExtra = newsman.mapExtra;
-		mapping = newsman.mapping;
-		ajaxURL = newsman.ajaxURL;
-		strings = newsman.strings;
+        data = newsman.data;
+        mapExtra = newsman.mapExtra;
+        mapping = newsman.mapping;
+        ajaxURL = newsman.ajaxURL;
+        strings = newsman.strings;
 
-		if (data)
-			$(updateSelects);
+        if (data)
+            $(updateSelects);
 
-		$('#sel_list').change(function () {
-			var $me = $(this);
-			var $ld = $('<i class="process-icon-loading" style="display: inline-block"/>');
-			$me.css({display: 'inline-block'}).after($ld);
-			mapping.list = $me.val();
-			ajaxCall('ListChanged', {list_id: mapping.list}, function (ret) {
-				data.segments = ret.segments;
-				updateSelects();
-				$ld.remove();
-			});
-		})
-	});
+        $('#sel_list').change(function () {
+            var $me = $(this);
+            var $ld = $('<i class="process-icon-loading" style="display: inline-block"/>');
+            $me.css({display: 'inline-block'}).after($ld);
+            mapping.list = $me.val();
+            ajaxCall('ListChanged', {list_id: mapping.list}, function (ret) {
+                data.segments = ret.segments;
+                updateSelects();
+                $ld.remove();
+            });
+        })
+    });
 
-	function updateSelects() {
-		//list select
-		$('#sel_list').empty().append(data.lists.map(function (item) {
-			return $('<option/>').attr('value', item.list_id).text(item.list_name);
-		}));
+    function updateSelects() {
+        //list select
+        $('#sel_list').empty().append(data.lists.map(function (item) {
+            return $('<option/>').attr('value', item.list_id).text(item.list_name);
+        }));
 
-		//segment selects
-		var options = mapExtra.concat(data.segments.map(function (item) {
-			return ['seg_' + item.segment_id, item.segment_name];
-		}));
+        //segment selects
+        var options = mapExtra.concat(data.segments.map(function (item) {
+            return ['seg_' + item.segment_id, item.segment_name];
+        }));
 
-		$('.id-map-select').each(function () {
-			$(this).empty().append(options.map(function (item) {
-				return $('<option/>').attr('value', item[0]).text(item[1]);
-			}))
-		});
-		if (mapping) {
-			$('#sel_list').val(mapping.list);
-			$('.id-map-select').each(function () {
-				$(this).val(mapping[$(this).attr('name')]);
-				if ($(this).val() == null) $(this).val('');
-			})
-		}
-	}
+        $('.id-map-select').each(function () {
+            $(this).empty().append(options.map(function (item) {
+                return $('<option/>').attr('value', item[0]).text(item[1]);
+            }))
+        });
+        if (mapping) {
+            $('#sel_list').val(mapping.list);
+            $('.id-map-select').each(function () {
+                $(this).val(mapping[$(this).attr('name')]);
+                if ($(this).val() == null) $(this).val('');
+            })
+        }
+    }
 
-	function ajaxCall(action, vars, ready) {
-		$.ajax({
-			url: ajaxURL,
-			data: $.extend({ajax: true, action: action}, vars),
-			success: ready
-		});
-	}
+    function ajaxCall(action, vars, ready) {
+        $.ajax({
+            url: ajaxURL,
+            data: $.extend({ajax: true, action: action}, vars),
+            success: ready
+        });
+    }
 
-	function connectAPI(btn) {
-		var icn = btn.querySelector('i');
-		icn.className = 'process-icon-loading';
-		ajaxCall('Connect', {
-			api_key: $('#api_key').val(),
-			user_id: $('#user_id').val()
-		}, function (ret) {
-			debug(ret);
-			icn.className = ret.ok ? 'process-icon-ok' : 'process-icon-next';
-			$('#newsman-msg').html(ret.msg);
-			data = {lists: ret.lists, segments: ret.segments};
-			updateSelects();
-		});
-	}
+    function connectAPI(btn) {
+        var icn = btn.querySelector('i');
+        icn.className = 'process-icon-loading';
+        ajaxCall('Connect', {
+            api_key: $('#api_key').val(),
+            user_id: $('#user_id').val()
+        }, function (ret) {
+            debug(ret);
+            icn.className = ret.ok ? 'process-icon-ok' : 'process-icon-next';
+            $('#newsman-msg').html(ret.msg);
+            data = {lists: ret.lists, segments: ret.segments};
+            updateSelects();
+        });
+    }
 
-	function saveMapping(btn) {
-		if (!data) {
-			return alert(strings.needConnect);
-		}
-		var icn = btn.querySelector('i');
-		icn.className = 'process-icon-loading';
-		mapping = {
-			list: $('#sel_list').val()
-		};
-		$('.id-map-select').each(function () {
-			mapping[$(this).attr('name')] = $(this).val();
-		});
-		ajaxCall('SaveMapping', {mapping: JSON.stringify(mapping)}, function (ret) {
-			icn.className = 'process-icon-ok';
-		});
-	}
+    function saveMapping(btn) {
+        if (!data) {
+            return alert(strings.needConnect);
+        }
+        var icn = btn.querySelector('i');
+        icn.className = 'process-icon-loading';
+        mapping = {
+            list: $('#sel_list').val()
+        };
+        $('.id-map-select').each(function () {
+            mapping[$(this).attr('name')] = $(this).val();
+        });
+        ajaxCall('SaveMapping', {mapping: JSON.stringify(mapping)}, function (ret) {
+            icn.className = 'process-icon-ok';
+        });
+    }
 
-	function synchronizeNow(btn) {
-		if (!mapping)
-			return alert(strings.needMapping);
+    function synchronizeNow(btn) {
+        if (!mapping)
+            return alert(strings.needMapping);
 
-		var icn = btn.querySelector('i');
-		icn.className = 'process-icon-loading';
-		ajaxCall('Synchronize', {}, function (ret) {
-			icn.className = 'process-icon-ok';
-			debug(ret);
-			$('body').animate({scrollTop: 0}, 300);
-			$('#newsman-msg').html(ret.msg);
-		});
-	}
+        var icn = btn.querySelector('i');
+        icn.className = 'process-icon-loading';
+        ajaxCall('Synchronize', {}, function (ret) {
+            icn.className = 'process-icon-ok';
+            debug(ret);
+            $('body').animate({scrollTop: 0}, 300);
+            $('#newsman-msg').html(ret.msg);
+        });
+    }
 
-	function saveCron(btn) {
-		var icn = btn.querySelector('i');
-		icn.className = 'process-icon-loading';
-		ajaxCall('SaveCron', {option: $('#cron_option').val()}, function (ret) {
-			$('#newsman-msg').html(ret.msg);
-			$('body').animate({scrollTop: 0}, 300);
-			icn.className = 'process-icon-ok';
-			if (ret.fail) {
-				$('#cron_option').val('');
-			}
-		});
-	}
+    function saveCron(btn) {
+        var icn = btn.querySelector('i');
+        icn.className = 'process-icon-loading';
+        ajaxCall('SaveCron', {option: $('#cron_option').val()}, function (ret) {
+            $('#newsman-msg').html(ret.msg);
+            $('body').animate({scrollTop: 0}, 300);
+            icn.className = 'process-icon-ok';
+            if (ret.fail) {
+                $('#cron_option').val('');
+            }
+        });
+    }
 
 })();
