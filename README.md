@@ -24,6 +24,5 @@ You can also do a manual synchronization by clicking "Synchronize now".
 
 For the automatic synchronization to work, you need to have the "native" "Cron tasks manager" (cronjobs) module installed and configured.
 
-Alternatively, you can set up your own cron to run this URL:
-`http://yourshop.com/modules/newsman/cron_task.php`
+
 
