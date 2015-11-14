@@ -217,6 +217,8 @@ class Newsman extends Module
         ));
 
         //the script
+        $this->context->controller->addJS($this->_path . 'views/js/newsman.js');
+
         $ajaxURL = $this->context->link->getAdminLink('AdminModules').'&configure='.$this->name;
         $mapExtra = array(
             array('', $this->l('Do not import')),
@@ -224,126 +226,18 @@ class Newsman extends Module
         );
         $data = Configuration::get('NEWSMAN_DATA');
         $mapping = Configuration::get('NEWSMAN_MAPPING');
-        ob_start();
-        ?>
-        <script>
-        var debug = self.console && console.debug ? console.debug.bind(console) : $.noop;
-        var data = <?=$data ? $data : 'false'?>;
-        var mapExtra = <?=Tools::jsonEncode($mapExtra)?>;
-        var mapping = <?=$mapping ? $mapping : 'false'?>;
 
-        function updateSelects()
-        {
-            //list select
-            $('#sel_list').empty().append(data.lists.map(function (item) {
-                return $('<option/>').attr('value', item.list_id).text(item.list_name);
-            }));
+        $out .= '<script>var newsman='.Tools::jsonEncode(array(
+            'data' => $data ? Tools::jsonDecode($data) : false,
+            'mapExtra' => $mapExtra,
+            'mapping' => $mapping ? Tools::jsonDecode($mapping) : false,
+            'ajaxURL' => $ajaxURL,
+            'strings' => array(
+                'needConnect' => $this->l('You need to connect to Newsman first!'),
+                'needMapping' => $this->l('You need to save mapping first!')
+            )
+            )).'</script>';
 
-            //segment selects
-            var options = mapExtra.concat(data.segments.map(function (item) {
-                return ['seg_'+item.segment_id, item.segment_name];
-            }));
-
-            $('.id-map-select').each(function () {
-                $(this).empty().append(options.map(function (item) {
-                    return $('<option/>').attr('value', item[0]).text(item[1]);
-                }))
-            });
-            if (mapping) {
-                $('#sel_list').val(mapping.list);
-                $('.id-map-select').each(function () {
-                    $(this).val(mapping[$(this).attr('name')]);
-                    if ($(this).val() == null) $(this).val('');
-                })
-            }
-        }
-        if (data) {
-            $(updateSelects);
-        }
-
-        $(function () {
-            $('#sel_list').change(function () {
-                var $me = $(this);
-                var $ld = $('<i class="process-icon-loading" style="display: inline-block"/>');
-                $me.css({display:'inline-block'}).after($ld);
-                mapping.list = $me.val();
-                ajaxCall('ListChanged', {list_id: mapping.list}, function (ret) {
-                    data.segments = ret.segments;
-                    updateSelects();
-                    $ld.remove();
-                });
-            })
-        });
-
-        function ajaxCall(action, vars, ready) {
-            $.ajax({
-                url: '<?=$ajaxURL?>',
-                data: $.extend({ajax:true, action: action}, vars),
-                success: ready
-            });
-        }
-
-        function connectAPI(btn) {
-            var icn = btn.querySelector('i');
-            icn.className = 'process-icon-loading';
-            ajaxCall('Connect', {
-                api_key: $('#api_key').val(),
-                user_id: $('#user_id').val()
-            }, function (ret) {
-                debug(ret);
-                icn.className = ret.ok ? 'process-icon-ok' : 'process-icon-next';
-                $('#newsman-msg').html(ret.msg);
-                data = {lists: ret.lists, segments: ret.segments};
-                updateSelects();
-            });
-        }
-
-        function saveMapping(btn) {
-            if (!data) {
-                return alert('<?=$this->l('You need to connect to Newsman first!')?>');
-            }
-            var icn = btn.querySelector('i');
-            icn.className = 'process-icon-loading';
-            mapping = {
-                list: $('#sel_list').val()
-            };
-            $('.id-map-select').each(function () {
-                mapping[$(this).attr('name')] = $(this).val();
-            });
-            ajaxCall('SaveMapping', {mapping: JSON.stringify(mapping)}, function (ret) {
-                icn.className = 'process-icon-ok';
-            });
-        }
-
-        function synchronizeNow(btn) {
-            if (!mapping) {
-                return alert('<?=$this->l('You need to save mapping first!')?>');
-            }
-            var icn = btn.querySelector('i');
-            icn.className = 'process-icon-loading';
-            ajaxCall('Synchronize', {}, function (ret) {
-                icn.className = 'process-icon-ok';
-                debug(ret);
-                $('body').animate({scrollTop: 0}, 300);
-                $('#newsman-msg').html(ret.msg);
-            });
-        }
-
-        function saveCron(btn) {
-            var icn = btn.querySelector('i');
-            icn.className = 'process-icon-loading';
-            ajaxCall('SaveCron', {option:$('#cron_option').val()}, function (ret) {
-                $('#newsman-msg').html(ret.msg);
-                $('body').animate({scrollTop: 0}, 300);
-                icn.className = 'process-icon-ok';
-                if (ret.fail) {
-                    $('#cron_option').val('');
-                }
-            });
-        }
-        </script>
-        <?php
-        $out .= ob_get_clean();
         return $out;
     }
 
