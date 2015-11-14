@@ -192,12 +192,7 @@ class Newsman extends Module
                             'id' => 'value',
                             'name' => 'label'
                         )
-                    ),
-                    /*array(
-                        'label' => 'Cron URL',
-                        'type' => 'text',
-                        'name' => 'cron_url'
-                    )*/
+                    )
                 ),
                 'buttons' => array(
                     array(
