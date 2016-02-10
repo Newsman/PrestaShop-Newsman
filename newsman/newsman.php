@@ -93,10 +93,12 @@ class Newsman extends Module
             array(
                 'type' => 'select',
                 'label' => 'Newsman list',
-                'name' => 'sel_list'
+                'name' => 'sel_list',
+                'options' => array('query'=>array())
             ),
             array(
                 'type' => 'html',
+                'name' => 'unused',
                 'html_content' => $this->l('Newsman destination segment')
             )
         );
@@ -107,7 +109,8 @@ class Newsman extends Module
                 'type' => 'select',
                 'label' => $this->l('Newsletter subscribers'),
                 'name' => 'map_newsletter',
-                'class' => 'id-map-select'
+                'class' => 'id-map-select',
+                'options' => array('query'=>array())
             );
         }
         //list groups
@@ -119,7 +122,8 @@ class Newsman extends Module
                 'type' => 'select',
                 'label' => $row['name'] . ' ' . $this->l('Group'),
                 'name' => 'map_group_'.$row['id_group'],
-                'class' => 'id-map-select'
+                'class' => 'id-map-select',
+                'options' => array('query'=>array())
             );
         }
 
@@ -255,7 +259,7 @@ class Newsman extends Module
         if (!Validate::isInt($user_id)) {
             $output['msg'][] = $this->displayError($this->l('Invalid value for UserID'));
         }
-        if (!count($output['msg'])) {
+        if (!isset($output['msg']) || !count($output['msg'])) {
             $client = $this->getClient($user_id, $api_key);
             if ($client->query('list.all')) {
                 $output['lists'] = $client->getResponse();
