@@ -418,8 +418,8 @@ class Newsman extends Module
 				continue;
 			}
 			$id_group = (int)(Tools::substr($key, 10));
-			$q = (new DbQuery())
-				->select('c.email, c.firstname, c.lastname')
+			$dbq = new DbQuery();
+			$q = $dbq->select('c.email, c.firstname, c.lastname')
 				->from('customer', 'c')
 				->leftJoin('customer_group', 'cg', 'cg.id_customer=c.id_customer')
 				->where('cg.id_group=' . $id_group);
