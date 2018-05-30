@@ -270,6 +270,7 @@ class Newsman extends Module
 			if ($client->query('list.all'))
 			{
 				$output['lists'] = $client->getResponse();
+
 				Configuration::updateValue('NEWSMAN_API_KEY', $api_key);
 				Configuration::updateValue('NEWSMAN_USER_ID', $user_id);
 				Configuration::updateValue('NEWSMAN_CONNECTED', 1);
@@ -311,7 +312,7 @@ class Newsman extends Module
 
 	public function ajaxProcessSynchronize()
 	{
-		$this->doSynchronize();
+		$x = $this->doSynchronize();
 		$this->jsonOut(array('msg' =>
 			$this->displayConfirmation($this->l('Users uploaded and scheduled for import. It might take a few minutes until they show up in your Newsman lists.'))));
 	}
@@ -422,8 +423,11 @@ class Newsman extends Module
 			$q = $dbq->select('c.email, c.firstname, c.lastname')
 				->from('customer', 'c')
 				->leftJoin('customer_group', 'cg', 'cg.id_customer=c.id_customer')
-				->where('cg.id_group=' . $id_group);
+				->where('cg.id_group=' . $id_group)
+				->where('c.newsletter=1');
+
 			$ret = Db::getInstance()->executeS($q->build());
+
 			if (count($ret))
 			{
 				$count += count($ret);
@@ -455,7 +459,7 @@ class Newsman extends Module
 		{
 			$a = array_slice($lines, $i, $max);
 			array_unshift($a, $header);
-			$client->query('import.csv', $list_id, $segments, join("\n", $a));
+			$ret = $client->query('import.csv', $list_id, $segments, join("\n", $a));
 		}
 	}
 }
