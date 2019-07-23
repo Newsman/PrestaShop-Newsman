@@ -422,17 +422,17 @@ class Newsman extends Module
 		{
 			//search on customer
 			$dbq = new DbQuery();
-			$q = $dbq->select('`email`')
+			$q = $dbq->select('`email`, `firstname`, `lastname`')
 				->from('customer')
 				->where('`newsletter` = 1');
 			$ret = Db::getInstance()->executeS($q->build());
 			$count += count($ret);
 
-			$header = "email,prestashop_source";
+			$header = "email,firstname,lastname,prestashop_source";
 			$lines = array();
 			foreach ($ret as $row)
 			{
-				$lines[] = "{$row['email']},newsletter";
+				$lines[] = "{$row['email']},{$row['firstname']},{$row['lastname']},customer with newsletter";
 			}
 			$segment_id = Tools::substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? Tools::substr($mapping['map_newsletter'], 4) : null;
 			$this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
