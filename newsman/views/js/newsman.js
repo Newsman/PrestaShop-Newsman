@@ -20,7 +20,7 @@
  *  @license   http://www.apache.org/licenses/LICENSE-2.0
  */
 
-(function() {
+(function () {
 
     //export
     self.saveCron = saveCron;
@@ -72,11 +72,14 @@
                 return $('<option/>').attr('value', item[0]).text(item[1]);
             }))
         });
+        console.log(mapping);
         if (mapping) {
             $('#sel_list').val(mapping.list);
             $('.id-map-select').each(function () {
                 $(this).val(mapping[$(this).attr('name')]);
-                if ($(this).val() == null) $(this).val('');
+                if ($(this).val() == null) {
+                    $(this).val('');
+                }
             })
         }
     }

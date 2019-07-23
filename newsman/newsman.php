@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @author    Dramba Victor for Newsman
+ * @author    Newsman Developers
  * @copyright 2015 Dazoot Software
  * @license   http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -30,7 +30,7 @@ class Newsman extends Module
 		$this->name = 'newsman';
 		$this->tab = 'advertising_marketing';
 		$this->version = '1.0.0';
-		$this->author = 'Victor Dramba for Newsman';
+		$this->author = 'NewsmanApp Developers';
 		$this->need_instance = 0;
 		$this->ps_versions_compliancy = array('min' => '1.4', 'max' => _PS_VERSION_);
 		$this->module_key = 'bb46dd134d42c2936ece1d3322d3a384';
@@ -324,6 +324,14 @@ class Newsman extends Module
 		$client->query('segment.all', $list_id);
 		$output = array();
 		$output['segments'] = $client->getResponse();
+
+		$client->query('list.all');
+		$output['lists'] = $client->getResponse();
+		Configuration::updateValue(
+			'NEWSMAN_DATA',
+			Tools::jsonEncode(array('lists' => $output['lists'], 'segments' => $output['segments']))
+		);
+		
 		$this->jsonOut($output);
 	}
 
@@ -388,10 +396,11 @@ class Newsman extends Module
 		$mapping = Tools::jsonDecode($mappingData, true);
 		$list_id = $mapping['list'];
 		$count = 0;
-		//newsletter
+
 		$value = $mapping['map_newsletter'];
 		if ($value && Module::isInstalled('blocknewsletter'))
 		{
+			//search on blocknewsletter module
 			$dbq = new DbQuery();
 			$q = $dbq->select('`email`')
 				->from('newsletter')
@@ -408,6 +417,27 @@ class Newsman extends Module
 			$segment_id = Tools::substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? Tools::substr($mapping['map_newsletter'], 4) : null;
 			$this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
 		}
+
+		if ($value)
+		{
+			//search on customer
+			$dbq = new DbQuery();
+			$q = $dbq->select('`email`')
+				->from('customer')
+				->where('`newsletter` = 1');
+			$ret = Db::getInstance()->executeS($q->build());
+			$count += count($ret);
+
+			$header = "email,prestashop_source";
+			$lines = array();
+			foreach ($ret as $row)
+			{
+				$lines[] = "{$row['email']},newsletter";
+			}
+			$segment_id = Tools::substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? Tools::substr($mapping['map_newsletter'], 4) : null;
+			$this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
+		}
+
 		foreach ($mapping as $key => $value)
 		{
 			if (!$value)
@@ -446,7 +476,8 @@ class Newsman extends Module
 				}
 				//upload group
 				$segment_id = Tools::substr($value, 0, 4) == 'seg_' ? Tools::substr($value, 4) : null;
-				$this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
+
+				//$this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
 			}
 		}
 		return $count;
