@@ -477,7 +477,7 @@ class Newsman extends Module
 				//upload group
 				$segment_id = Tools::substr($value, 0, 4) == 'seg_' ? Tools::substr($value, 4) : null;
 
-				//$this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
+				$this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
 			}
 		}
 		return $count;

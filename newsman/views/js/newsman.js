@@ -72,7 +72,7 @@
                 return $('<option/>').attr('value', item[0]).text(item[1]);
             }))
         });
-        console.log(mapping);
+ 
         if (mapping) {
             $('#sel_list').val(mapping.list);
             $('.id-map-select').each(function () {
