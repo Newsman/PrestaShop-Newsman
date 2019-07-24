@@ -331,7 +331,7 @@ class Newsman extends Module
 			'NEWSMAN_DATA',
 			Tools::jsonEncode(array('lists' => $output['lists'], 'segments' => $output['segments']))
 		);
-		
+
 		$this->jsonOut($output);
 	}
 
@@ -485,12 +485,18 @@ class Newsman extends Module
 
 	private function exportCSV($client, $list_id, $segments, $header, $lines)
 	{
+		//clear segments
+		if (!empty($segments))
+		{
+			$ret = $client->query('segment.clear', $segments[0]);
+		}
+
 		$max = 10000;
 		for ($i = 0; $i < count($lines); $i += $max)
 		{
 			$a = array_slice($lines, $i, $max);
 			array_unshift($a, $header);
-			$ret = $client->query('import.csv', $list_id, $segments, join("\n", $a));
+			$ret = $client->query('import.schedulecsv', $list_id, $segments, join("\n", $a), 600);
 		}
 	}
 }

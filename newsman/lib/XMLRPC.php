@@ -435,6 +435,7 @@ class XMLRPC_Client
 				    'verify_peer_name' => true,
 			    )
 		    );
+            
 		    $contents = file_get_contents($this->url, false, stream_context_create($opts));
 	    } else {
 		    $ch = curl_init();
@@ -461,7 +462,7 @@ class XMLRPC_Client
         // Is the message a fault?
         if ($this->message->messageType == 'fault') {
             $this->error = new XMLRPC_Error($this->message->faultCode, $this->message->faultString);
-            return false;
+            return $this->error;
         }
 
         // Message must be OK
