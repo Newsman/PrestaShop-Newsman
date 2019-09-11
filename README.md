@@ -4,11 +4,18 @@
 This is the easiest way to connect your Shop with [Newsman](https://www.newsmanapp.com).
 Generate an API KEY in your [Newsman](https://www.newsmanapp.com) account, install this plugin and you will be able to sync your shop customers and newsletter subscribers with Newsman list / segments.
 
-#Installation
+# Installation
+
+## Prestashop 1.6x
+
 Manual installation:
 Copy the "newsman" directory from this repository to your "modules" shop directory.
 
-#Setup
+## Prestashop 1.7x
+
+Admin -> Module Manager -> Upload a module -> add "newsman.zip".
+
+# Setup
 1. Fill in your Newsman API KEY and User ID and click connect
 ![](https://raw.githubusercontent.com/Newsman/PrestaShop-Newsman/master/assets/api-setup-screen.png)
 
