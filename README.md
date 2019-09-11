@@ -31,5 +31,22 @@ You can also do a manual synchronization by clicking "Synchronize now".
 
 For the automatic synchronization to work, you need to have the "native" "Cron tasks manager" (cronjobs) module installed and configured.
 
+# Newsman Remarketing
 
+# Installation
+
+## Prestashop 1.6x
+
+Manual installation:
+Copy the "newsmanremarketing" directory from this repository to your "modules" shop directory.
+
+## Prestashop 1.7x
+
+Admin -> Module Manager -> Upload a module -> add "newsmanremarketing.zip".
+
+## Setup
+1. Fill in your Newsman Remarketing Tracking ID
+![](https://raw.githubusercontent.com/Newsman/PrestaShop-Newsman/master/assets/1.jpg)
+
+2. Enable and click save
 
