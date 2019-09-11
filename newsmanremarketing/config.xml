@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>newsmanremarketing</name>
+	<displayName><![CDATA[Newsman Remarketing]]></displayName>
+	<version><![CDATA[2.3.4]]></version>
+	<description><![CDATA[Gain clear insights into important metrics about your customers, using Newsman Remarketing]]></description>
+	<author><![CDATA[Newsman App]]></author>
+	<tab><![CDATA[analytics_stats]]></tab>
+	<confirmUninstall><![CDATA[Are you sure you want to uninstall Newsman Remarketing? You will lose all the data related to this module.]]></confirmUninstall>
+	<is_configurable>1</is_configurable>
+	<need_instance>1</need_instance>
+	<limited_countries></limited_countries>
+</module>
