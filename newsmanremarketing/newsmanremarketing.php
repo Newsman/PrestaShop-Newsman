@@ -292,8 +292,12 @@ class NewsmanRemarketing extends Module
         _nzm.run( 'set', 'dimension1', 'no' );
         _nzm.run( 'require', 'ec' );
         </script>
-        <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js\"></script>
         ";
+		if (version_compare(_PS_VERSION_, '1.7', '>='))
+		{
+			$ga_snippet_head .= "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js\"></script>";
+		}
+		$ga_snippet_head .= "<script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js\"></script>";
 
 		return $ga_snippet_head;
 
@@ -612,12 +616,6 @@ class NewsmanRemarketing extends Module
 
 		if ($full)
 		{
-			$_list = Tools::getValue('controller');
-
-			if(empty($_list)){
-				$_list = "category";
-			}
-
 			$ga_product = array(
 				'id' => $product_id,
 				'name' => Tools::jsonEncode($product['name']),
@@ -627,7 +625,7 @@ class NewsmanRemarketing extends Module
 				'type' => $product_type,
 				'position' => $index ? $index : '0',
 				'quantity' => $product_qty,
-				'list' => $_list,
+				'list' => Tools::getValue('controller'),
 				'url' => isset($product['link']) ? urlencode($product['link']) : '',
 				'price' => number_format($product['price'], '2')
 			);
@@ -799,7 +797,7 @@ class NewsmanRemarketing extends Module
 	}
 
 	/**
-	 *  admin office header to add Newsman Remarketing js
+	 *  admin office header
 	 */
 	public function hookBackOfficeHeader()
 	{
@@ -826,10 +824,10 @@ class NewsmanRemarketing extends Module
 		{
 			if (version_compare(_PS_VERSION_, '1.5', '>=') == true)
 			{
-				$this->context->controller->addJs($this->_path . 'views/js/NewsmanRemarketingActionLib.js');
+				//$this->context->controller->addJs($this->_path . 'views/js/NewsmanRemarketingActionLib.js');
 			} else
 			{
-				$js .= '<script type="text/javascript" src="' . $this->_path . 'views/js/NewsmanRemarketingActionLib.js"></script>';
+				//$js .= '<script type="text/javascript" src="' . $this->_path . 'views/js/NewsmanRemarketingActionLib.js"></script>';
 			}
 
 			$this->context->smarty->assign('GA_ACCOUNT_ID', $ga_account_id);
