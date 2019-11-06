@@ -612,6 +612,12 @@ class NewsmanRemarketing extends Module
 
 		if ($full)
 		{
+			$_list = Tools::getValue('controller');
+
+			if(empty($_list)){
+				$_list = "category";
+			}
+
 			$ga_product = array(
 				'id' => $product_id,
 				'name' => Tools::jsonEncode($product['name']),
@@ -621,7 +627,7 @@ class NewsmanRemarketing extends Module
 				'type' => $product_type,
 				'position' => $index ? $index : '0',
 				'quantity' => $product_qty,
-				'list' => Tools::getValue('controller'),
+				'list' => $_list,
 				'url' => isset($product['link']) ? urlencode($product['link']) : '',
 				'price' => number_format($product['price'], '2')
 			);
