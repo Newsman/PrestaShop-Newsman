@@ -422,7 +422,7 @@ class XMLRPC_Client
 
 	    $header = "Content-type: text/xml\r\nContent-length: $length\r\n";
 	    //choose transport
-	    if ($this->httpsWrapperEnabled()) {
+	    /*if ($this->httpsWrapperEnabled()) {
 		    $opts = array(
 			    'http' => array(
 				    'method' => 'POST',
@@ -437,7 +437,7 @@ class XMLRPC_Client
 		    );
             
 		    $contents = file_get_contents($this->url, false, stream_context_create($opts));
-	    } else {
+	    } else {*/
 		    $ch = curl_init();
 		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 		    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, true);
@@ -449,7 +449,7 @@ class XMLRPC_Client
 		    curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
 		    $contents = curl_exec($ch);
 		    curl_close($ch);
-	    }
+	    //}
 
         // Now parse what we've got back
         $this->message = new XMLRPC_Message($contents);
