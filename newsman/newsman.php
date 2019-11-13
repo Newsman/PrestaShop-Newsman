@@ -488,7 +488,16 @@ class Newsman extends Module
 		//clear segments
 		if (!empty($segments))
 		{
-			$ret = $client->query('segment.clear', $segments[0]);
+			if(!empty($segments[0]))
+			{
+				$ret = $client->query('segment.clear', $segments[0]);
+			}
+		}
+
+		if(count($segments) == 1){
+			if(empty($segments[0])){
+				$segments = array();
+			}
 		}
 
 		$max = 10000;
