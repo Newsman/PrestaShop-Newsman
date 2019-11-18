@@ -171,25 +171,11 @@ var NewsmanAnalyticEnhancedECommerce = {
      id, type, affiliation, revenue, tax, shipping and coupon.
      **/
     refundByOrderId: function (Order) {
-        /**
-         * Refund an entire transaction.
-         **/
-        _nzm.run('ec:setAction', 'refund', {
-            'id': Order.id // Transaction ID is only required field for full refund.
-        });
-        _nzm.run('send', 'event', 'Ecommerce', 'Refund', {'nonInteraction': 1});
+
     },
 
     refundByProduct: function (Order) {
-        /**
-         * Refund a single product.
-         **/
-            //this.add(Product);
 
-        _nzm.run('ec:setAction', 'refund', {
-            'id': Order.id, // Transaction ID is required for partial refund.
-        });
-        _nzm.run('send', 'event', 'Ecommerce', 'Refund', {'nonInteraction': 1});
     },
 
     addProductClick: function (Product) {
@@ -230,22 +216,11 @@ var NewsmanAnalyticEnhancedECommerce = {
 
         //this.add(Product);
         _nzm.run('ec:setAction', 'purchase', Order);
-        _nzm.run('send', 'pageview', 'Transaction', 'purchase', {
-            'hitCallback': function () {
-                $.get(Order.url, {
-                    orderid: Order.id,
-                    customer: Order.customer
-                });
-            }
-        });
+        _nzm.run('send', 'pageview');
 
     },
 
     addCheckout: function (Step) {
-        _nzm.run('ec:setAction', 'checkout', {
-            'step': Step
-            //'option':'Visa'
-        });
-        _nzm.run('send', 'pageview');
+
     }
 };
