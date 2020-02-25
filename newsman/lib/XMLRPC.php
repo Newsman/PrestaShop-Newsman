@@ -107,30 +107,30 @@ class XMLRPC_Value
         // Return XML for this value
         switch ($this->type) {
             case 'boolean':
-                return '<boolean>'.(($this->data) ? '1' : '0').'</boolean>';
+                return '<boolean>' . (($this->data) ? '1' : '0') . '</boolean>';
                 break;
             case 'int':
-                return '<int>'.$this->data.'</int>';
+                return '<int>' . $this->data . '</int>';
                 break;
             case 'double':
-                return '<double>'.$this->data.'</double>';
+                return '<double>' . $this->data . '</double>';
                 break;
             case 'string':
-                return '<string>'.htmlspecialchars($this->data).'</string>';
+                return '<string>' . htmlspecialchars($this->data) . '</string>';
                 break;
             case 'array':
-                $return = '<array><data>'."\n";
+                $return = '<array><data>' . "\n";
                 foreach ($this->data as $item) {
-                    $return .= '  <value>'.$item->getXml()."</value>\n";
+                    $return .= '  <value>' . $item->getXml() . "</value>\n";
                 }
                 $return .= '</data></array>';
                 return $return;
                 break;
             case 'struct':
-                $return = '<struct>'."\n";
+                $return = '<struct>' . "\n";
                 foreach ($this->data as $name => $value) {
                     $return .= "  <member><name>$name</name><value>";
-                    $return .= $value->getXml()."</value></member>\n";
+                    $return .= $value->getXml() . "</value></member>\n";
                 }
                 $return .= '</struct>';
                 return $return;
@@ -198,7 +198,7 @@ class XMLRPC_Message
     {
         // first remove the XML declaration
         // merged from WP #10698 - this method avoids the RAM usage of preg_replace on very large messages
-        $header = preg_replace( '/<\?xml.*?\?'.'>/', '', substr($this->message, 0, 100), 1);
+        $header = preg_replace('/<\?xml.*?\?' . '>/', '', substr($this->message, 0, 100), 1);
         $this->message = substr_replace($this->message, $header, 0, 100);
         if (trim($this->message) == '') {
             return false;
@@ -238,13 +238,13 @@ class XMLRPC_Message
     {
         $this->_currentTagContents = '';
         $this->currentTag = $tag;
-        switch($tag) {
+        switch ($tag) {
             case 'methodCall':
             case 'methodResponse':
             case 'fault':
                 $this->messageType = $tag;
                 break;
-                /* Deal with stacks of arrays and structs */
+            /* Deal with stacks of arrays and structs */
             case 'data':    // data is to all intents and puposes more interesting than array
                 $this->_arraystructstypes[] = 'array';
                 $this->_arraystructs[] = array();
@@ -264,7 +264,7 @@ class XMLRPC_Message
     function tag_close($parser, $tag)
     {
         $valueFlag = false;
-        switch($tag) {
+        switch ($tag) {
             case 'int':
             case 'i4':
                 $value = (int)trim($this->_currentTagContents);
@@ -297,7 +297,7 @@ class XMLRPC_Message
                 $value = base64_decode($this->_currentTagContents);
                 $valueFlag = true;
                 break;
-                /* Deal with stacks of arrays and structs */
+            /* Deal with stacks of arrays and structs */
             case 'data':
             case 'struct':
                 $value = array_pop($this->_arraystructs);
@@ -318,12 +318,12 @@ class XMLRPC_Message
         if ($valueFlag) {
             if (count($this->_arraystructs) > 0) {
                 // Add value to struct or array
-                if ($this->_arraystructstypes[count($this->_arraystructstypes)-1] == 'struct') {
+                if ($this->_arraystructstypes[count($this->_arraystructstypes) - 1] == 'struct') {
                     // Add to struct
-                    $this->_arraystructs[count($this->_arraystructs)-1][$this->_currentStructName[count($this->_currentStructName)-1]] = $value;
+                    $this->_arraystructs[count($this->_arraystructs) - 1][$this->_currentStructName[count($this->_currentStructName) - 1]] = $value;
                 } else {
                     // Add to array
-                    $this->_arraystructs[count($this->_arraystructs)-1][] = $value;
+                    $this->_arraystructs[count($this->_arraystructs) - 1][] = $value;
                 }
             } else {
                 // Just add as a paramater
@@ -377,7 +377,9 @@ EOD;
     }
 }
 
-class XMLRPC_LibraryMissingException extends Exception {}
+class XMLRPC_LibraryMissingException extends Exception
+{
+}
 
 /**
  * XMLRPC_Client
@@ -388,7 +390,7 @@ class XMLRPC_LibraryMissingException extends Exception {}
  */
 class XMLRPC_Client
 {
-	var $url;
+    var $url;
     var $response;
     var $message = false;
     var $debug = false;
@@ -399,18 +401,19 @@ class XMLRPC_Client
 
     function XMLRPC_Client($url, $timeout = 15)
     {
-	    if (!$this->httpsWrapperEnabled() && !function_exists('curl_init'))
-		    throw new XMLRPC_LibraryMissingException('You need either php_curl extension or php_openssl and allow_url_fopen=on');
-	    if (substr($url, 0, 8) !== 'https://')
-		    throw new Exception('The URL must begin with https://');
+        if (!$this->httpsWrapperEnabled() && !function_exists('curl_init'))
+            throw new XMLRPC_LibraryMissingException('You need either php_curl extension or php_openssl and allow_url_fopen=on');
+        if (substr($url, 0, 8) !== 'https://')
+            throw new Exception('The URL must begin with https://');
 
         $this->url = $url;
         $this->timeout = $timeout;
     }
 
-	private function httpsWrapperEnabled() {
-		return in_array('https', stream_get_wrappers()) && extension_loaded('openssl');
-	}
+    private function httpsWrapperEnabled()
+    {
+        return in_array('https', stream_get_wrappers()) && extension_loaded('openssl');
+    }
 
     function query()
     {
@@ -420,36 +423,36 @@ class XMLRPC_Client
         $length = $request->getLength();
         $xml = $request->getXml();
 
-	    $header = "Content-type: text/xml\r\nContent-length: $length\r\n";
-	    //choose transport
-	    if ($this->httpsWrapperEnabled()) {
-		    $opts = array(
-			    'http' => array(
-				    'method' => 'POST',
-				    'header' => $header,
-				    'content' => $xml
-			    ),
-			    'ssl' => array(
-				    'cafile' => dirname(__FILE__) . '/cacert.pem',
-				    'verify_peer' => true,
-				    'verify_peer_name' => true,
-			    )
-		    );
-            
-		    $contents = file_get_contents($this->url, false, stream_context_create($opts));
-	    } else {
-		    $ch = curl_init();
-		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-		    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, true);
-		    curl_setopt($ch, CURLOPT_HEADER, false);
-		    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-		    curl_setopt($ch, CURLOPT_URL, $this->url);
-		    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: text/xml'));
-		    curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
-		    $contents = curl_exec($ch);
-		    curl_close($ch);
-	    }
+        $header = "Content-type: text/xml\r\nContent-length: $length\r\n";
+        //choose transport
+        /*if ($this->httpsWrapperEnabled()) {
+            $opts = array(
+                'http' => array(
+                    'method' => 'POST',
+                    'header' => $header,
+                    'content' => $xml
+                ),
+                'ssl' => array(
+                    'cafile' => dirname(__FILE__) . '/cacert.pem',
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                )
+            );
+
+            $contents = file_get_contents($this->url, false, stream_context_create($opts));
+        } else {*/
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_URL, $this->url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: text/xml'));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
+        $contents = curl_exec($ch);
+        curl_close($ch);
+        //}
 
         // Now parse what we've got back
         $this->message = new XMLRPC_Message($contents);
@@ -540,7 +543,8 @@ EOD;
  * @package IXR
  * @since 1.5
  */
-class XMLRPC_Date {
+class XMLRPC_Date
+{
     var $year;
     var $month;
     var $day;
@@ -583,12 +587,12 @@ class XMLRPC_Date {
 
     function getIso()
     {
-        return $this->year.$this->month.$this->day.'T'.$this->hour.':'.$this->minute.':'.$this->second.$this->timezone;
+        return $this->year . $this->month . $this->day . 'T' . $this->hour . ':' . $this->minute . ':' . $this->second . $this->timezone;
     }
 
     function getXml()
     {
-        return '<dateTime.iso8601>'.$this->getIso().'</dateTime.iso8601>';
+        return '<dateTime.iso8601>' . $this->getIso() . '</dateTime.iso8601>';
     }
 
     function getTimestamp()
@@ -614,7 +618,7 @@ class XMLRPC_Base64
 
     function getXml()
     {
-        return '<base64>'.base64_encode($this->data).'</base64>';
+        return '<base64>' . base64_encode($this->data) . '</base64>';
     }
 }
 
