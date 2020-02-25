@@ -131,6 +131,9 @@
         var icn = btn.querySelector('i');
         icn.className = 'process-icon-loading';
         ajaxCall('Synchronize', {}, function (ret) {
+
+            console.log(ret);
+
             icn.className = 'process-icon-ok';
             debug(ret);
             $('body').animate({scrollTop: 0}, 300);
