@@ -10,6 +10,7 @@ Generate an API KEY in your [Newsman](https://www.newsmanapp.com) account, insta
 
 Manual installation:
 Copy the "newsman" directory from this repository to your "modules" shop directory.
+Copy "newsmanfetch.php" to your root directory.
 
 ## Prestashop 1.7x
 
