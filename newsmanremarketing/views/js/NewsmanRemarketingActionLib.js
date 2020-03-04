@@ -22,15 +22,7 @@
 
 /* globals $, _nzm.run, jQuery */
 
-let newsmanJqueryLoaded = false;
-
-window.onload = function () {
-    if (window.jQuery) {
-        newsmanJqueryLoaded = true;
-    }
-}
-
-if (newsmanJqueryLoaded) {
+//window.addEventListener('load', function () {
 
     jQuery(document).ready(function () {
 
@@ -260,4 +252,4 @@ if (newsmanJqueryLoaded) {
         }
     };
 
-}
+//});
