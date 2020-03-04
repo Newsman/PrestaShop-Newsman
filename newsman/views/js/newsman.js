@@ -72,7 +72,7 @@
                 return $('<option/>').attr('value', item[0]).text(item[1]);
             }))
         });
- 
+
         if (mapping) {
             $('#sel_list').val(mapping.list);
             $('.id-map-select').each(function () {
@@ -119,6 +119,7 @@
         $('.id-map-select').each(function () {
             mapping[$(this).attr('name')] = $(this).val();
         });
+        
         ajaxCall('SaveMapping', {mapping: JSON.stringify(mapping)}, function (ret) {
             icn.className = 'process-icon-ok';
         });

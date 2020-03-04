@@ -22,23 +22,58 @@
 
 /* globals $, _nzm.run, jQuery */
 
-jQuery(document).ready(function () {
+let newsmanJqueryLoaded = false;
 
-    //category view
-    var _items = jQuery('.product-container');
-    for (var x = 0; x <= _items.length; x++) {
+window.onload = function () {
+    if (window.jQuery) {
+        newsmanJqueryLoaded = true;
+    }
+}
 
-        var currentProd = jQuery('.product-container:eq(' + x + ')');
+if (newsmanJqueryLoaded) {
 
-        $('.product-container:eq(' + x + ') .ajax_add_to_cart_button').click(function () {
+    jQuery(document).ready(function () {
 
-            var _c = $(this).closest('.product-container');
+        //category view
+        var _items = jQuery('.product-container');
+        for (var x = 0; x <= _items.length; x++) {
 
-            var id = $(this).attr('data-id-product');
-            var name = _c.find('.product-name').text();
+            var currentProd = jQuery('.product-container:eq(' + x + ')');
+
+            $('.product-container:eq(' + x + ') .ajax_add_to_cart_button').click(function () {
+
+                var _c = $(this).closest('.product-container');
+
+                var id = $(this).attr('data-id-product');
+                var name = _c.find('.product-name').text();
+                name = $.trim(name);
+                var category = "";
+                var price = _c.find('.content_price span:first').text();
+                price = $.trim(price);
+
+                _nzm.run('ec:addProduct', {
+                    'id': id,
+                    'name': name,
+                    'category': category,
+                    'price': price,
+                    'quantity': '1'
+                });
+                _nzm.run('ec:setAction', 'add');
+                _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
+
+            });
+        }
+
+        //product view
+        $('#add_to_cart').click(function () {
+
+            //var _c = $(this).closest('.product-container');
+
+            var id = $('#product_page_product_id').val();
+            var name = $('h1:first').text();
             name = $.trim(name);
             var category = "";
-            var price = _c.find('.content_price span:first').text();
+            var price = $('#our_price_display').text();
             price = $.trim(price);
 
             _nzm.run('ec:addProduct', {
@@ -52,175 +87,177 @@ jQuery(document).ready(function () {
             _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
 
         });
-    }
 
-    //product view
-    $('#add_to_cart').click(function () {
+        //delete from cart
+        $(".cart_quantity_delete").each(function () {
+            jQuery(this).bind("click", {"elem": jQuery(this)}, function (ev) {
 
-        //var _c = $(this).closest('.product-container');
+                var _c = $(this).closest('.cart_item');
 
-        var id = $('#product_page_product_id').val();
-        var name = $('h1:first').text();
-        name = $.trim(name);
-        var category = "";
-        var price = $('#our_price_display').text();
-        price = $.trim(price);
+                var id = ev.data.elem.attr('id');
+                id = id.substr(0, id.indexOf('_'));
+                var qty = _c.find('.cart_quantity_input').val();
 
-        _nzm.run('ec:addProduct', {
-            'id': id,
-            'name': name,
-            'category': category,
-            'price': price,
-            'quantity': '1'
+                _nzm.run('ec:addProduct', {
+                    'id': id,
+                    'quantity': qty
+                });
+
+                _nzm.run('ec:setAction', 'remove');
+                _nzm.run('send', 'event', 'UX', 'click', 'remove from cart');
+
+            });
         });
-        _nzm.run('ec:setAction', 'add');
-        _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
 
     });
 
-    //delete from cart
-    $(".cart_quantity_delete").each(function () {
-        jQuery(this).bind("click", {"elem": jQuery(this)}, function (ev) {
+    var NewsmanAnalyticEnhancedECommerce = {
 
-            var _c = $(this).closest('.cart_item');
+        add: function (Product, Order, Impression) {
+            var Products = {};
+            var Orders = {};
 
-            var id = ev.data.elem.attr('id');
-            id = id.substr(0, id.indexOf('_'));
-            var qty = _c.find('.cart_quantity_input').val();
+            var ProductFieldObject = ['id', 'name', 'category', 'brand', 'variant', 'price', 'quantity', 'coupon', 'list', 'position', 'dimension1'];
+            var OrderFieldObject = ['id', 'affiliation', 'revenue', 'tax', 'shipping', 'coupon', 'list', 'step', 'option'];
 
-            _nzm.run('ec:addProduct', {
-                'id': id,
-                'quantity': qty
+            if (Product != null) {
+                if (Impression && Product.quantity !== undefined) {
+                    delete Product.quantity;
+                }
+
+                for (var productKey in Product) {
+                    for (var i = 0; i < ProductFieldObject.length; i++) {
+                        if (productKey.toLowerCase() == ProductFieldObject[i]) {
+                            if (Product[productKey] != null) {
+                                Products[productKey.toLowerCase()] = Product[productKey];
+                            }
+
+                        }
+                    }
+
+                }
+            }
+
+            if (Order != null) {
+                for (var orderKey in Order) {
+                    for (var j = 0; j < OrderFieldObject.length; j++) {
+                        if (orderKey.toLowerCase() == OrderFieldObject[j]) {
+                            Orders[orderKey.toLowerCase()] = Order[orderKey];
+                        }
+                    }
+                }
+            }
+
+            if (Impression) {
+                _nzm.run('ec:addImpression', Products);
+            } else {
+                _nzm.run('ec:addProduct', Products);
+            }
+        },
+
+        addProductDetailView: function (Product) {
+            this.add(Product);
+            _nzm.run('ec:setAction', 'detail');
+            _nzm.run('send', 'pageview');
+        },
+
+        addToCart: function (Product) {
+            this.add(Product);
+            _nzm.run('ec:setAction', 'add');
+            _nzm.run('send', 'event', 'UX', 'click', 'Add to Cart'); // Send data using an event.
+        },
+
+        removeFromCart: function (Product) {
+            this.add(Product);
+            _nzm.run('ec:setAction', 'remove');
+            _nzm.run('send', 'event', 'UX', 'click', 'Remove From cart'); // Send data using an event.
+        },
+
+        addProductImpression: function (Product) {
+            //_nzm.run('send', 'pageview');
+        },
+
+        /**
+         id, type, affiliation, revenue, tax, shipping and coupon.
+         **/
+        refundByOrderId: function (Order) {
+            /**
+             * Refund an entire transaction.
+             **/
+            _nzm.run('ec:setAction', 'refund', {
+                'id': Order.id // Transaction ID is only required field for full refund.
+            });
+            _nzm.run('send', 'event', 'Ecommerce', 'Refund', {'nonInteraction': 1});
+        },
+
+        refundByProduct: function (Order) {
+            /**
+             * Refund a single product.
+             **/
+            //this.add(Product);
+
+            _nzm.run('ec:setAction', 'refund', {
+                'id': Order.id, // Transaction ID is required for partial refund.
+            });
+            _nzm.run('send', 'event', 'Ecommerce', 'Refund', {'nonInteraction': 1});
+        },
+
+        addProductClick: function (Product) {
+            var ClickPoint = jQuery('a[href$="' + Product.url + '"].quick-view');
+
+            ClickPoint.on("click", function () {
+
+                NewsmanAnalyticEnhancedECommerce.add(Product);
+                _nzm.run('ec:setAction', 'click', {
+                    list: Product.list
+                });
+
+                _nzm.run('send', 'event', 'Product Quick View', 'click', Product.list, {
+                    'hitCallback': function () {
+                        return !_nzm.run.loaded;
+                    }
+                });
             });
 
-            _nzm.run('ec:setAction', 'remove');
-            _nzm.run('send', 'event', 'UX', 'click', 'remove from cart');
+        },
 
-        });
-    });
-
-});
-
-var NewsmanAnalyticEnhancedECommerce = {
-
-    add: function (Product, Order, Impression) {
-        var Products = {};
-        var Orders = {};
-
-        var ProductFieldObject = ['id', 'name', 'category', 'brand', 'variant', 'price', 'quantity', 'coupon', 'list', 'position', 'dimension1'];
-        var OrderFieldObject = ['id', 'affiliation', 'revenue', 'tax', 'shipping', 'coupon', 'list', 'step', 'option'];
-
-        if (Product != null) {
-            if (Impression && Product.quantity !== undefined) {
-                delete Product.quantity;
-            }
-
-            for (var productKey in Product) {
-                for (var i = 0; i < ProductFieldObject.length; i++) {
-                    if (productKey.toLowerCase() == ProductFieldObject[i]) {
-                        if (Product[productKey] != null) {
-                            Products[productKey.toLowerCase()] = Product[productKey];
-                        }
-
-                    }
-                }
-
-            }
-        }
-
-        if (Order != null) {
-            for (var orderKey in Order) {
-                for (var j = 0; j < OrderFieldObject.length; j++) {
-                    if (orderKey.toLowerCase() == OrderFieldObject[j]) {
-                        Orders[orderKey.toLowerCase()] = Order[orderKey];
-                    }
-                }
-            }
-        }
-
-        if (Impression) {
-            _nzm.run('ec:addImpression', Products);
-        } else {
-            _nzm.run('ec:addProduct', Products);
-        }
-    },
-
-    addProductDetailView: function (Product) {
-        this.add(Product);
-        _nzm.run('ec:setAction', 'detail');
-        _nzm.run('send', 'pageview');
-    },
-
-    addToCart: function (Product) {
-        this.add(Product);
-        _nzm.run('ec:setAction', 'add');
-        _nzm.run('send', 'event', 'UX', 'click', 'Add to Cart'); // Send data using an event.
-    },
-
-    removeFromCart: function (Product) {
-        this.add(Product);
-        _nzm.run('ec:setAction', 'remove');
-        _nzm.run('send', 'event', 'UX', 'click', 'Remove From cart'); // Send data using an event.
-    },
-
-    addProductImpression: function (Product) {
-        //_nzm.run('send', 'pageview');
-    },
-
-    /**
-     id, type, affiliation, revenue, tax, shipping and coupon.
-     **/
-    refundByOrderId: function (Order) {
-
-    },
-
-    refundByProduct: function (Order) {
-
-    },
-
-    addProductClick: function (Product) {
-        var ClickPoint = jQuery('a[href$="' + Product.url + '"].quick-view');
-
-        ClickPoint.on("click", function () {
-
-            NewsmanAnalyticEnhancedECommerce.add(Product);
+        addProductClickByHttpReferal: function (Product) {
+            this.add(Product);
             _nzm.run('ec:setAction', 'click', {
                 list: Product.list
             });
 
-            _nzm.run('send', 'event', 'Product Quick View', 'click', Product.list, {
+            _nzm.run('send', 'event', 'Product Click', 'click', Product.list, {
+                'nonInteraction': 1,
                 'hitCallback': function () {
                     return !_nzm.run.loaded;
                 }
             });
-        });
 
-    },
+        },
 
-    addProductClickByHttpReferal: function (Product) {
-        this.add(Product);
-        _nzm.run('ec:setAction', 'click', {
-            list: Product.list
-        });
+        addTransaction: function (Order) {
 
-        _nzm.run('send', 'event', 'Product Click', 'click', Product.list, {
-            'nonInteraction': 1,
-            'hitCallback': function () {
-                return !_nzm.run.loaded;
-            }
-        });
+            //this.add(Product);
+            _nzm.run('ec:setAction', 'purchase', Order);
+            _nzm.run('send', 'pageview', 'Transaction', 'purchase', {
+                'hitCallback': function () {
+                    $.get(Order.url, {
+                        orderid: Order.id,
+                        customer: Order.customer
+                    });
+                }
+            });
 
-    },
+        },
 
-    addTransaction: function (Order) {
+        addCheckout: function (Step) {
+            _nzm.run('ec:setAction', 'checkout', {
+                'step': Step
+                //'option':'Visa'
+            });
+            _nzm.run('send', 'pageview');
+        }
+    };
 
-        //this.add(Product);
-        _nzm.run('ec:setAction', 'purchase', Order);
-        _nzm.run('send', 'pageview');
-
-    },
-
-    addCheckout: function (Step) {
-
-    }
-};
+}

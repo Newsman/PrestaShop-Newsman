@@ -393,7 +393,7 @@ class Newsman extends Module
         $count = 0;
 
         $value = $mapping['map_newsletter'];
-        if ($value && Module::isInstalled('blocknewsletter')) {
+        if (Module::isInstalled('blocknewsletter')) {
             //search on blocknewsletter module
             $dbq = new DbQuery();
             $q = $dbq->select('`email`')
@@ -408,22 +408,56 @@ class Newsman extends Module
             }
             //upload from newsletter
             $segment_id = Tools::substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? Tools::substr($mapping['map_newsletter'], 4) : null;
-            $this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
+            if ($segment_id != null) {
+                array($segment_id);
+            } else {
+                $segment_id = array();
+            }
+
+            $this->exportCSV($client, $list_id, $segment_id, $header, $lines);
+        }
+
+        if (Module::isInstalled('ps_emailsubscription') || Module::isInstalled("emailsubscription")) {
+            //search on emailsubscription module
+            $dbq = new DbQuery();
+            $q = $dbq->select('`email`, `newsletter_date_add`')
+                ->from('emailsubscription')
+                ->where('`active` = 1');
+            $ret = Db::getInstance()->executeS($q->build());
+            $count += count($ret);
+            $header = "email, newsletter_date_add, source";
+            $lines = array();
+            foreach ($ret as $row) {
+                $lines[] = "{$row['email']}, {$row["newsletter_date_add"]}, prestashop 1.6-1.7 plugin newsletter active";
+            }
+            //upload from newsletter
+            $segment_id = Tools::substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? Tools::substr($mapping['map_newsletter'], 4) : null;
+            if ($segment_id != null) {
+                array($segment_id);
+            } else {
+                $segment_id = array();
+            }
+
+            $this->exportCSV($client, $list_id, $segment_id, $header, $lines);
         }
 
         if ($value) {
             //search on customer
             $dbq = new DbQuery();
-            $q = $dbq->select('`email`, `firstname`, `lastname`')
+            $q = $dbq->select('`email`, `firstname`, `lastname`, `id_gender`, `birthday`')
                 ->from('customer')
                 ->where('`newsletter` = 1');
             $ret = Db::getInstance()->executeS($q->build());
+
             $count += count($ret);
 
-            $header = "email,firstname,lastname,prestashop_source";
+            $header = "email,firstname,lastname,gender,birthday,source";
             $lines = array();
             foreach ($ret as $row) {
-                $lines[] = "{$row['email']},{$row['firstname']},{$row['lastname']},customer with newsletter";
+
+                $gender = ($row["gender"] == "1") ? "Barbat" : "Femeie";
+
+                $lines[] = "{$row['email']},{$row['firstname']},{$row['lastname']}, {$gender}, {$row["birthday"]}, prestashop 1.6-1.7 plugin customer with newsletter";
             }
             $segment_id = Tools::substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? Tools::substr($mapping['map_newsletter'], 4) : null;
             $this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
@@ -438,7 +472,7 @@ class Newsman extends Module
             }
             $id_group = (int)(Tools::substr($key, 10));
             $dbq = new DbQuery();
-            $q = $dbq->select('c.email, c.firstname, c.lastname')
+            $q = $dbq->select('c.email, c.firstname, c.lastname, c.id_gender, c.birthday')
                 ->from('customer', 'c')
                 ->leftJoin('customer_group', 'cg', 'cg.id_customer=c.id_customer')
                 ->where('cg.id_group=' . $id_group)
@@ -449,16 +483,32 @@ class Newsman extends Module
             if (count($ret)) {
                 $count += count($ret);
                 $cols = array_keys($ret[0]);
-                $header = join(',', $cols) . ",prestashop_source";
+                //rename id_gender
+                $cols[3] = "gender";
+
+                $header = join(',', $cols) . ",prestashop 1.6-1.7 plugin customers with newsletter by prestahop groups";
+
+                //rename gender again to be filtered
+                $cols[3] = "id_gender";
 
                 $lines = array();
                 foreach ($ret as $row) {
                     $line = '';
                     foreach ($cols as $col) {
+
+                        if ($col == "id_gender") {
+                            if ($row[$col] == "1") {
+                                $row[$col] = "Barbat";
+                            } else if ($row[$col] == "2") {
+                                $row[$col] = "Femeie";
+                            }
+                        }
+
                         $line .= $row[$col] . ',';
                     }
                     $lines[] = "$line,group_{$id_group}";
                 }
+
                 //upload group
                 $segment_id = Tools::substr($value, 0, 4) == 'seg_' ? Tools::substr($value, 4) : null;
 
