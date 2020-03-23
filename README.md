@@ -32,6 +32,11 @@ You can also do a manual synchronization by clicking "Synchronize now".
 
 For the automatic synchronization to work, you need to have the "native" "Cron tasks manager" (cronjobs) module installed and configured.
 
+# Sync Segmentation
+
+Newsletter Subscribers: email, newsletter_date_add, source
+Customers with Newsletter: email, firstname, lastname, gender, birthday, source
+
 # Newsman Remarketing
 
 # Installation
