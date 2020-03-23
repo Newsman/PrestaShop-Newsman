@@ -34,8 +34,8 @@ For the automatic synchronization to work, you need to have the "native" "Cron t
 
 # Sync Segmentation
 
-Newsletter Subscribers: email, newsletter_date_add, source
-Customers with Newsletter: email, firstname, lastname, gender, birthday, source
+- Newsletter Subscribers: email, newsletter_date_add, source
+- Customers with Newsletter: email, firstname, lastname, gender, birthday, source
 
 # Newsman Remarketing
 
