@@ -67,13 +67,14 @@
             var category = "";
             var price = $('#our_price_display').text();
             price = $.trim(price);
+            var _qty = $('#quantity_wanted').val();
 
             _nzm.run('ec:addProduct', {
                 'id': id,
                 'name': name,
                 'category': category,
                 'price': price,
-                'quantity': '1'
+                'quantity': _qty
             });
             _nzm.run('ec:setAction', 'add');
             _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
@@ -82,13 +83,36 @@
 
         //delete from cart
         $(".cart_quantity_delete").each(function () {
-            jQuery(this).bind("click", {"elem": jQuery(this)}, function (ev) {
+            jQuery(this).bind("click", {"elem": jQuery(this)}, function (ev) {       
 
-                var _c = $(this).closest('.cart_item');
+                    var _c = $(this).closest('.cart_item');
 
-                var id = ev.data.elem.attr('id');
+                    var id = ev.data.elem.attr('id');
+                    id = id.substr(0, id.indexOf('_'));
+                    var qty = _c.find('.cart_quantity_input').val();
+    
+                    _nzm.run('ec:addProduct', {
+                        'id': id,
+                        'quantity': qty
+                    });
+    
+                    _nzm.run('ec:setAction', 'remove');
+                    _nzm.run('send', 'event', 'UX', 'click', 'remove from cart'); 
+
+            });
+        });        
+
+        //delete from cart widget
+        $(".ajax_cart_block_remove_link").each(function () {
+            jQuery(this).bind("click", {"elem": jQuery(this)}, function (ev) {          
+
+                var _c = $(this).closest('.first_item');                
+
+                var id = _c.attr('data-id');                                
+                id = id.replace('cart_block_product_', '');
                 id = id.substr(0, id.indexOf('_'));
-                var qty = _c.find('.cart_quantity_input').val();
+                
+                var qty = _c.find('.quantity').html();
 
                 _nzm.run('ec:addProduct', {
                     'id': id,
@@ -96,7 +120,7 @@
                 });
 
                 _nzm.run('ec:setAction', 'remove');
-                _nzm.run('send', 'event', 'UX', 'click', 'remove from cart');
+                _nzm.run('send', 'event', 'UX', 'click', 'remove from cart');                            
 
             });
         });
@@ -228,27 +252,30 @@
 
         },
 
-        addTransaction: function (Order) {
+        addTransaction: function (Order) {      
 
-            //this.add(Product);
-            _nzm.run('ec:setAction', 'purchase', Order);
-            _nzm.run('send', 'pageview', 'Transaction', 'purchase', {
-                'hitCallback': function () {
-                    $.get(Order.url, {
-                        orderid: Order.id,
-                        customer: Order.customer
-                    });
-                }
+            _nzm.run('ec:setAction', 'purchase',{
+                "id": Order.id,
+                "affiliation": Order.affiliation,
+                "revenue": Order.revenue,
+                "tax": Order.tax,
+                "shipping": Order.shipping
             });
+            _nzm.run('send', 'pageview');
 
         },
 
         addCheckout: function (Step) {
-            _nzm.run('ec:setAction', 'checkout', {
-                'step': Step
+           // _nzm.run('ec:setAction', 'checkout', {
+           //     'step': Step
                 //'option':'Visa'
-            });
-            _nzm.run('send', 'pageview');
+          //  });
+
+            //_nzm.run('ec:addProduct', '');
+            //_nzm.run('ec:setAction', 'checkout');
+            //_nzm.run('send', 'pageview');
+
+           // alert('sda');
         }
     };
 
