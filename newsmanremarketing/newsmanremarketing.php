@@ -349,8 +349,14 @@ class NewsmanRemarketing extends Module
                     foreach ($cart->getProducts() as $order_product)
                         $order_products[] = $this->wrapProduct($order_product, array(), 0, true);
 
+                    $id_cust = $order->id_customer;
+                    $customer = new Customer($id_cust);			              
+
                     $transaction = array(
                         'id' => $order->id,
+                        'email' => $customer->email,
+                        "firstname" => $customer->firstname,
+                        "lastname" => $customer->lastname,
                         'affiliation' => (version_compare(_PS_VERSION_, '1.5', '>=') && Shop::isFeatureActive()) ? $this->context->shop->name : Configuration::get('PS_SHOP_NAME'),
                         'revenue' => $order->total_paid,
                         'shipping' => $order->total_shipping,
