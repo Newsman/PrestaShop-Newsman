@@ -253,10 +253,8 @@
         },
 
         addTransaction: function (Order) {      
-                      
-                    if (_nzm.get_tracking_id() == '') {
-                         _nzm.identify({ email: Order.email, first_name: Order.firstname, last_name: Order.lastname });
-                    }              
+                                    
+            _nzm.identify({ email: Order.email, first_name: Order.firstname, last_name: Order.lastname });                           
 
             _nzm.run('ec:setAction', 'purchase',{
                 "id": Order.id,
