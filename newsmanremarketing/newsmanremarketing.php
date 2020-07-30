@@ -282,7 +282,7 @@ class NewsmanRemarketing extends Module
             $ga_snippet_head .= "<script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/jquery-1.12.4.min.js\"></script>";
         }
         $ga_snippet_head .= "
-        <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js\"></script>     
+        <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=300720\"></script>     
         ";
 
         return $ga_snippet_head;
@@ -780,9 +780,9 @@ class NewsmanRemarketing extends Module
 
         if (!empty($ga_account_id) && $this->active) {
             if (version_compare(_PS_VERSION_, '1.5', '>=') == true) {
-                $this->context->controller->addJs($this->_path . 'views/js/NewsmanRemarketingActionLib.js');
+                $this->context->controller->addJs($this->_path . 'views/js/NewsmanRemarketingActionLib.js?t=30072020');
             } else {
-                $js .= '<script type="text/javascript" src="' . $this->_path . 'views/js/NewsmanRemarketingActionLib.js"></script>';
+                $js .= '<script type="text/javascript" src="' . $this->_path . 'views/js/NewsmanRemarketingActionLib.js?t=30072020"></script>';
             }
 
             $this->context->smarty->assign('GA_ACCOUNT_ID', $ga_account_id);
