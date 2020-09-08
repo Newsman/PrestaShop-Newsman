@@ -265,8 +265,6 @@
             });
             _nzm.run('send', 'pageview');
 
-            console.log('sadasdsadsaddsadas');
-
         },
 
         addCheckout: function (Step) {

@@ -378,8 +378,17 @@
         }
 
         public function hookDisplayOrderConfirmation($params){
-            //$order = $params['objOrder'];
-            $order = $params["order"];    
+            
+            $order = null;
+
+            if (version_compare(_PS_VERSION_, '1.7', '>='))
+            {
+                $order = $params["order"];
+            }
+            else{
+                $order = $params['objOrder'];
+            }
+   
             //if (Validate::isLoadedObject($order) && $order->getCurrentState() != (int)Configuration::get('PS_OS_ERROR')) {
                 $ga_order_sent = Db::getInstance()->getValue('SELECT id_order FROM `' . _DB_PREFIX_ . 'newsmanremarketing` WHERE id_order = ' . (int)$order->id);
             // if ($ga_order_sent === false) {
@@ -410,7 +419,7 @@
                         return $this->_runJs($ga_scripts);
                     //}
                 //}
-            //}
+            //}        
         }
 
         /**
