@@ -50,30 +50,38 @@
         }
 
         public function install()
-        {
+        {			         
             if (version_compare(_PS_VERSION_, '1.5', '>=') && Shop::isFeatureActive()) {
                 Shop::setContext(Shop::CONTEXT_ALL);
             }
 
-            if (!parent::install() || !$this->installTab() || !$this->registerHook('header') || !$this->registerHook('adminOrder')
-                || !$this->registerHook('footer') || !$this->registerHook('home')
-                || !$this->registerHook('productfooter') || !$this->registerHook('orderConfirmation')
-                || !$this->registerHook('backOfficeHeader')
+            if (!parent::install() || !$this->installTab() || !$this->registerHook('header') 
+               //|| !$this->registerHook('adminOrder')
+               || !$this->registerHook('footer') 
+               //|| !$this->registerHook('home')
+                || !$this->registerHook('productfooter') 
+                || !$this->registerHook('orderConfirmation')
+                || !$this->registerHook('displayFooter')
+                || !$this->registerHook('displayFooterCategory')
+               // || !$this->registerHook('backOfficeHeader')
             ) {
                 return false;
             }
 
+            /*
             if (version_compare(_PS_VERSION_, '1.5', '>=')
                 && (!$this->registerHook('actionProductCancel') || !$this->registerHook('actionCartSave'))
             ) {
                 return false;
             }
+            */
 
             if (version_compare(_PS_VERSION_, '1.7', '>=') && (!$this->registerHook('displayOrderConfirmation')))
             {
                 
             }
 
+            /*
             Db::getInstance()->Execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'newsmanremarketing`');
 
             if (!Db::getInstance()->Execute('
@@ -91,8 +99,9 @@
             ) {
                 return $this->uninstall();
             }
-
-            return true;
+            */
+                        
+            return true;			
         }
 
         public function uninstall()
@@ -101,7 +110,8 @@
                 return false;
             }
 
-            return Db::getInstance()->Execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'newsmanremarketing`');
+            //return Db::getInstance()->Execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'newsmanremarketing`');
+            return true;
         }
 
         public function installTab()
@@ -281,13 +291,14 @@
             script_dom.src = '" . self::$endpoint . "';s.parentNode.insertBefore(script_dom, s);})();
             _nzm.run( 'set', 'dimension1', 'no' );
             _nzm.run( 'require', 'ec' );
+            let newsmanVersion = '" . _PS_VERSION_ . "';
             </script>
             ";
             if (version_compare(_PS_VERSION_, '1.7', '>=')) {
-                $ga_snippet_head .= "<script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/jquery-1.12.4.min.js\"></script>";
+                //$ga_snippet_head .= "<script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/jquery-1.12.4.min.js\"></script>";
             }
             $ga_snippet_head .= "
-            <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=300720\"></script>     
+            <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=300721\"></script>     
             ";
 
             return $ga_snippet_head;
@@ -314,7 +325,7 @@
 
                 //$this->context->controller->addJs($this->_path . 'views/js/jquery-1.12.4.min.js');
                 //$this->context->controller->addJs($this->_path . 'views/js/NewsmanRemarketingActionLib.js');
-
+               
                 return $nzm;
             }
         }
@@ -345,9 +356,9 @@
         {
             $order = $params['objOrder'];
             if (Validate::isLoadedObject($order) && $order->getCurrentState() != (int)Configuration::get('PS_OS_ERROR')) {
-                $ga_order_sent = Db::getInstance()->getValue('SELECT id_order FROM `' . _DB_PREFIX_ . 'newsmanremarketing` WHERE id_order = ' . (int)$order->id);
-                if ($ga_order_sent === false) {
-                    Db::getInstance()->Execute('INSERT INTO `' . _DB_PREFIX_ . 'newsmanremarketing` (id_order, id_shop, sent, date_add) VALUES (' . (int)$order->id . ', ' . (int)$this->context->shop->id . ', 0, NOW())');
+                //$ga_order_sent = Db::getInstance()->getValue('SELECT id_order FROM `' . _DB_PREFIX_ . 'newsmanremarketing` WHERE id_order = ' . (int)$order->id);
+                //if ($ga_order_sent === false) {
+                    //Db::getInstance()->Execute('INSERT INTO `' . _DB_PREFIX_ . 'newsmanremarketing` (id_order, id_shop, sent, date_add) VALUES (' . (int)$order->id . ', ' . (int)$this->context->shop->id . ', 0, NOW())');
                     if ($order->id_customer == $this->context->cookie->id_customer) {
                         $order_products = array();
                         $cart = new Cart($order->id_cart);
@@ -373,7 +384,7 @@
                         $this->js_state = 1;
                         return $this->_runJs($ga_scripts);
                     }
-                }
+                //}
             }
         }
 
@@ -390,9 +401,9 @@
             }
    
             //if (Validate::isLoadedObject($order) && $order->getCurrentState() != (int)Configuration::get('PS_OS_ERROR')) {
-                $ga_order_sent = Db::getInstance()->getValue('SELECT id_order FROM `' . _DB_PREFIX_ . 'newsmanremarketing` WHERE id_order = ' . (int)$order->id);
+                //$ga_order_sent = Db::getInstance()->getValue('SELECT id_order FROM `' . _DB_PREFIX_ . 'newsmanremarketing` WHERE id_order = ' . (int)$order->id);
             // if ($ga_order_sent === false) {
-                    Db::getInstance()->Execute('INSERT INTO `' . _DB_PREFIX_ . 'newsmanremarketing` (id_order, id_shop, sent, date_add) VALUES (' . (int)$order->id . ', ' . (int)$this->context->shop->id . ', 0, NOW())');
+                    //Db::getInstance()->Execute('INSERT INTO `' . _DB_PREFIX_ . 'newsmanremarketing` (id_order, id_shop, sent, date_add) VALUES (' . (int)$order->id . ', ' . (int)$this->context->shop->id . ', 0, NOW())');
                     //if ($order->id_customer == $this->context->cookie->id_customer) {               
                         $order_products = array();
                         $cart = new Cart($order->id_cart);
@@ -429,8 +440,8 @@
         {
             $ga_scripts = '';
             $this->js_state = 0;
-
-            if (isset($this->context->cookie->ga_cart)) {
+            
+			if (isset($this->context->cookie->ga_cart)) {
                 $this->filterable = 0;
 
                 $gacarts = unserialize($this->context->cookie->ga_cart);
@@ -443,10 +454,10 @@
                     }
                 }
                 unset($this->context->cookie->ga_cart);
-            }
-
+            }			
+			
             $controller_name = Tools::getValue('controller');
-            $products = $this->wrapProducts($this->context->smarty->getTemplateVars('products'), array(), true);
+            $products = $this->wrapProducts($this->context->smarty->getTemplateVars('products'), array(), true);         
 
             if ($controller_name == 'order' || $controller_name == 'orderopc') {
                 $this->eligible = 1;
@@ -454,8 +465,8 @@
                 if (empty($step)) {
                     $step = 0;
                 }
-                $ga_scripts .= $this->addProductFromCheckout($products, $step);
-                $ga_scripts .= 'NMBG.addCheckout(\'' . (int)$step . '\');';
+                //$ga_scripts .= $this->addProductFromCheckout($products, $step);
+                //$ga_scripts .= 'NMBG.addCheckout(\'' . (int)$step . '\');';
             }
 
             if (version_compare(_PS_VERSION_, '1.5', '<')) {
@@ -477,7 +488,8 @@
             }
 
             return $this->_runJs($ga_scripts);
-        }
+			
+        }    
 
         protected function filter($ga_scripts)
         {
@@ -606,7 +618,7 @@
             }
 
             if (!empty($product['id_product_attribute'])) {
-                $product_id .= '-' . $product['id_product_attribute'];
+                //$product_id .= '-' . $product['id_product_attribute'];
             }
 
             $product_type = 'typical';
@@ -619,24 +631,26 @@
             $price = 0;
 
             if (version_compare(_PS_VERSION_, '1.7', '>=')) {
-                $price = number_format($product['price_amount'], '2');
+                $price = number_format($product['price_amount'], '2');			
             } else {
-                $price = number_format($product['price'], '2');
-            }
-
+                $price = number_format($product['price'], '2');			
+            }					
+			
+			$price = str_replace(",", "", $price);					
+			
             if ($full) {
                 $ga_product = array(
-                    'id' => $product_id,
+                    'id' => '' . $product_id . '',
                     'name' => Tools::jsonEncode($product['name']),
                     'category' => Tools::jsonEncode($product['category']),
                     'brand' => isset($product['manufacturer_name']) ? Tools::jsonEncode($product['manufacturer_name']) : '',
                     'variant' => Tools::jsonEncode($variant),
                     'type' => $product_type,
-                    'position' => $index ? $index : '0',
+                    'position' => $index ? $index : 0,
                     'quantity' => $product_qty,
                     'list' => Tools::getValue('controller'),
                     'url' => isset($product['link']) ? urlencode($product['link']) : '',
-                    'price' => $price
+                    'price' => (float)$price
                 );
             } else {
                 $ga_product = array(
@@ -684,6 +698,7 @@
 
         public function addProductClick($products)
         {
+            /*
             if (!is_array($products)) {
                 return;
             }
@@ -693,10 +708,12 @@
                 $js .= 'NMBG.addProductClick(' . Tools::jsonEncode($product) . ');';
 
             return $js;
+            */
         }
 
         public function addProductClickByHttpReferal($products)
         {
+            /*
             if (!is_array($products)) {
                 return;
             }
@@ -706,6 +723,7 @@
                 $js .= 'NMBG.addProductClickByHttpReferal(' . Tools::jsonEncode($product) . ');';
 
             return $js;
+            */
         }
 
         /**
@@ -728,7 +746,7 @@
          * hook product page footer to load JS for product details view
          */
         public function hookProductFooter($params)
-        {
+        {			
             $controller_name = Tools::getValue('controller');
             if ($controller_name == 'product') {
 
@@ -754,7 +772,7 @@
 
                 $this->js_state = 1;
                 return $this->_runJs($js);
-            }
+            }		
         }
 
         /**
@@ -806,8 +824,10 @@
          */
         public function hookAdminOrder()
         {
+            /*
             echo $this->_runJs($this->context->cookie->ga_admin_refund, 1);
             unset($this->context->cookie->ga_admin_refund);
+            */
         }
 
         /**
@@ -815,6 +835,7 @@
          */
         public function hookBackOfficeHeader()
         {
+            /*
             $js = '';
             if (strcmp(Tools::getValue('configure'), $this->name) === 0) {
                 if (version_compare(_PS_VERSION_, '1.5', '>') == true) {
@@ -869,6 +890,7 @@
             } else {
                 return $js;
             }
+            */
         }
 
         /**
@@ -876,6 +898,7 @@
          */
         public function hookActionProductCancel($params)
         {
+            /*
             $qty_refunded = Tools::getValue('cancelQuantity');
             $ga_scripts = '';
             foreach ($qty_refunded as $orderdetail_id => $qty) {
@@ -888,6 +911,7 @@
                     ) . ');';
             }
             $this->context->cookie->ga_admin_refund = $ga_scripts . 'NMBG.refundByProduct(' . Tools::jsonEncode(array('id' => $params['order']->id)) . ');';
+            */
         }
 
         /**
@@ -895,6 +919,7 @@
          */
         public function hookActionCartSave()
         {
+            /*
             if (!isset($this->context->cart)) {
                 return;
             }
@@ -971,6 +996,7 @@
                 $gacart[$id_product] = $ga_products;
                 $this->context->cookie->ga_cart = serialize($gacart);
             }
+            */
         }
 
         protected function _debugLog($function, $log)

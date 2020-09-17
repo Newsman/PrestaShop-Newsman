@@ -30,7 +30,9 @@ class AdminNewsmanAjaxController extends ModuleAdminController
 		$context = Context::getContext();
 		if (Validate::isLoadedObject($order) && (isset($context->employee->id) && $context->employee->id))
 		{
+			/*
 			Db::getInstance()->execute('UPDATE `'._DB_PREFIX_.'newsmanremarketing` SET sent = 1, date_add = NOW() WHERE id_order = '.(int)Tools::getValue('orderid'));
+			*/
 			die('OK');
 		}
 		die('KO');

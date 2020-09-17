@@ -2,7 +2,7 @@
 <module>
 	<name>newsmanremarketing</name>
 	<displayName><![CDATA[Newsman Remarketing]]></displayName>
-	<version><![CDATA[2.3.4]]></version>
+	<version><![CDATA[1.0.0]]></version>
 	<description><![CDATA[Gain clear insights into important metrics about your customers, using Newsman Remarketing]]></description>
 	<author><![CDATA[Newsman App]]></author>
 	<tab><![CDATA[analytics_stats]]></tab>

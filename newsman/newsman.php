@@ -486,7 +486,7 @@ class Newsman extends Module
                 //rename id_gender
                 $cols[3] = "gender";
 
-                $header = join(',', $cols) . ",prestashop 1.6-1.7 plugin customers with newsletter by prestahop groups";
+                $header = join(',', $cols) . ",prestashop 1.6-1.7 plugin customers with newsletter by prestashop groups";
 
                 //rename gender again to be filtered
                 $cols[3] = "id_gender";

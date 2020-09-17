@@ -26,11 +26,40 @@
 
     jQuery(document).ready(function () {
 
-        //category view
+        //category add to cart
         var _items = jQuery('.product-container');
         for (var x = 0; x <= _items.length; x++) {
 
-            var currentProd = jQuery('.product-container:eq(' + x + ')');
+            if (newsmanVersion.indexOf("1.7") >= 0)
+            {
+
+                var currentProd = jQuery('.product-container:eq(' + x + ')');
+
+                var id = currentProd.find('.ajax-add-to-cart');
+                id = id.attr('data-id-product');       
+                                      
+                if(x == _items.length){
+                    _nzm.run( 'send', 'pageview' );
+                }
+
+                if(id == "" || id == undefined)
+                    continue;      
+
+                var name = currentProd.find('.product-title').text();
+                name = $.trim(name);
+                var category = $('.title-page').html();
+                var price = currentProd.find('.content_price span:first').text();
+                price = $.trim(price);
+    
+                _nzm.run( 'ec:addImpression', {
+                    'id': id,
+                    'name': name,
+                    'category': category,
+                    'list': 'Category List',
+                    'position': x
+                } );
+
+            }           
 
             $('.product-container:eq(' + x + ') .ajax_add_to_cart_button').click(function () {
 
@@ -54,9 +83,10 @@
                 _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
 
             });
+			
         }
 
-        //product view
+        //add to cart - prestashop 1.6.x
         $('#add_to_cart').click(function () {
 
             //var _c = $(this).closest('.product-container');
@@ -79,8 +109,33 @@
             _nzm.run('ec:setAction', 'add');
             _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
 
-        });
+        })/
 
+		//add to cart - prestashop 1.7.x
+        $('.add-to-cart').click(function () {
+
+            //var _c = $(this).closest('.product-container');
+
+            var id = $('#product_page_product_id').val();
+            var name = $('h1:first').text();
+            name = $.trim(name);
+            var category = "";
+            var price = $('.current-price span').attr('content');		
+            //price = $.trim(price);
+            var _qty = $('#quantity_wanted').val();
+
+            _nzm.run('ec:addProduct', {
+                'id': id,
+                'name': name,
+                'category': category,
+                'price': price,
+                'quantity': _qty
+            });
+            _nzm.run('ec:setAction', 'add');
+            _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
+
+        });
+		
         //delete from cart
         $(".cart_quantity_delete").each(function () {
             jQuery(this).bind("click", {"elem": jQuery(this)}, function (ev) {       
@@ -123,7 +178,7 @@
                 _nzm.run('send', 'event', 'UX', 'click', 'remove from cart');                            
 
             });
-        });
+        });		
 
     });
 
@@ -171,22 +226,26 @@
             }
         },
 
-        addProductDetailView: function (Product) {
+        addProductDetailView: function (Product) {								
             this.add(Product);
             _nzm.run('ec:setAction', 'detail');
             _nzm.run('send', 'pageview');
         },
 
         addToCart: function (Product) {
-            this.add(Product);
+            /*
+			this.add(Product);
             _nzm.run('ec:setAction', 'add');
             _nzm.run('send', 'event', 'UX', 'click', 'Add to Cart'); // Send data using an event.
+			*/
         },
 
         removeFromCart: function (Product) {
+			/*
             this.add(Product);
             _nzm.run('ec:setAction', 'remove');
             _nzm.run('send', 'event', 'UX', 'click', 'Remove From cart'); // Send data using an event.
+			*/
         },
 
         addProductImpression: function (Product) {
@@ -200,10 +259,12 @@
             /**
              * Refund an entire transaction.
              **/
-            _nzm.run('ec:setAction', 'refund', {
+            /*
+			_nzm.run('ec:setAction', 'refund', {
                 'id': Order.id // Transaction ID is only required field for full refund.
             });
             _nzm.run('send', 'event', 'Ecommerce', 'Refund', {'nonInteraction': 1});
+			*/
         },
 
         refundByProduct: function (Order) {
@@ -212,14 +273,17 @@
              **/
             //this.add(Product);
 
-            _nzm.run('ec:setAction', 'refund', {
+            /*
+			_nzm.run('ec:setAction', 'refund', {
                 'id': Order.id, // Transaction ID is required for partial refund.
             });
             _nzm.run('send', 'event', 'Ecommerce', 'Refund', {'nonInteraction': 1});
+			*/
         },
 
         addProductClick: function (Product) {
-            var ClickPoint = jQuery('a[href$="' + Product.url + '"].quick-view');
+           /* 
+		    var ClickPoint = jQuery('a[href$="' + Product.url + '"].quick-view');
 
             ClickPoint.on("click", function () {
 
@@ -234,11 +298,12 @@
                     }
                 });
             });
-
+			*/
         },
 
         addProductClickByHttpReferal: function (Product) {
-            this.add(Product);
+           /*
+		   this.add(Product);
             _nzm.run('ec:setAction', 'click', {
                 list: Product.list
             });
@@ -249,7 +314,7 @@
                     return !_nzm.run.loaded;
                 }
             });
-
+		   */
         },
 
         addTransaction: function (Order) {      
