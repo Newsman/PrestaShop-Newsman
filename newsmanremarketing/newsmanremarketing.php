@@ -295,7 +295,7 @@
             </script>
             ";
             if (version_compare(_PS_VERSION_, '1.7', '>=')) {
-                //$ga_snippet_head .= "<script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/jquery-1.12.4.min.js\"></script>";
+                $ga_snippet_head .= "<script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/jquery-1.12.4.min.js\"></script>";
             }
             $ga_snippet_head .= "
             <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=300721\"></script>     
