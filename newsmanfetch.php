@@ -2,6 +2,11 @@
 
 require(dirname(__FILE__) . '/config/config.inc.php');
 
+include(dirname(__FILE__).'/init.php');
+
+//@ini_set('display_errors', 'on');
+//@error_reporting(E_ALL | E_STRICT);
+
 $_apikey = Configuration::get('NEWSMAN_API_KEY');
 
 $apikey = (empty($_GET["apikey"])) ? "" : $_GET["apikey"];
@@ -11,6 +16,9 @@ $limit = (empty($_GET["limit"])) ? 10 : $_GET["limit"];
 $startLimit = "";
 $order_id = (empty($_GET["order_id"])) ? "" : " WHERE id_order='" . $_GET["order_id"] . "'";
 $product_id = (empty($_GET["product_id"])) ? "" : $_GET["product_id"];
+$debug = (empty($_GET["debug"])) ? "" : $_GET["debug"];
+if(!empty($debug))
+	$debug = ($debug == "true") ? true : false;
 
 if(!empty($start) && $start >= 0 && !empty($limit))
     $startLimit .= " LIMIT {$limit} OFFSET {$start}";
@@ -62,16 +70,78 @@ if (!empty($newsman) && !empty($apikey)) {
                 }
 
                 foreach ($products as $prod) {
+				
+					if($prod["product_id"] == 0)
+						continue;
+					
+                   /*
+                   $url = Context::getContext()->link->getProductLink($prod["product_id"]);                       
+
+                    $link = new Link();
+                    $product_url = $link->getProductLink($prod["product_id"]);
+                    $image = Product::getCover($prod["product_id"]);
+                    $image = new Image($image['id_image']);
+                    $image_url = _PS_BASE_URL_._THEME_PROD_DIR_.$image->getExistingImgPath().".jpg";	
+					
                     $productsJson[] = array(
                         "id" => $prod['product_id'],
                         "name" => $prod['product_name'],
                         "stock_quantity" => (int)$prod['product_quantity'],
                         "price" => (float)$prod['product_price'],
                         "price_old" => 0,
-                        "image_url" => "",
-                        "url" => ""
+                        "image_url" => $image_url,
+                        "url" => $url
 
                     );
+                    */
+
+                    $url = Context::getContext()->link->getProductLink($prod["product_id"]);                       
+
+                    $link = new Link();
+                    $product_url = $link->getProductLink($prod["product_id"]);
+    
+                    $image = Product::getCover($prod["product_id"]);
+                    $image = new Image($image['id_image']);
+                    $image_url = _PS_BASE_URL_._THEME_PROD_DIR_.$image->getExistingImgPath().".jpg";	                  
+    
+                    $qty = Product::getQuantity($prod["product_id"]);								                              
+    
+                    $_prod = new Product((int)$prod["product_id"]);
+                    $price = $_prod->getPrice();
+                    
+                    $price_old = $_prod->getPrice();
+                                 
+                    $discount = 0;
+    
+                    $reductions = DB::getInstance()->executeS('
+                    SELECT reduction
+                    FROM `'._DB_PREFIX_.'specific_price`
+                    WHERE id_product = '.$prod["product_id"].''
+                    );
+            
+                    foreach($reductions as $reduction){                
+                        $discount = $reduction['reduction'];
+                    }
+                    
+                    $discount = (int)substr($discount, 2, 2);
+                    $discount = 100 / (100 - $discount);                				
+                    $price_old = $discount * $price_old;		
+                    
+                    if($price_old == $price)
+                    {
+                        $price_old = 0;
+                    }
+                    
+                    $productsJson[] = array(
+                        "id" => $prod["product_id"],
+                        "name" => $prod["name"],
+                        "stock_quantity" => $qty,
+                        "price" => $price,
+                        "price_old" => $price_old,
+                        "image_url" => $image_url,
+                        "url" => $url
+                    );
+
                 }
 
                 $date = new DateTime($item["date_add"]);
@@ -175,19 +245,59 @@ if (!empty($newsman) && !empty($apikey)) {
 
                 $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'product c LEFT JOIN `ps_product_lang` `cg` ON cg.id_product=c.id_product ' . $startLimit;
             }
-
+            
             $products = Db::getInstance()->executeS($q);
-            $productsJson = array();
+            $productsJson = array();     
 
             foreach ($products as $prod) {
+      
+                $url = Context::getContext()->link->getProductLink($prod["id_product"]);                       
+
+                $link = new Link();
+                $product_url = $link->getProductLink($prod["id_product"]);
+
+                $image = Product::getCover($prod["id_product"]);
+                $image = new Image($image['id_image']);
+                $image_url = _PS_BASE_URL_._THEME_PROD_DIR_.$image->getExistingImgPath().".jpg";	                  
+
+                $qty = Product::getQuantity($prod["id_product"]);								                              
+
+                $_prod = new Product((int)$prod["id_product"]);
+                $price = $_prod->getPrice();			
+				$price = ceil($price);	
+				
+				$price_old = $_prod->getPrice();
+				$price_old = ceil($price_old);
+				             
+				$discount = 0;
+
+                $reductions = DB::getInstance()->executeS('
+                SELECT reduction
+                FROM `'._DB_PREFIX_.'specific_price`
+                WHERE id_product = '.$prod["id_product"].''
+                );
+        
+                foreach($reductions as $reduction){                
+                    $discount = $reduction['reduction'];
+                }
+				
+                $discount = (int)substr($discount, 2, 2);
+                $discount = 100 / (100 - $discount);                				
+                $price_old = $discount * $price_old;		
+				
+				if($price_old == $price)
+                {
+                    $price_old = 0;
+                }
+				
                 $productsJson[] = array(
                     "id" => $prod["id_product"],
                     "name" => $prod["name"],
-                    "stock_quantity" => (int)$prod["quantity"],
-                    "price" => (float)$prod["price"],
-                    "price_old" => 0,
-                    "image_url" => "",
-                    "url" => ""
+                    "stock_quantity" => $qty,
+                    "price" => $price,
+                    "price_old" => $price_old,
+                    "image_url" => $image_url,
+                    "url" => $url
                 );
             }
 
