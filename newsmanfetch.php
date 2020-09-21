@@ -112,22 +112,34 @@ if (!empty($newsman) && !empty($apikey)) {
                     $price_old = $_prod->getPrice();
                                  
                     $discount = 0;
+                    $reduction_type = null;
     
                     $reductions = DB::getInstance()->executeS('
-                    SELECT reduction
+                    SELECT reduction, reduction_type
                     FROM `'._DB_PREFIX_.'specific_price`
-                    WHERE id_product = '.$prod["product_id"].''
+                    WHERE id_product = '.$prod["id_product"].''
                     );
             
                     foreach($reductions as $reduction){                
                         $discount = $reduction['reduction'];
+                        $reduction_type = $reduction["reduction_type"];
                     }
                     
-                    $discount = (int)substr($discount, 2, 2);
-                    $discount = 100 / (100 - $discount);                				
-                    $price_old = $discount * $price_old;		
-                    
-                    if($price_old == $price)
+                    if($reduction_type == "percentage")
+                    {
+                        $discount = (int)substr($discount, 2, 2);
+                        $discount = 100 / (100 - $discount);                				
+                        $price_old = $discount * $price_old;		
+                    }
+                    elseif($reduction_type == "amount")
+                    {
+                        $price_old = $price_old + $discount;
+                    }
+                    else{
+                        $price_old = 0;
+                    }
+    				
+    				if($price_old == $price)
                     {
                         $price_old = 0;
                     }
