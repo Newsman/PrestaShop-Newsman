@@ -109,10 +109,15 @@
             _nzm.run('ec:setAction', 'add');
             _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
 
-        })/
+        });
 
-		//add to cart - prestashop 1.7.x
-        $('.add-to-cart').click(function () {
+        //add to cart - prestashop 1.7.x
+        function addToCart17(){
+                     
+            //jQuery('.add-to-cart').unbind('click');
+            
+            $(document).on('click', '.add-to-cart', function() {
+            //$('.add-to-cart').click(function () {           
 
             //var _c = $(this).closest('.product-container');
 
@@ -132,10 +137,38 @@
                 'quantity': _qty
             });
             _nzm.run('ec:setAction', 'add');
-            _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
+            _nzm.run('send', 'event', 'UX', 'click', 'add to cart');            
 
-        });
-		
+            });
+
+        }
+
+        addToCart17();
+        
+        setTimeout(function(){
+
+        //delete from cart prestashop 1.7
+        $(".remove-from-cart").each(function () {
+            jQuery(this).bind("click", {"elem": jQuery(this)}, function (ev) {       
+                
+                    var _c = $(this).closest('.cart_item');
+
+                    var id = ev.data.elem.attr('data-id-product');                    
+                    var qty = _c.find('[name=product-quantity-spin]').val();
+    
+                    _nzm.run('ec:addProduct', {
+                        'id': id,
+                        'quantity': qty
+                    });
+    
+                    _nzm.run('ec:setAction', 'remove');
+                    _nzm.run('send', 'event', 'UX', 'click', 'remove from cart');              
+
+            });
+        }); 
+        
+        }, 1500);
+
         //delete from cart
         $(".cart_quantity_delete").each(function () {
             jQuery(this).bind("click", {"elem": jQuery(this)}, function (ev) {       
