@@ -26,64 +26,80 @@
 
     jQuery(document).ready(function () {
 
-        //category add to cart
-        var _items = jQuery('.product-container');
-        for (var x = 0; x <= _items.length; x++) {
+        //default class name .product-container
+        var currClass = '.product-container';
+        //default class name .ajax-add-to-cart
+        var currClassId = '.ajax-add-to-cart';
+        //default class name .product-title
+        var currClassName = '.product-title';
+        //default class name .title-page
+        var currClassCategory = '.title-page';
+        //default class name .content_price
+        var currClassPrice = '.content_price';
 
-            if (newsmanVersion.indexOf("1.7") >= 0)
-            {
-
-                var currentProd = jQuery('.product-container:eq(' + x + ')');
-
-                var id = currentProd.find('.ajax-add-to-cart');
-                id = id.attr('data-id-product');       
-                                      
-                if(x == _items.length){
-                    _nzm.run( 'send', 'pageview' );
-                }
-
-                if(id == "" || id == undefined)
-                    continue;      
-
-                var name = currentProd.find('.product-title').text();
-                name = $.trim(name);
-                var category = $('.title-page').html();
-                var price = currentProd.find('.content_price span:first').text();
-                price = $.trim(price);
+        //category view / add to cart
+        var _items = jQuery(currClass);
+        
+        if(_items.length > 0)
+        {
+            
+            for (var x = 0; x <= _items.length; x++) {
     
-                _nzm.run( 'ec:addImpression', {
-                    'id': id,
-                    'name': name,
-                    'category': category,
-                    'list': 'Category List',
-                    'position': x
-                } );
-
-            }           
-
-            $('.product-container:eq(' + x + ') .ajax_add_to_cart_button').click(function () {
-
-                var _c = $(this).closest('.product-container');
-
-                var id = $(this).attr('data-id-product');
-                var name = _c.find('.product-name').text();
-                name = $.trim(name);
-                var category = "";
-                var price = _c.find('.content_price span:first').text();
-                price = $.trim(price);
-
-                _nzm.run('ec:addProduct', {
-                    'id': id,
-                    'name': name,
-                    'category': category,
-                    'price': price,
-                    'quantity': '1'
+                if (newsmanVersion.indexOf("1.7") >= 0)
+                {
+    
+                    var currentProd = jQuery(currClass + ':eq(' + x + ')');
+    
+                    var id = currentProd.find(currClassId);
+                    id = id.attr('data-id-product');       
+                                          
+                    if(x == _items.length){
+                        _nzm.run( 'send', 'pageview' );
+                    }
+    
+                    if(id == "" || id == undefined)
+                        continue;      
+    
+                    var name = currentProd.find(currClassName).text();
+                    name = $.trim(name);
+                    var category = $(currClassCategory).html();
+                    var price = currentProd.find(currClassPrice + ' span:first').text();
+                    price = $.trim(price);
+        
+                    _nzm.run( 'ec:addImpression', {
+                        'id': id,
+                        'name': name,
+                        'category': category,
+                        'list': 'Category List',
+                        'position': x
+                    } );
+    
+                }           
+    
+                $('.product-container:eq(' + x + ') .ajax_add_to_cart_button').click(function () {
+    
+                    var _c = $(this).closest('.product-container');
+    
+                    var id = $(this).attr('data-id-product');
+                    var name = _c.find('.product-name').text();
+                    name = $.trim(name);
+                    var category = "";
+                    var price = _c.find('.content_price span:first').text();
+                    price = $.trim(price);
+    
+                    _nzm.run('ec:addProduct', {
+                        'id': id,
+                        'name': name,
+                        'category': category,
+                        'price': price,
+                        'quantity': '1'
+                    });
+                    _nzm.run('ec:setAction', 'add');
+                    _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
+    
                 });
-                _nzm.run('ec:setAction', 'add');
-                _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
-
-            });
 			
+            }
         }
 
         //add to cart - prestashop 1.6.x
@@ -110,42 +126,37 @@
             _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
 
         });
-
-        //add to cart - prestashop 1.7.x
-        function addToCart17(){
-                     
-            //jQuery('.add-to-cart').unbind('click');
-            
-            $(document).on('click', '.add-to-cart', function() {
-            //$('.add-to-cart').click(function () {           
-
-            //var _c = $(this).closest('.product-container');
-
-            var id = $('#product_page_product_id').val();
-            var name = $('h1:first').text();
-            name = $.trim(name);
-            var category = "";
-            var price = $('.current-price span').attr('content');		
-            //price = $.trim(price);
-            var _qty = $('#quantity_wanted').val();
-
-            _nzm.run('ec:addProduct', {
-                'id': id,
-                'name': name,
-                'category': category,
-                'price': price,
-                'quantity': _qty
-            });
-            _nzm.run('ec:setAction', 'add');
-            _nzm.run('send', 'event', 'UX', 'click', 'add to cart');            
-
-            });
-
-        }
-
-        addToCart17();
         
         setTimeout(function(){
+
+            //add to cart - prestashop 1.7.x
+            //$(document).on('click', '.add-to-cart', function() {
+             //jQuery('.add-to-cart').unbind('click');
+            $('.add-to-cart').click(function () {           
+    
+                console.log("clicked");
+    
+                //var _c = $(this).closest('.product-container');
+    
+                var id = $('#product_page_product_id').val();
+                var name = $('h1:first').text();
+                name = $.trim(name);
+                var category = "";
+                var price = $('.current-price span').attr('content');		
+                //price = $.trim(price);
+                var _qty = $('#quantity_wanted').val();
+    
+                _nzm.run('ec:addProduct', {
+                    'id': id,
+                    'name': name,
+                    'category': category,
+                    'price': price,
+                    'quantity': _qty
+                });
+                _nzm.run('ec:setAction', 'add');
+                _nzm.run('send', 'event', 'UX', 'click', 'add to cart');            
+
+            });
 
         //delete from cart prestashop 1.7
         $(".remove-from-cart").each(function () {
@@ -361,6 +372,7 @@
                 "tax": Order.tax,
                 "shipping": Order.shipping
             });
+            
             _nzm.run('send', 'pageview');
 
         },
@@ -374,8 +386,6 @@
             //_nzm.run('ec:addProduct', '');
             //_nzm.run('ec:setAction', 'checkout');
             //_nzm.run('send', 'pageview');
-
-           // alert('sda');
         }
     };
 

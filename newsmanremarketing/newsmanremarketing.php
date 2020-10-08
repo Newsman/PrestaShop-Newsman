@@ -291,7 +291,6 @@
             s = document.getElementsByTagName('script')[0];var script_dom = document.createElement('script');script_dom.async = true;
             script_dom.id = 'nzm-tracker';script_dom.setAttribute('data-site-id', '" . $ga_id . "');
             script_dom.src = '" . self::$endpoint . "';s.parentNode.insertBefore(script_dom, s);})();
-            _nzm.run( 'set', 'dimension1', 'no' );
             _nzm.run( 'require', 'ec' );
             let newsmanVersion = '" . _PS_VERSION_ . "';
             </script>
@@ -300,7 +299,7 @@
                 $ga_snippet_head .= "<script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/jquery-1.12.4.min.js\"></script>";
             }
             $ga_snippet_head .= "
-            <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=300721\"></script>     
+            <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=310721\"></script>     
             ";
 
             return $ga_snippet_head;
@@ -694,7 +693,7 @@
             foreach ($products as $product)
                 $js .= 'NMBG.add(' . Tools::jsonEncode($product) . ",'',true);";
 
-            $js .= '_nzm.run(\'send\', \'pageview\');';
+            //$js .= '_nzm.run(\'send\', \'pageview\');';
             return $js;
         }
 
@@ -812,7 +811,7 @@
                     if ($controller_name != 'order' && $controller_name != 'product') {
                         $runjs_code .= '
                     <script type="text/javascript">
-                    //_nzm.run(\'send\', \'pageview\');
+                        //_nzm.run(\'send\', \'pageview\');
                     </script>';
                     }
                 }
