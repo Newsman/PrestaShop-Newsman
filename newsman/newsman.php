@@ -99,7 +99,16 @@ class Newsman extends Module
             array(
                 'type' => 'html',
                 'name' => 'unused',
-                'html_content' => $this->l('Newsman destination segment')
+                'html_content' => $this->l('              
+                CRON Sync newsletter subscribers {{url}}/newsmanfetch.php?newsman=cron.json&cron=newsletter&apikey={{apikey}}&start={{start}}&limit={{limit}}
+                ')
+            ),
+            array(
+                'type' => 'html',
+                'name' => 'unused',
+                'html_content' => $this->l('              
+                CRON Sync customers with newsletter {{url}}/newsmanfetch.php?newsman=cron.json&cron=customers_newsletter&apikey={{apikey}}&start={{start}}&limit={{limit}}
+                ')
             )
         );
 
@@ -178,6 +187,8 @@ class Newsman extends Module
                     )
                 )
             )),
+
+            /*
             array('form' => array(
                 'legend' => array(
                     'title' => $this->l('Automatic synchronization')
@@ -213,6 +224,8 @@ class Newsman extends Module
 
                 )
             ))
+           */
+
         ));
 
         //the script

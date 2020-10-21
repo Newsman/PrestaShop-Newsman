@@ -47,15 +47,11 @@
     
                 if (newsmanVersion.indexOf("1.7") >= 0)
                 {
-    
+
                     var currentProd = jQuery(currClass + ':eq(' + x + ')');
     
                     var id = currentProd.find(currClassId);
-                    id = id.attr('data-id-product');       
-                                          
-                    if(x == _items.length){
-                        _nzm.run( 'send', 'pageview' );
-                    }
+                    id = id.attr('data-id-product');                                                            
     
                     if(id == "" || id == undefined)
                         continue;      
@@ -74,32 +70,104 @@
                         'position': x
                     } );
     
-                }           
+                } 
+                else if(newsmanVersion.indexOf("1.6") >= 0)          
+                {
+
+                    var currentProd = jQuery(currClass + ':eq(' + x + ')');
     
-                $('.product-container:eq(' + x + ') .ajax_add_to_cart_button').click(function () {
+                    currClassId = '.ajax_add_to_cart_button';
+
+                    var id = currentProd.find(currClassId);
+                    id = id.attr('data-id-product');                                                                
+
+                    if(id == "" || id == undefined)
+                        continue;      
     
-                    var _c = $(this).closest('.product-container');
+                        currClassName = ".product-name";
+
+                        var name = currentProd.find(currClassName).text();
+                        name = $.trim(name);
     
-                    var id = $(this).attr('data-id-product');
-                    var name = _c.find('.product-name').text();
-                    name = $.trim(name);
-                    var category = "";
-                    var price = _c.find('.content_price span:first').text();
-                    price = $.trim(price);
-    
-                    _nzm.run('ec:addProduct', {
-                        'id': id,
-                        'name': name,
-                        'category': category,
-                        'price': price,
-                        'quantity': '1'
-                    });
-                    _nzm.run('ec:setAction', 'add');
-                    _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
-    
-                });
-			
+                        currClassCategory = '.cat-name';
+                        
+                        var category = $(currClassCategory).html();
+                        var price = currentProd.find(currClassPrice + ' span:first').text();
+                        price = $.trim(price);
+            
+                        _nzm.run( 'ec:addImpression', {
+                            'id': id,
+                            'name': name,
+                            'category': category,
+                            'list': 'Category List',
+                            'position': x
+                        } );
+
+                }
+
             }
+
+            _nzm.run( 'send', 'pageview' );
+
+            for (var x = 0; x <= _items.length; x++) {
+    
+                if (newsmanVersion.indexOf("1.7") >= 0)
+                {
+
+                    $('.product-container:eq(' + x + ') .ajax-add-to-cart').on('click', function () {
+        
+                        var _c = $(this).closest('.product-container');
+        
+                        var id = $(this).attr('data-id-product');
+                        var name = _c.find('.product-title').text();
+                        name = $.trim(name);
+                        var category = "";
+                        var price = _c.find('.product-price-and-shipping span.price').text();
+                        price = $.trim(price);
+        
+                        _nzm.run('ec:addProduct', {
+                            'id': id,
+                            'name': name,
+                            'category': category,
+                            'price': price,
+                            'quantity': '1'
+                        });
+                        _nzm.run('ec:setAction', 'add');
+                        _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
+        
+                    });                   
+            
+                }
+                else if(newsmanVersion.indexOf("1.6") >= 0)          
+                {
+
+                    $('.product-container:eq(' + x + ') .ajax_add_to_cart_button').on('click', function () {
+        
+                        var _c = $(this).closest('.product-container');
+        
+                        var id = $(this).attr('data-id-product');
+                        var name = _c.find('.product-name').text();
+                        name = $.trim(name);
+                        var category = "";
+                        var price = _c.find('.content_price span:first').text();
+                        price = $.trim(price);
+        
+                        _nzm.run('ec:addProduct', {
+                            'id': id,
+                            'name': name,
+                            'category': category,
+                            'price': price,
+                            'quantity': '1'
+                        });
+                        _nzm.run('ec:setAction', 'add');
+                        _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
+        
+                    }); 
+
+                }
+
+            }    
+
         }
 
         //add to cart - prestashop 1.6.x

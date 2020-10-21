@@ -2,12 +2,23 @@
 
 require(dirname(__FILE__) . '/config/config.inc.php');
 
+include(dirname(__FILE__) . '/modules/newsman/lib/Client.php');
+
 include(dirname(__FILE__).'/init.php');
 
 //@ini_set('display_errors', 'on');
 //@error_reporting(E_ALL | E_STRICT);
 
+$_userId = Configuration::get('NEWSMAN_USER_ID');
 $_apikey = Configuration::get('NEWSMAN_API_KEY');
+$_mapping = Configuration::get('NEWSMAN_MAPPING');
+
+if(empty($_userId) || empty($_apikey) || empty($_mapping)){
+    http_response_code(403);
+    header('Content-Type: application/json');
+    echo Tools::jsonEncode("Newsman Plugin setup incomplete");
+    return;
+}
 
 $apikey = (empty($_GET["apikey"])) ? "" : $_GET["apikey"];
 $newsman = (empty($_GET["newsman"])) ? "" : $_GET["newsman"];
@@ -37,13 +48,7 @@ if (!empty($newsman) && !empty($apikey)) {
     switch ($_GET["newsman"]) {
         case "orders.json":
 
-            $ordersObj = array();
-
-            /*$dbq = new DbQuery();
-            $q = $dbq->select('*')
-                ->from('orders', 'c');           
-
-            $orders = Db::getInstance()->executeS($q->build());*/
+            $ordersObj = array();   
 
             if(!empty($order_id))
                 $startLimit = null;
@@ -72,28 +77,7 @@ if (!empty($newsman) && !empty($apikey)) {
                 foreach ($products as $prod) {
 				
 					if($prod["product_id"] == 0)
-						continue;
-					
-                   /*
-                   $url = Context::getContext()->link->getProductLink($prod["product_id"]);                       
-
-                    $link = new Link();
-                    $product_url = $link->getProductLink($prod["product_id"]);
-                    $image = Product::getCover($prod["product_id"]);
-                    $image = new Image($image['id_image']);
-                    $image_url = _PS_BASE_URL_._THEME_PROD_DIR_.$image->getExistingImgPath().".jpg";	
-					
-                    $productsJson[] = array(
-                        "id" => $prod['product_id'],
-                        "name" => $prod['product_name'],
-                        "stock_quantity" => (int)$prod['product_quantity'],
-                        "price" => (float)$prod['product_price'],
-                        "price_old" => 0,
-                        "image_url" => $image_url,
-                        "url" => $url
-
-                    );
-                    */
+						continue;					
 
                     $url = Context::getContext()->link->getProductLink($prod["product_id"]);                       
 
@@ -239,22 +223,9 @@ if (!empty($newsman) && !empty($apikey)) {
             {
                 $startLimit = null;
 
-                $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'product c LEFT JOIN `ps_product_lang` `cg` ON cg.id_product=c.id_product WHERE c.id_product=' . $product_id . '';
-
-                /*
-                $q = $dbq->select('*')
-                    ->from('product', 'c')
-                    ->where('id_product=' . $product_id)
-                    ->leftJoin('product_lang', 'cg', 'cg.id_product=c.id_product');
-                */               
+                $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'product c LEFT JOIN `ps_product_lang` `cg` ON cg.id_product=c.id_product WHERE c.id_product=' . $product_id . '';               
             }
             else{                
-                /*
-                $q = $dbq->select('*')
-                ->from('product', 'c')                
-                ->leftJoin('product_lang', 'cg', 'cg.id_product=c.id_product');
-                */
-
                 $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'product c LEFT JOIN `ps_product_lang` `cg` ON cg.id_product=c.id_product ' . $startLimit;
             }
             
@@ -332,14 +303,8 @@ if (!empty($newsman) && !empty($apikey)) {
             break;
 
         case "customers.json":
-            
-            /*
-            $dbq = new DbQuery();
-            $q = $dbq->select('*')
-                ->from('customer', 'c');
-            */
 
-            $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'customer' . $startLimit;
+            $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'customer WHERE newsletter=1' . $startLimit;
 
             $wp_cust = Db::getInstance()->executeS($q);
 
@@ -362,14 +327,7 @@ if (!empty($newsman) && !empty($apikey)) {
 
         case "subscribers.json":
 
-            /*
-            $dbq = new DbQuery();
-            $q = $dbq->select('*')
-                ->from('newsletter', 'c')
-                ->where('active=1');
-            */
-
-            $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'newsletter' . $startLimit;
+            $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1' . $startLimit;
 
             $wp_subscribers = Db::getInstance()->executeS($q);
 
@@ -391,12 +349,12 @@ if (!empty($newsman) && !empty($apikey)) {
 
         case "count.json":
             
-            $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'customer WHERE newsletter=1' . $startLimit;
+            $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'customer WHERE newsletter=1';
 
             $data = Db::getInstance()->executeS($q);            
-            $cNewsletter = $data[0]["COUNT(*)"];
+            $cNewsletter = $data[0]["COUNT(*)"];      
 
-            $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'newsletter' . $startLimit;
+            $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1';
 
             $data = Db::getInstance()->executeS($q);            
             $newsletter = $data[0]["COUNT(*)"];
@@ -410,10 +368,115 @@ if (!empty($newsman) && !empty($apikey)) {
             echo json_encode($json, JSON_PRETTY_PRINT);     
 
         break;
+        
         case "version.json":
 
             header('Content-Type: application/json');
             echo json_encode(_PS_VERSION_, JSON_PRETTY_PRINT);            
+
+        break;
+
+        case "cron.json":
+         
+            $cron = $_GET["cron"];
+
+            if(empty($cron))
+            {
+                http_response_code(403);
+                header('Content-Type: application/json');
+                echo Tools::jsonEncode("Empty cron method");
+                return;
+            }
+
+           $batchSize = 9000;
+                
+           $_mapping = array(json_decode($_mapping));
+           $list_id = $_mapping[0]->list;
+
+           $client = new Newsman_Client($_userId, $apikey);
+
+           switch($cron){
+               
+                case "newsletter":
+
+                    $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1' . $startLimit;
+
+                    $wp_subscribers = Db::getInstance()->executeS($q);
+        
+                    $subs = array();
+        
+                    foreach ($wp_subscribers as $users) {
+                        $subs[] = array(
+                            "email" => $users["email"],
+                            "firstname" => $users["firstname"],
+                            "lastname" => $users["lastname"]
+                        );
+
+                        if ((count($subs) % $batchSize) == 0) {
+                            _importData($subs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                        }
+                        
+                    }
+
+                    if (count($subs) > 0) {
+                        _importData($subs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                    }
+
+                    $status = array(
+                        "status" => "success"
+                        );
+            
+                    header('Content-Type: application/json');
+                    echo json_encode($status, JSON_PRETTY_PRINT); 
+                    return;
+
+                break;
+
+                case "customers_newsletter":
+
+                    $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'customer WHERE newsletter=1' . $startLimit;
+
+                    $wp_cust = Db::getInstance()->executeS($q);
+                    
+                    $custs = array();
+        
+                    foreach ($wp_cust as $users) {
+        
+                        $custs[] = array(
+                            "email" => $users["email"],
+                            "firstname" => $users["firstname"],
+                            "lastname" => $users["lastname"]
+                        );
+
+                        if ((count($custs) % $batchSize) == 0) {
+                            _importData($custs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
+                        }
+                        
+                    }                
+                  
+                    if (count($custs) > 0) {
+                        _importData($custs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
+                    }   
+
+                    $status = array(
+                        "status" => "success"
+                        );
+            
+                    header('Content-Type: application/json');
+                    echo json_encode($status, JSON_PRETTY_PRINT); 
+                    return;
+
+                break;
+
+           }
+
+           $status = array(
+            "status" => "method does not exist"
+            );
+
+        header('Content-Type: application/json');
+        echo json_encode($status, JSON_PRETTY_PRINT); 
+        return;
 
         break;
     }
@@ -421,4 +484,58 @@ if (!empty($newsman) && !empty($apikey)) {
     http_response_code(403);
     header('Content-Type: application/json');
     echo Tools::jsonEncode(403);
+}
+
+function safeForCsvCRON($str)
+{
+    return '"' . str_replace('"', '""', $str) . '"';
+}
+
+function _importData(&$data, $list, $segments = null, $client, $source, $type)
+{
+    $csv = "";
+
+    switch($type)
+    {
+        case "newsletter":
+
+            $csv = '"email","firstname","lastname","source"' . PHP_EOL;
+
+        break;
+
+        case "customers_newsletter":
+
+            $csv = '"email","firstname","lastname","source"' . PHP_EOL;
+
+        break;
+
+    }
+
+    foreach ($data as $_dat) {
+        $csv .= sprintf(
+            "%s,%s,%s,%s",
+            safeForCsvCRON($_dat["email"]),
+            safeForCsvCRON($_dat["firstname"]),
+            safeForCsvCRON($_dat["lastname"]),
+            safeForCsvCRON($source)
+        );
+        $csv .= PHP_EOL;
+    }
+
+    $ret = null;
+    try {
+        if (is_array($segments) && count($segments) > 0) {
+            $ret = $client->import->csv($list, $segments, $csv);
+        } else {
+            $ret = $client->import->csv($list, array(), $csv);    
+        }
+
+        if ($ret == "") {
+            throw new Exception("Import failed");
+        }
+    } catch (Exception $e) {
+        throw new Exception($e->getMessage());
+    }
+
+    $data = array();
 }
