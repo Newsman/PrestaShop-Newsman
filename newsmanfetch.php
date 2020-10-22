@@ -22,8 +22,11 @@ if(empty($_userId) || empty($_apikey) || empty($_mapping)){
 
 $apikey = (empty($_GET["apikey"])) ? "" : $_GET["apikey"];
 $newsman = (empty($_GET["newsman"])) ? "" : $_GET["newsman"];
-$start = (!empty($_GET["start"]) && $_GET["start"] >= 0) ? $_GET["start"] : 0;
-$limit = (empty($_GET["limit"])) ? 10 : $_GET["limit"];
+$start = (!empty($_GET["start"]) && $_GET["start"] >= 0) ? $_GET["start"] : 1;
+$limit = (empty($_GET["limit"])) ? 1000 : $_GET["limit"];
+$cronLast = (empty($_GET["cronlast"])) ? "" : $_GET["cronlast"];
+if(!empty($cronLast))
+	$cronLast = ($cronLast == "true") ? true : false;
 $startLimit = "";
 $order_id = (empty($_GET["order_id"])) ? "" : " WHERE id_order='" . $_GET["order_id"] . "'";
 $product_id = (empty($_GET["product_id"])) ? "" : $_GET["product_id"];
@@ -398,7 +401,22 @@ if (!empty($newsman) && !empty($apikey)) {
            switch($cron){
                
                 case "newsletter":
+                    
+                    //Get latest
+                    $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1';
 
+                    $data = Db::getInstance()->executeS($q);            
+                    $newsletter = $data[0]["COUNT(*)"];
+
+                    $start = $newsletter - $limit;
+
+                    if($start < 1)
+                    {
+                        $start = 1;
+                    }                    
+
+                    $startLimit = " LIMIT {$limit} OFFSET {$start}";
+                    
                     $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1' . $startLimit;
 
                     $wp_subscribers = Db::getInstance()->executeS($q);
@@ -421,7 +439,7 @@ if (!empty($newsman) && !empty($apikey)) {
                     if (count($subs) > 0) {
                         _importData($subs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
                     }
-
+              
                     $status = array(
                         "status" => "success"
                         );
@@ -433,6 +451,21 @@ if (!empty($newsman) && !empty($apikey)) {
                 break;
 
                 case "customers_newsletter":
+
+                    //Get latest                    
+                    $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'customer WHERE newsletter=1';
+
+                    $data = Db::getInstance()->executeS($q);            
+                    $cNewsletter = $data[0]["COUNT(*)"];   
+
+                    $start = $cNewsletter - $limit;
+
+                    if($start < 1)
+                    {
+                        $start = 1;
+                    }                    
+
+                    $startLimit = " LIMIT {$limit} OFFSET {$start}";
 
                     $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'customer WHERE newsletter=1' . $startLimit;
 
@@ -457,7 +490,7 @@ if (!empty($newsman) && !empty($apikey)) {
                     if (count($custs) > 0) {
                         _importData($custs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
                     }   
-
+                   
                     $status = array(
                         "status" => "success"
                         );
