@@ -24,6 +24,18 @@ $apikey = (empty($_GET["apikey"])) ? "" : $_GET["apikey"];
 $newsman = (empty($_GET["newsman"])) ? "" : $_GET["newsman"];
 $start = (!empty($_GET["start"]) && $_GET["start"] >= 0) ? $_GET["start"] : 1;
 $limit = (empty($_GET["limit"])) ? 1000 : $_GET["limit"];
+
+if(!is_numeric($start) || !is_numeric($limit))
+{
+    http_response_code(403);
+    header('Content-Type: application/json');
+    $status = array(
+        "status" => "start & limit must be numeric"
+    );
+    echo json_encode($status);
+    return;
+}
+
 $cronLast = (empty($_GET["cronlast"])) ? "" : $_GET["cronlast"];
 if(!empty($cronLast))
 	$cronLast = ($cronLast == "true") ? true : false;
@@ -402,23 +414,26 @@ if (!empty($newsman) && !empty($apikey)) {
                
                 case "newsletter":
                     
-                    //Get latest
-                    $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1';
-
-                    $data = Db::getInstance()->executeS($q);            
-                    $newsletter = $data[0]["COUNT(*)"];
-
-                    $start = $newsletter - $limit;
-
-                    if($start < 1)
+                    if($cronLast)
                     {
-                        $start = 1;
-                    }                    
+                        //Get latest
+                        $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1';
 
-                    $startLimit = " LIMIT {$limit} OFFSET {$start}";
+                        $data = Db::getInstance()->executeS($q);            
+                        $newsletter = $data[0]["COUNT(*)"];
+
+                        $start = $newsletter - $limit;
+
+                        if($start < 1)
+                        {
+                            $start = 1;
+                        }                    
+
+                        $startLimit = " LIMIT {$limit} OFFSET {$start}";                   
+                    }
                     
                     $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1' . $startLimit;
-
+            
                     $wp_subscribers = Db::getInstance()->executeS($q);
         
                     $subs = array();
@@ -452,22 +467,25 @@ if (!empty($newsman) && !empty($apikey)) {
 
                 case "customers_newsletter":
 
-                    //Get latest                    
-                    $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'customer WHERE newsletter=1';
-
-                    $data = Db::getInstance()->executeS($q);            
-                    $cNewsletter = $data[0]["COUNT(*)"];   
-
-                    $start = $cNewsletter - $limit;
-
-                    if($start < 1)
+                    if($cronLast)
                     {
-                        $start = 1;
-                    }                    
+                        //Get latest                    
+                        $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'customer WHERE newsletter=1';
 
-                    $startLimit = " LIMIT {$limit} OFFSET {$start}";
+                        $data = Db::getInstance()->executeS($q);            
+                        $cNewsletter = $data[0]["COUNT(*)"];   
 
-                    $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'customer WHERE newsletter=1' . $startLimit;
+                        $start = $cNewsletter - $limit;
+
+                        if($start < 1)
+                        {
+                            $start = 1;
+                        }                    
+          
+                        $startLimit = " LIMIT {$limit} OFFSET {$start}";
+                    }                                                
+
+                    $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'customer WHERE newsletter=1' . $startLimit;              
 
                     $wp_cust = Db::getInstance()->executeS($q);
                     
