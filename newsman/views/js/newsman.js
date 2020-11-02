@@ -111,6 +111,17 @@
         if (!data) {
             return alert(strings.needConnect);
         }
+
+        var jquery__ = $('#jquery__').is(':checked');       
+
+        if(jquery__ === true)
+        {
+            jquery__ = "on";
+        }
+        else{
+            jquery__ = "off";
+        }
+        
         var icn = btn.querySelector('i');
         icn.className = 'process-icon-loading';
         mapping = {
@@ -120,7 +131,7 @@
             mapping[$(this).attr('name')] = $(this).val();
         });
         
-        ajaxCall('SaveMapping', {mapping: JSON.stringify(mapping)}, function (ret) {
+        ajaxCall('SaveMapping', {mapping: JSON.stringify(mapping), jquery: jquery__}, function (ret) {
             icn.className = 'process-icon-ok';
         });
     }

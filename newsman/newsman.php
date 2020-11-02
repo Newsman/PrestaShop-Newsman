@@ -86,6 +86,15 @@ class Newsman extends Module
         // Load current value
         $helper->fields_value['api_key'] = Configuration::get('NEWSMAN_API_KEY');
         $helper->fields_value['user_id'] = Configuration::get('NEWSMAN_USER_ID');
+
+        if(Configuration::get('NEWSMAN_JQUERY') == "on")
+        {
+            $helper->fields_value['jquery__'] = true;
+        }
+        else{
+            $helper->fields_value['jquery__'] = false;
+        }
+
         $helper->fields_value['cron_url'] = $this->context->shop->getBaseURL() . 'modules/newsman/cron_task.php';
         $helper->fields_value['cron_option'] = Configuration::get('NEWSMAN_CRON');
 
@@ -95,23 +104,49 @@ class Newsman extends Module
                 'label' => 'Newsman list',
                 'name' => 'sel_list',
                 'options' => array('query' => array())
+            ),          
+            array(
+                'type' => 'checkbox',
+                'label' => $this->l('Use jQuery'),
+                'name' => 'jquery_',
+                'values' => array(
+                    'query' => '',
+                    'id' => 'id',
+                    'name' => 'jquery__',
+                    'value' => '1'
+                )
             ),
             array(
                 'type' => 'html',
                 'name' => 'unused',
                 'html_content' => $this->l('              
-                CRON Sync newsletter subscribers {{url}}/newsmanfetch.php?newsman=cron.json&cron=newsletter&apikey={{apikey}}&start={{start}}&limit={{limit}}
+                SYNC via CRON
                 ')
             ),
             array(
                 'type' => 'html',
                 'name' => 'unused',
                 'html_content' => $this->l('              
-                CRON Sync customers with newsletter {{url}}/newsmanfetch.php?newsman=cron.json&cron=customers_newsletter&apikey={{apikey}}&start={{start}}&limit={{limit}}
+                {{limit}} = Sync with newsman from latest number of records (ex: 2000)
+                ')
+            ),
+            array(
+                'type' => 'html',
+                'name' => 'unused',
+                'html_content' => $this->l('              
+                CRON Sync newsletter subscribers: ' . $this->context->shop->getBaseURL() . 'newsmanfetch.php?newsman=cron.json&cron=newsletter&apikey={{apikey}}&start=1&limit={{limit}}&cronlast=true
+                ')
+            ),
+            array(
+                'type' => 'html',
+                'name' => 'unused',
+                'html_content' => $this->l('              
+                CRON Sync customers with newsletter: ' . $this->context->shop->getBaseURL() . 'newsmanfetch.php?newsman=cron.json&cron=customers_newsletter&apikey={{apikey}}&start=1&limit={{limit}}&cronlast=true
                 ')
             )
         );
 
+        /*
         //check for newsletter module
         if (Module::isInstalled('blocknewsletter')) {
             $mappingSection[] = array(
@@ -135,6 +170,7 @@ class Newsman extends Module
                 'options' => array('query' => array())
             );
         }
+        */
 
         $out = '<div id="newsman-msg"></div>';
         $out .= $helper->generateForm(array(
@@ -304,8 +340,22 @@ class Newsman extends Module
 
     public function ajaxProcessSaveMapping()
     {
+        require_once dirname(__FILE__) . '/lib/Client.php';
+        
+        $client = new Newsman_Client(Configuration::get('NEWSMAN_USER_ID'), Configuration::get('NEWSMAN_API_KEY'));
+
+        $jquery = Tools::getValue('jquery');     
+
         $mapping = Tools::getValue('mapping');
+
+        //Generate feed        
+        $list = (array)json_decode($mapping);
+        $list = $list["list"];
+        $url = Context::getContext()->shop->getBaseURL(true) . "newsmanfetch.php?newsman=products.json&apikey=" . Configuration::get('NEWSMAN_API_KEY');			      
+        $ret = $client->feeds->setFeedOnList($list, $url, Context::getContext()->shop->getBaseURL(true), "NewsMAN");	
+
         Configuration::updateValue('NEWSMAN_MAPPING', $mapping);
+        Configuration::updateValue('NEWSMAN_JQUERY', $jquery);
         $this->jsonOut(true);
     }
 

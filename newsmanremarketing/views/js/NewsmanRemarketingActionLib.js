@@ -43,6 +43,7 @@
         if(_items.length > 0)
         {
             
+            //category view
             for (var x = 0; x <= _items.length; x++) {
     
                 if (newsmanVersion.indexOf("1.7") >= 0)
@@ -109,6 +110,7 @@
 
             _nzm.run( 'send', 'pageview' );
 
+            //add to cart
             for (var x = 0; x <= _items.length; x++) {
     
                 if (newsmanVersion.indexOf("1.7") >= 0)
@@ -173,8 +175,6 @@
         //add to cart - prestashop 1.6.x
         $('#add_to_cart').click(function () {
 
-            //var _c = $(this).closest('.product-container');
-
             var id = $('#product_page_product_id').val();
             var name = $('h1:first').text();
             name = $.trim(name);
@@ -195,23 +195,19 @@
 
         });
         
-        setTimeout(function(){
+        function addToCart17(){
 
             //add to cart - prestashop 1.7.x
-            //$(document).on('click', '.add-to-cart', function() {
-             //jQuery('.add-to-cart').unbind('click');
-            $('.add-to-cart').click(function () {           
-    
-                console.log("clicked");
-    
-                //var _c = $(this).closest('.product-container');
+             $('body').on('click', '.add-to-cart', (function(e) {
+
+                var attr = $('.product-variants input[type=radio]:checked');
+                var attr = attr.closest('.input-container').find('.radio-label').html();
     
                 var id = $('#product_page_product_id').val();
                 var name = $('h1:first').text();
                 name = $.trim(name);
                 var category = "";
-                var price = $('.current-price span').attr('content');		
-                //price = $.trim(price);
+                var price = $('.current-price span').attr('content');		            
                 var _qty = $('#quantity_wanted').val();
     
                 _nzm.run('ec:addProduct', {
@@ -222,29 +218,76 @@
                     'quantity': _qty
                 });
                 _nzm.run('ec:setAction', 'add');
-                _nzm.run('send', 'event', 'UX', 'click', 'add to cart');            
+                _nzm.run('send', 'event', 'UX', 'click', 'add to cart');
+    
+                setTimeout(function(){
 
+                    removeFromCartWidget17();
+
+                }, 2000);
+
+            }));
+        }
+        
+        function removeFromCartWidget17(){
+
+            //delete from cart widget prestashop 1.7
+            $(".ajax_remove_button").each(function () {
+                jQuery(this).bind("click", {"elem": jQuery(this)}, function (ev) {       
+                    
+                        var _c = $(this).closest('.small_cart_info');
+    
+                        var id = _c.find('.cart_quantity');
+                        id = id.attr('data-product-id');                    
+                        var qty = _c.find('.cart_quantity').val();
+                       
+                        _nzm.run('ec:addProduct', {
+                            'id': id,
+                            'quantity': qty
+                        });
+        
+                        _nzm.run('ec:setAction', 'remove');
+                        _nzm.run('send', 'event', 'UX', 'click', 'remove from cart');              
+    
+                });
             });
 
-        //delete from cart prestashop 1.7
-        $(".remove-from-cart").each(function () {
-            jQuery(this).bind("click", {"elem": jQuery(this)}, function (ev) {       
+        }
+
+        function clickedVariants(){
+            
+            $('.product-variants input[type=radio]').on('change', (function(){
                 
-                    var _c = $(this).closest('.cart_item');
+                
+            }));
+            
+        }
 
-                    var id = ev.data.elem.attr('data-id-product');                    
-                    var qty = _c.find('[name=product-quantity-spin]').val();
-    
-                    _nzm.run('ec:addProduct', {
-                        'id': id,
-                        'quantity': qty
-                    });
-    
-                    _nzm.run('ec:setAction', 'remove');
-                    _nzm.run('send', 'event', 'UX', 'click', 'remove from cart');              
+        setTimeout(function(){
+            
+            clickedVariants();
+            addToCart17();
+            removeFromCartWidget17();
 
-            });
-        }); 
+            //delete from cart prestashop 1.7
+            $(".remove-from-cart").each(function () {
+                jQuery(this).bind("click", {"elem": jQuery(this)}, function (ev) {       
+                    
+                        var _c = $(this).closest('.cart_item');
+    
+                        var id = ev.data.elem.attr('data-id-product');                    
+                        var qty = _c.find('[name=product-quantity-spin]').val();
+        
+                        _nzm.run('ec:addProduct', {
+                            'id': id,
+                            'quantity': qty
+                        });
+        
+                        _nzm.run('ec:setAction', 'remove');
+                        _nzm.run('send', 'event', 'UX', 'click', 'remove from cart');              
+    
+                });
+            });                         
         
         }, 1500);
 
@@ -337,98 +380,33 @@
                 _nzm.run('ec:addProduct', Products);
             }
         },
-
         addProductDetailView: function (Product) {								
             this.add(Product);
             _nzm.run('ec:setAction', 'detail');
             _nzm.run('send', 'pageview');
         },
-
         addToCart: function (Product) {
-            /*
-			this.add(Product);
-            _nzm.run('ec:setAction', 'add');
-            _nzm.run('send', 'event', 'UX', 'click', 'Add to Cart'); // Send data using an event.
-			*/
-        },
 
+        },
         removeFromCart: function (Product) {
-			/*
-            this.add(Product);
-            _nzm.run('ec:setAction', 'remove');
-            _nzm.run('send', 'event', 'UX', 'click', 'Remove From cart'); // Send data using an event.
-			*/
-        },
 
+        },
         addProductImpression: function (Product) {
-            //_nzm.run('send', 'pageview');
+          
         },
-
-        /**
-         id, type, affiliation, revenue, tax, shipping and coupon.
-         **/
         refundByOrderId: function (Order) {
-            /**
-             * Refund an entire transaction.
-             **/
-            /*
-			_nzm.run('ec:setAction', 'refund', {
-                'id': Order.id // Transaction ID is only required field for full refund.
-            });
-            _nzm.run('send', 'event', 'Ecommerce', 'Refund', {'nonInteraction': 1});
-			*/
+		
         },
-
         refundByProduct: function (Order) {
-            /**
-             * Refund a single product.
-             **/
-            //this.add(Product);
 
-            /*
-			_nzm.run('ec:setAction', 'refund', {
-                'id': Order.id, // Transaction ID is required for partial refund.
-            });
-            _nzm.run('send', 'event', 'Ecommerce', 'Refund', {'nonInteraction': 1});
-			*/
         },
 
         addProductClick: function (Product) {
-           /* 
-		    var ClickPoint = jQuery('a[href$="' + Product.url + '"].quick-view');
 
-            ClickPoint.on("click", function () {
-
-                NewsmanAnalyticEnhancedECommerce.add(Product);
-                _nzm.run('ec:setAction', 'click', {
-                    list: Product.list
-                });
-
-                _nzm.run('send', 'event', 'Product Quick View', 'click', Product.list, {
-                    'hitCallback': function () {
-                        return !_nzm.run.loaded;
-                    }
-                });
-            });
-			*/
         },
-
         addProductClickByHttpReferal: function (Product) {
-           /*
-		   this.add(Product);
-            _nzm.run('ec:setAction', 'click', {
-                list: Product.list
-            });
-
-            _nzm.run('send', 'event', 'Product Click', 'click', Product.list, {
-                'nonInteraction': 1,
-                'hitCallback': function () {
-                    return !_nzm.run.loaded;
-                }
-            });
-		   */
+        
         },
-
         addTransaction: function (Order) {      
                                     
             _nzm.identify({ email: Order.email, first_name: Order.firstname, last_name: Order.lastname });                           
@@ -444,16 +422,8 @@
             _nzm.run('send', 'pageview');
 
         },
-
         addCheckout: function (Step) {
-           // _nzm.run('ec:setAction', 'checkout', {
-           //     'step': Step
-                //'option':'Visa'
-          //  });
-
-            //_nzm.run('ec:addProduct', '');
-            //_nzm.run('ec:setAction', 'checkout');
-            //_nzm.run('send', 'pageview');
+      
         }
     };
 

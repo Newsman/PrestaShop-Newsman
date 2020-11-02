@@ -500,15 +500,17 @@ if (!empty($newsman) && !empty($apikey)) {
                         );
 
                         if ((count($custs) % $batchSize) == 0) {
-                            _importData($custs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
+                          //_importData($custs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
                         }
                         
                     }                
                   
                     if (count($custs) > 0) {
-                        _importData($custs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
+                        //_importData($custs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
                     }   
                    
+                    var_dump($custs);die('');
+
                     $status = array(
                         "status" => "success"
                         );

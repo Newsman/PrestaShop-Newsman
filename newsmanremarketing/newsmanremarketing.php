@@ -285,7 +285,7 @@
                 <script type=\"text/javascript\">
             var _nzm = _nzm || []; var _nzm_config = _nzm_config || [];
             _nzm_config['disable_datalayer']=1;
-	    _nzm_tracking_server = '" . self::$endpointHost . "';
+	        _nzm_tracking_server = '" . self::$endpointHost . "';
             (function() {var a, methods, i;a = function(f) {return function() {_nzm.push([f].concat(Array.prototype.slice.call(arguments, 0)));
             }};methods = ['identify', 'track', 'run'];for(i = 0; i < methods.length; i++) {_nzm[methods[i]] = a(methods[i])};
             s = document.getElementsByTagName('script')[0];var script_dom = document.createElement('script');script_dom.async = true;
@@ -295,11 +295,16 @@
             let newsmanVersion = '" . _PS_VERSION_ . "';
             </script>
             ";
-            if (version_compare(_PS_VERSION_, '1.7', '>=')) {
-                $ga_snippet_head .= "<script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/jquery-1.12.4.min.js\"></script>";
+            if (version_compare(_PS_VERSION_, '1.7', '>=')) {                
+                if(Configuration::get('NEWSMAN_JQUERY') == "on")
+                {                
+                    $ga_snippet_head .= "                
+                    <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/jquery-1.12.4.min.js\"></script>
+                    ";
+                }
             }
             $ga_snippet_head .= "
-            <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=310721\"></script>     
+            <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=02112020\"></script>     
             ";
 
             return $ga_snippet_head;
