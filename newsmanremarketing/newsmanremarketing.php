@@ -55,51 +55,22 @@
                 Shop::setContext(Shop::CONTEXT_ALL);
             }
 
-            if (!parent::install() || !$this->installTab() || !$this->registerHook('header') 
-               //|| !$this->registerHook('adminOrder')
-               || !$this->registerHook('footer') 
-               //|| !$this->registerHook('home')
+            if (!parent::install() 
+                || !$this->installTab() 
+                || !$this->registerHook('header')             
+                || !$this->registerHook('footer')           
                 || !$this->registerHook('productfooter') 
                 || !$this->registerHook('orderConfirmation')
                 || !$this->registerHook('displayFooter')
                 || !$this->registerHook('displayFooterCategory')
-               // || !$this->registerHook('backOfficeHeader')
             ) {
                 return false;
             }
-
-            /*
-            if (version_compare(_PS_VERSION_, '1.5', '>=')
-                && (!$this->registerHook('actionProductCancel') || !$this->registerHook('actionCartSave'))
-            ) {
-                return false;
-            }
-            */
 
             if (version_compare(_PS_VERSION_, '1.7', '>=') && (!$this->registerHook('displayOrderConfirmation')))
             {
                 
             }
-
-            /*
-            Db::getInstance()->Execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'newsmanremarketing`');
-
-            if (!Db::getInstance()->Execute('
-                CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'newsmanremarketing` (
-                    `id_google_analytics` int(11) NOT NULL AUTO_INCREMENT,
-                    `id_order` int(11) NOT NULL,
-                    `id_customer` int(10) NOT NULL,
-                    `id_shop` int(11) NOT NULL,
-                    `sent` tinyint(1) DEFAULT NULL,
-                    `date_add` datetime DEFAULT NULL,
-                    PRIMARY KEY (`id_google_analytics`),
-                    KEY `id_order` (`id_order`),
-                    KEY `sent` (`sent`)
-                ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 AUTO_INCREMENT=1')
-            ) {
-                return $this->uninstall();
-            }
-            */
                         
             return true;			
         }
@@ -110,7 +81,6 @@
                 return false;
             }
 
-            //return Db::getInstance()->Execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'newsmanremarketing`');
             return true;
         }
 
@@ -260,18 +230,18 @@
         }
 
         public static $endpoint = "https://retargeting.newsmanapp.com/js/retargeting/track.js";
-        public static $endpointHost = "https://retargeting.newsmanapp.com";
-        //public static $endpoint = "https://bogdandev2.newsmanapp.com/js/retargeting/track.dev.js";
-        //public static $endpointHost = "https://bogdandev2.newsmanapp.com";
+        public static $endpointHost = "https://retargeting.newsmanapp.com";  
 
         protected function _getGoogleAnalyticsTag($back_office = false)
         {
+            /*
             $user_id = null;
             if (Configuration::get('NEWSMAN_USERID_ENABLED') &&
                 $this->context->customer && $this->context->customer->isLogged()
             ) {
                 $user_id = (int)$this->context->customer->id;
             }
+            */
 
             $ga_id = Configuration::get('NEWSMAN_ACCOUNT_ID');
 
@@ -303,34 +273,18 @@
                     ";
                 }
             }
+            
             $ga_snippet_head .= "
             <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=02112020\"></script>     
-            ";
-
-            return $ga_snippet_head;
-
-            /*return '
-                <script type="text/javascript">
-                    (window.gaDevIds=window.gaDevIds||[]).push(\'d6YPbH\');
-                    (function(i,s,o,g,r,a,m){i[\'GoogleAnalyticsObject\']=r;i[r]=i[r]||function(){
-                    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-                    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-                    })(window,document,\'script\',\'//www.google-analytics.com/analytics.js\',\'ga\');
-                    ga(\'create\', \'' . Tools::safeOutput(Configuration::get('NEWSMAN_ACCOUNT_ID')) . '\', \'auto\');
-                    ga(\'require\', \'ec\');'
-            . (($user_id && !$back_office) ? 'ga(\'set\', \'&uid\', \'' . $user_id . '\');' : '')
-            . ($back_office ? 'ga(\'set\', \'nonInteraction\', true);' : '')
-            . '</script>';
-            */
+            ";            
+       
+            return $ga_snippet_head;   
         }
 
         public function hookHeader()
         {
             if (Configuration::get('NEWSMAN_ACCOUNT_ID')) {
-                $nzm = $this->_getGoogleAnalyticsTag();
-
-                //$this->context->controller->addJs($this->_path . 'views/js/jquery-1.12.4.min.js');
-                //$this->context->controller->addJs($this->_path . 'views/js/NewsmanRemarketingActionLib.js');
+                $nzm = $this->_getGoogleAnalyticsTag();           
                
                 return $nzm;
             }
@@ -452,11 +406,9 @@
 
                 $gacarts = unserialize($this->context->cookie->ga_cart);
                 foreach ($gacarts as $gacart) {
-                    if ($gacart['quantity'] > 0) {
-                        //$ga_scripts .= 'NMBG.addToCart(' . Tools::jsonEncode($gacart) . ');';
+                    if ($gacart['quantity'] > 0) {                     
                     } elseif ($gacart['quantity'] < 0) {
-                        $gacart['quantity'] = abs($gacart['quantity']);
-                        //$ga_scripts .= 'NMBG.removeFromCart(' . Tools::jsonEncode($gacart) . ');';
+                        $gacart['quantity'] = abs($gacart['quantity']);             
                     }
                 }
                 unset($this->context->cookie->ga_cart);
@@ -471,8 +423,6 @@
                 if (empty($step)) {
                     $step = 0;
                 }
-                //$ga_scripts .= $this->addProductFromCheckout($products, $step);
-                //$ga_scripts .= 'NMBG.addCheckout(\'' . (int)$step . '\');';
             }
 
             if (version_compare(_PS_VERSION_, '1.5', '<')) {
@@ -824,187 +774,7 @@
                 return $runjs_code;
             }
         }
-
-        /**
-         * Hook admin order to send transactions and refunds details
-         */
-        public function hookAdminOrder()
-        {
-            /*
-            echo $this->_runJs($this->context->cookie->ga_admin_refund, 1);
-            unset($this->context->cookie->ga_admin_refund);
-            */
-        }
-
-        /**
-         *  admin office header to add Newsman Remarketing js
-         */
-        public function hookBackOfficeHeader()
-        {
-            /*
-            $js = '';
-            if (strcmp(Tools::getValue('configure'), $this->name) === 0) {
-                if (version_compare(_PS_VERSION_, '1.5', '>') == true) {
-                    $this->context->controller->addCSS($this->_path . 'views/css/newsman.css');
-                    if (version_compare(_PS_VERSION_, '1.6', '<') == true) {
-                        $this->context->controller->addCSS($this->_path . 'views/css/newsman-nobootstrap.css');
-                    }
-                } else {
-                    $js .= '<link rel="stylesheet" href="' . $this->_path . 'views/css/newsman.css" type="text/css" />\
-                            <link rel="stylesheet" href="' . $this->_path . 'views/css/newsman-nobootstrap.css" type="text/css" />';
-                }
-            }
-
-            $ga_account_id = Configuration::get('NEWSMAN_ACCOUNT_ID');
-
-            if (!empty($ga_account_id) && $this->active) {
-                if (version_compare(_PS_VERSION_, '1.5', '>=') == true) {
-                    $this->context->controller->addJs($this->_path . 'views/js/NewsmanRemarketingActionLib.js?t=30072020');
-                } else {
-                    $js .= '<script type="text/javascript" src="' . $this->_path . 'views/js/NewsmanRemarketingActionLib.js?t=30072020"></script>';
-                }
-
-                $this->context->smarty->assign('NEWSMAN_ACCOUNT_ID', $ga_account_id);
-
-                $ga_scripts = '';
-                if ($this->context->controller->controller_name == 'AdminOrders') {
-                    if (Tools::getValue('id_order')) {
-                        $order = new Order((int)Tools::getValue('id_order'));
-                        if (Validate::isLoadedObject($order) && strtotime('+1 day', strtotime($order->date_add)) > time()) {
-                            $ga_order_sent = Db::getInstance()->getValue('SELECT id_order FROM `' . _DB_PREFIX_ . 'newsmanremarketing` WHERE id_order = ' . (int)Tools::getValue('id_order'));
-                            if ($ga_order_sent === false) {
-                                Db::getInstance()->Execute('INSERT IGNORE INTO `' . _DB_PREFIX_ . 'newsmanremarketing` (id_order, id_shop, sent, date_add) VALUES (' . (int)Tools::getValue('id_order') . ', ' . (int)$this->context->shop->id . ', 0, NOW())');
-                            }
-                        }
-                    } else {
-                        $ga_order_records = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'newsmanremarketing` WHERE sent = 0 AND id_shop = \'' . (int)$this->context->shop->id . '\' AND DATE_ADD(date_add, INTERVAL 30 minute) < NOW()');
-
-                        if ($ga_order_records) {
-                            foreach ($ga_order_records as $row) {
-                                $transaction = $this->wrapOrder($row['id_order']);
-                                if (!empty($transaction)) {
-                                    Db::getInstance()->execute('UPDATE `' . _DB_PREFIX_ . 'newsmanremarketing` SET date_add = NOW(), sent = 1 WHERE id_order = ' . (int)$row['id_order'] . ' AND id_shop = \'' . (int)$this->context->shop->id . '\'');
-                                    $transaction = Tools::jsonEncode($transaction);
-                                    $ga_scripts .= 'NMBG.addTransaction(' . $transaction . ');';
-                                }
-                            }
-                        }
-
-                    }
-                }
-                return $js . $this->_getGoogleAnalyticsTag(true) . $this->_runJs($ga_scripts, 1);
-            } else {
-                return $js;
-            }
-            */
-        }
-
-        /**
-         * Hook admin office header to add Newsman Remarketing js
-         */
-        public function hookActionProductCancel($params)
-        {
-            /*
-            $qty_refunded = Tools::getValue('cancelQuantity');
-            $ga_scripts = '';
-            foreach ($qty_refunded as $orderdetail_id => $qty) {
-                // Display GA refund product
-                $order_detail = new OrderDetail($orderdetail_id);
-                $ga_scripts .= 'NMBG.add(' . Tools::jsonEncode(
-                        array(
-                            'id' => empty($order_detail->product_attribute_id) ? $order_detail->product_id : $order_detail->product_id . '-' . $order_detail->product_attribute_id,
-                            'quantity' => $qty)
-                    ) . ');';
-            }
-            $this->context->cookie->ga_admin_refund = $ga_scripts . 'NMBG.refundByProduct(' . Tools::jsonEncode(array('id' => $params['order']->id)) . ');';
-            */
-        }
-
-        /**
-         * hook save cart event to implement addtocart and remove from cart functionality
-         */
-        public function hookActionCartSave()
-        {
-            /*
-            if (!isset($this->context->cart)) {
-                return;
-            }
-
-            if (!Tools::getIsset('id_product')) {
-                return;
-            }
-
-            $cart = array(
-                'controller' => Tools::getValue('controller'),
-                'addAction' => Tools::getValue('add') ? 'add' : '',
-                'removeAction' => Tools::getValue('delete') ? 'delete' : '',
-                'extraAction' => Tools::getValue('op'),
-                'qty' => (int)Tools::getValue('qty', 1)
-            );
-
-            $cart_products = $this->context->cart->getProducts();
-            if (isset($cart_products) && count($cart_products)) {
-                foreach ($cart_products as $cart_product)
-                    if ($cart_product['id_product'] == Tools::getValue('id_product')) {
-                        $add_product = $cart_product;
-                    }
-            }
-
-            if ($cart['removeAction'] == 'delete') {
-                $add_product_object = new Product((int)Tools::getValue('id_product'), true, (int)Configuration::get('PS_LANG_DEFAULT'));
-                if (Validate::isLoadedObject($add_product_object)) {
-                    $add_product['name'] = $add_product_object->name;
-                    $add_product['manufacturer_name'] = $add_product_object->manufacturer_name;
-                    $add_product['category'] = $add_product_object->category;
-                    $add_product['reference'] = $add_product_object->reference;
-                    $add_product['link_rewrite'] = $add_product_object->link_rewrite;
-                    $add_product['link'] = $add_product_object->link_rewrite;
-                    $add_product['price'] = $add_product_object->price;
-                    $add_product['ean13'] = $add_product_object->ean13;
-                    $add_product['id_product'] = Tools::getValue('id_product');
-                    $add_product['id_category_default'] = $add_product_object->id_category_default;
-                    $add_product['out_of_stock'] = $add_product_object->out_of_stock;
-                    $add_product = Product::getProductProperties((int)Configuration::get('PS_LANG_DEFAULT'), $add_product);
-                }
-            }
-
-            if (isset($add_product) && !in_array((int)Tools::getValue('id_product'), self::$products)) {
-                self::$products[] = (int)Tools::getValue('id_product');
-                $ga_products = $this->wrapProduct($add_product, $cart, 0, true);
-
-                if (array_key_exists('id_product_attribute', $ga_products) && $ga_products['id_product_attribute'] != '' && $ga_products['id_product_attribute'] != 0) {
-                    $id_product = $ga_products['id_product_attribute'];
-                } else {
-                    $id_product = Tools::getValue('id_product');
-                }
-
-                if (isset($this->context->cookie->ga_cart)) {
-                    $gacart = unserialize($this->context->cookie->ga_cart);
-                } else {
-                    $gacart = array();
-                }
-
-                if ($cart['removeAction'] == 'delete') {
-                    $ga_products['quantity'] = -1;
-                } elseif ($cart['extraAction'] == 'down') {
-                    if (array_key_exists($id_product, $gacart)) {
-                        $ga_products['quantity'] = $gacart[$id_product]['quantity'] - $cart['qty'];
-                    } else {
-                        $ga_products['quantity'] = $cart['qty'] * -1;
-                    }
-                } elseif (Tools::getValue('step') <= 0) // Sometimes cartsave is called in checkout
-                {
-                    if (array_key_exists($id_product, $gacart)) {
-                        $ga_products['quantity'] = $gacart[$id_product]['quantity'] + $cart['qty'];
-                    }
-                }
-
-                $gacart[$id_product] = $ga_products;
-                $this->context->cookie->ga_cart = serialize($gacart);
-            }
-            */
-        }
-
+   
         protected function _debugLog($function, $log)
         {
             if (!$this->_debug) {
