@@ -134,14 +134,14 @@ class Newsman extends Module
                 'type' => 'html',
                 'name' => 'unused',
                 'html_content' => $this->l('              
-                CRON Sync newsletter subscribers: ' . $this->context->shop->getBaseURL() . 'newsmanfetch.php?newsman=cron.json&cron=newsletter&apikey={{apikey}}&start=1&limit={{limit}}&cronlast=true
+                CRON Sync newsletter subscribers: ' . $this->context->shop->getBaseURL() . 'newsmanfetch.php?newsman=cron.json&cron=newsletter&apikey=' . $helper->fields_value['api_key'] . '&start=1&limit={{limit}}&cronlast=true
                 ')
             ),
             array(
                 'type' => 'html',
                 'name' => 'unused',
                 'html_content' => $this->l('              
-                CRON Sync customers with newsletter: ' . $this->context->shop->getBaseURL() . 'newsmanfetch.php?newsman=cron.json&cron=customers_newsletter&apikey={{apikey}}&start=1&limit={{limit}}&cronlast=true
+                CRON Sync customers with newsletter: ' . $this->context->shop->getBaseURL() . 'newsmanfetch.php?newsman=cron.json&cron=customers_newsletter&apikey=' . $helper->fields_value['api_key'] . '&start=1&limit={{limit}}&cronlast=true
                 ')
             )
         );
