@@ -323,7 +323,11 @@
                         $order_products = array();
                         $cart = new Cart($order->id_cart);
                         foreach ($cart->getProducts() as $order_product)
+                        {
+                            $category = new Category((int)$order_product["id_category_default"], (int)$this->context->language->id);   
+                            $order_product["category_name"] = $category->name;                                                     
                             $order_products[] = $this->wrapProduct($order_product, array(), 0, true);
+                        }                     
 
                         $id_cust = $order->id_customer;
                         $customer = new Customer($id_cust);			                       
@@ -368,10 +372,14 @@
                         $order_products = array();
                         $cart = new Cart($order->id_cart);
                         foreach ($cart->getProducts() as $order_product)
+                        {
+                            $category = new Category((int)$order_product["id_category_default"], (int)$this->context->language->id);   
+                            $order_product["category_name"] = $category->name;                                                     
                             $order_products[] = $this->wrapProduct($order_product, array(), 0, true);
+                        }
 
                         $id_cust = $order->id_customer;
-                        $customer = new Customer($id_cust);			                       
+                        $customer = new Customer($id_cust);			                           
 
                         $transaction = array(
                             'id' => $order->id,
@@ -593,7 +601,11 @@
             }					
 			
 			$price = str_replace(",", "", $price);					
-			
+            
+            if(!empty($product['category_name']))           
+                $product["category"] = $product["category_name"];
+          
+
             if ($full) {
                 $ga_product = array(
                     'id' => '' . $product_id . '',
@@ -715,6 +727,10 @@
                 }
 
                 // Add product view
+
+                $category = new Category((int)$paramProd["id_category_default"], (int)$this->context->language->id); 
+                $paramProd["category_name"] = $category->name;                
+
                 $ga_product = $this->wrapProduct($paramProd, null, 0, true);
                 $js = 'NMBG.addProductDetailView(' . Tools::jsonEncode($ga_product) . ');';
 
