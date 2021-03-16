@@ -15,6 +15,7 @@ Copy "newsmanfetch.php" to your root directory.
 ## Prestashop 1.7x
 
 Admin -> Module Manager -> Upload a module -> add "newsman.zip".
+Copy "newsmanfetch.php" to your root directory.
 
 # Setup
 1. Fill in your Newsman API KEY and User ID and click connect
