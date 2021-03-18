@@ -414,10 +414,59 @@
                 
                     case "newsletter":
                         
+                        try{
+                            if($cronLast)
+                            {
+                                //Get latest
+                                $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1';
+
+                                $data = Db::getInstance()->executeS($q);            
+                                $newsletter = $data[0]["COUNT(*)"];
+
+                                $start = $newsletter - $limit;
+
+                                if($start < 1)
+                                {
+                                    $start = 1;
+                                }                    
+
+                                $startLimit = " LIMIT {$limit} OFFSET {$start}";                   
+                            }
+                            
+                            $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1' . $startLimit;
+                    
+                            $wp_subscribers = Db::getInstance()->executeS($q);
+                
+                            $subs = array();
+                
+                            foreach ($wp_subscribers as $users) {
+                                $subs[] = array(
+                                    "email" => $users["email"],
+                                    "firstname" => $users["firstname"],
+                                    "lastname" => $users["lastname"]
+                                );
+
+                                if ((count($subs) % $batchSize) == 0) {
+                                    _importData($subs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                                }
+                                
+                            }
+
+                            if (count($subs) > 0) {
+                                _importData($subs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                            }
+                        }
+                        catch(Exception $ex)
+                        {
+                   
+                        }
+            
+                    
+                    try{
                         if($cronLast)
                         {
                             //Get latest
-                            $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1';
+                            $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'emailsubscription WHERE active=1';
 
                             $data = Db::getInstance()->executeS($q);            
                             $newsletter = $data[0]["COUNT(*)"];
@@ -432,17 +481,18 @@
                             $startLimit = " LIMIT {$limit} OFFSET {$start}";                   
                         }
                         
-                        $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1' . $startLimit;
+                        $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'emailsubscription WHERE active=1' . $startLimit;
                 
                         $wp_subscribers = Db::getInstance()->executeS($q);
             
                         $subs = array();
             
-                        foreach ($wp_subscribers as $users) {
+                        foreach ($wp_subscribers as $users) {                          
+
                             $subs[] = array(
                                 "email" => $users["email"],
-                                "firstname" => $users["firstname"],
-                                "lastname" => $users["lastname"]
+                                "firstname" => "",
+                                "lastname" => ""                           
                             );
 
                             if ((count($subs) % $batchSize) == 0) {
@@ -454,14 +504,19 @@
                         if (count($subs) > 0) {
                             _importData($subs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
                         }
+                    }
+                    catch(Exception $ex)
+                    {
+               
+                    }
                 
-                        $status = array(
-                            "status" => "success"
-                            );
-                
-                        header('Content-Type: application/json');
-                        echo json_encode($status, JSON_PRETTY_PRINT); 
-                        return;
+                    $status = array(
+                        "status" => "success"
+                        );
+            
+                    header('Content-Type: application/json');
+                    echo json_encode($status, JSON_PRETTY_PRINT); 
+                    return;
 
                     break;
 
