@@ -104,7 +104,13 @@ class Newsman extends Module
                 'label' => 'Newsman list',
                 'name' => 'sel_list',
                 'options' => array('query' => array())
-            ),          
+            ),    
+            array(
+                'type' => 'select',
+                'label' => 'Newsman segment',
+                'name' => 'sel_segment',
+                'options' => array('query' => array())
+            ),        
             array(
                 'type' => 'checkbox',
                 'label' => $this->l('Use jQuery'),
@@ -282,12 +288,13 @@ class Newsman extends Module
         $this->context->controller->addJS($this->_path . 'views/js/newsman.js');
 
         $ajaxURL = $this->context->link->getAdminLink('AdminModules') . '&configure=' . $this->name;
+
         $mapExtra = array(
             //array('', $this->l('Do not import')),
             //array('none', $this->l('Import, no segment'))
         );
         $data = Configuration::get('NEWSMAN_DATA');
-        $mapping = Configuration::get('NEWSMAN_MAPPING');
+        $mapping = Configuration::get('NEWSMAN_MAPPING');        
 
         $out .= '<script>var newsman=' . Tools::jsonEncode(array(
                 'data' => $data ? Tools::jsonDecode($data) : false,
@@ -353,20 +360,27 @@ class Newsman extends Module
     }
 
     public function ajaxProcessSaveMapping()
-    {
+    {	
         require_once dirname(__FILE__) . '/lib/Client.php';
         
         $client = new Newsman_Client(Configuration::get('NEWSMAN_USER_ID'), Configuration::get('NEWSMAN_API_KEY'));
 
         $jquery = Tools::getValue('jquery');     
 
-        $mapping = Tools::getValue('mapping');
+        $mapping = Tools::getValue('mapping');    
 
         //Generate feed        
         $list = (array)json_decode($mapping);
         $list = $list["list"];
-        $url = Context::getContext()->shop->getBaseURL(true) . "newsmanfetch.php?newsman=products.json&apikey=" . Configuration::get('NEWSMAN_API_KEY');			      
+        $url = Context::getContext()->shop->getBaseURL(true) . "newsmanfetch.php?newsman=products.json&apikey=" . Configuration::get('NEWSMAN_API_KEY');		      
+	
+try{
         $ret = $client->feeds->setFeedOnList($list, $url, Context::getContext()->shop->getBaseURL(true), "NewsMAN");	
+}
+catch(Exception $e)
+{
+
+}
 
         Configuration::updateValue('NEWSMAN_MAPPING', $mapping);
         Configuration::updateValue('NEWSMAN_JQUERY', $jquery);
@@ -394,7 +408,7 @@ class Newsman extends Module
     }
 
     public function ajaxProcessListChanged()
-    {
+    {      
         $list_id = Tools::getValue('list_id');
         $client = $this->getClient(Configuration::get('NEWSMAN_USER_ID'), Configuration::get('NEWSMAN_API_KEY'));
         $client->query('segment.all', $list_id);

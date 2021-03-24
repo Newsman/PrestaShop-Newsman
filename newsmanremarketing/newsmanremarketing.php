@@ -595,7 +595,13 @@
             $price = 0;
 
             if (version_compare(_PS_VERSION_, '1.7', '>=')) {
+                if(isset($product["price_amount"]))
+                {
+                    $price = number_format($product['price'], '2');
+                }
+                else{
                 $price = number_format($product['price_amount'], '2');			
+                }
             } else {
                 $price = number_format($product['price'], '2');			
             }					

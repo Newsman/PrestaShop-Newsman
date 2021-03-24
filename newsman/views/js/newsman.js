@@ -41,9 +41,20 @@
         strings = newsman.strings;
 
         if (data)
-            $(updateSelects);
+            updateSelects();
+      
+        if(mapping)
+        {                  
+         //   var $ld = $('<i class="process-icon-loading" style="display: inline-block"/>');
+         //   $ld.css({display: 'inline-block'}).after($ld);
+            ajaxCall('ListChanged', {list_id: mapping.list}, function (ret) {
+                data.segments = ret.segments;
+                updateSelects();   
+            //    $ld.remove();            
+            });
+        }
 
-        $('#sel_list').change(function () {
+        $('#sel_list').change(function () {        
             var $me = $(this);
             var $ld = $('<i class="process-icon-loading" style="display: inline-block"/>');
             $me.css({display: 'inline-block'}).after($ld);
@@ -60,12 +71,18 @@
         //list select
         $('#sel_list').empty().append(data.lists.map(function (item) {
             return $('<option/>').attr('value', item.list_id).text(item.list_name);
-        }));
+        }));      
 
-        //segment selects
-        var options = mapExtra.concat(data.segments.map(function (item) {
-            return ['seg_' + item.segment_id, item.segment_name];
-        }));
+        if(data.segments != null)
+        {
+            if(!data.segments.hasOwnProperty("faultCode"))
+            {             
+                //segment selects
+                $('#sel_segment').empty().append(data.segments.map(function (item) {
+                    return $('<option/>').attr('value', item.segment_id).text(item.segment_name);
+                }));
+            }
+        }
 
         $('.id-map-select').each(function () {
             $(this).empty().append(options.map(function (item) {
@@ -73,14 +90,15 @@
             }))
         });
 
-        if (mapping) {
+        if (mapping) {           
             $('#sel_list').val(mapping.list);
-            $('.id-map-select').each(function () {
+            $('#sel_segment').val(mapping.segment);
+            /*$('.id-map-select').each(function () {
                 $(this).val(mapping[$(this).attr('name')]);
                 if ($(this).val() == null) {
                     $(this).val('');
                 }
-            })
+            })*/
         }
     }
 
@@ -108,6 +126,7 @@
     }
 
     function saveMapping(btn) {
+
         if (!data) {
             return alert(strings.needConnect);
         }
@@ -125,14 +144,16 @@
         var icn = btn.querySelector('i');
         icn.className = 'process-icon-loading';
         mapping = {
-            list: $('#sel_list').val()
+            list: $('#sel_list').val(),
+            segment: $('#sel_segment').val()
         };
-        $('.id-map-select').each(function () {
+
+        /*$('.id-map-select').each(function () {
             mapping[$(this).attr('name')] = $(this).val();
-        });
-        
+        });*/
+
         ajaxCall('SaveMapping', {mapping: JSON.stringify(mapping), jquery: jquery__}, function (ret) {
-            icn.className = 'process-icon-ok';
+            icn.className = 'process-icon-ok';            
         });
     }
 
