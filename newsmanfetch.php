@@ -407,6 +407,15 @@
                     
             $_mapping = array(json_decode($_mapping));
             $list_id = $_mapping[0]->list;
+            $segment_id = $_mapping[0]->segment;            
+
+            if(empty($segment_id))
+            {
+                $segment_id = array();
+            }
+            else{
+                $segment_id = array($segment_id); 
+            }
 
             $client = new Newsman_Client($_userId, $apikey);
 
@@ -447,13 +456,13 @@
                                 );
 
                                 if ((count($subs) % $batchSize) == 0) {
-                                    _importData($subs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                                    _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
                                 }
                                 
                             }
 
                             if (count($subs) > 0) {
-                                _importData($subs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                                _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
                             }
                         }
                         catch(Exception $ex)
@@ -496,13 +505,13 @@
                             );
 
                             if ((count($subs) % $batchSize) == 0) {
-                                _importData($subs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                                _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
                             }
                             
                         }
 
                         if (count($subs) > 0) {
-                            _importData($subs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                            _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
                         }
                     }
                     catch(Exception $ex)
@@ -512,7 +521,7 @@
                 
                     $status = array(
                         "status" => "success"
-                        );
+                    );
             
                     header('Content-Type: application/json');
                     echo json_encode($status, JSON_PRETTY_PRINT); 
@@ -555,13 +564,13 @@
                             );
 
                             if ((count($custs) % $batchSize) == 0) {
-                            _importData($custs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
+                            _importData($custs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
                             }
                             
                         }                
                     
                         if (count($custs) > 0) {
-                            _importData($custs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
+                            _importData($custs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
                         }                                       
 
                         $status = array(
