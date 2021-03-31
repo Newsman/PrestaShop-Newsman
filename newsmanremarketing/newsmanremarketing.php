@@ -275,7 +275,7 @@
             }
             
             $ga_snippet_head .= "
-            <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=02112020\"></script>     
+            <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=31032021\"></script>     
             ";            
        
             return $ga_snippet_head;   

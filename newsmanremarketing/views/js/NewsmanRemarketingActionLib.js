@@ -95,6 +95,9 @@
                         var category = $(currClassCategory).html();
                         var price = currentProd.find(currClassPrice + ' span:first').text();
                         price = $.trim(price);
+                
+                        if(category == undefined)
+                            category = "All";
             
                         _nzm.run( 'ec:addImpression', {
                             'id': id,
@@ -153,6 +156,9 @@
                         var category = "";
                         var price = _c.find('.content_price span:first').text();
                         price = $.trim(price);
+                        
+                        if(category == undefined)
+                            category = "All";                        
         
                         _nzm.run('ec:addProduct', {
                             'id': id,
@@ -182,6 +188,9 @@
             var price = $('#our_price_display').text();
             price = $.trim(price);
             var _qty = $('#quantity_wanted').val();
+            
+            if(category == undefined)
+             category = "All";            
 
             _nzm.run('ec:addProduct', {
                 'id': id,
