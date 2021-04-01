@@ -97,8 +97,8 @@
                         price = $.trim(price);
                 
                         if(category == undefined)
-                            category = "All";
-            
+                            category = "All";            			
+
                         _nzm.run( 'ec:addImpression', {
                             'id': id,
                             'name': name,
@@ -364,6 +364,14 @@
                     for (var i = 0; i < ProductFieldObject.length; i++) {
                         if (productKey.toLowerCase() == ProductFieldObject[i]) {
                             if (Product[productKey] != null) {
+
+				if(productKey == "name" || productKey == "category" || productKey == "brand")
+				{	
+					var str = Product[productKey];		
+					str = str.toString().replace('"','');
+					Product[productKey] = str.toString().replace('"','');
+				}
+
                                 Products[productKey.toLowerCase()] = Product[productKey];
                             }
 
@@ -382,6 +390,8 @@
                     }
                 }
             }
+
+console.log(Products);
 
             if (Impression) {
                 _nzm.run('ec:addImpression', Products);
