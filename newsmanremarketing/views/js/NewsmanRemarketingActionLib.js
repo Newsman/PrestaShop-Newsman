@@ -22,7 +22,7 @@
 
 /* globals $, _nzm.run, jQuery */
 
-window.addEventListener('load', function () {
+//window.addEventListener('load', function () {
 
 //jQuery(document).ready(function () {
 
@@ -405,4 +405,4 @@ var NewsmanAnalyticEnhancedECommerce = {
   addCheckout: function (Step) {},
 };
 
-});
+//});

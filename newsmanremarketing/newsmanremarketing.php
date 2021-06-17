@@ -275,7 +275,7 @@
             }
             
             $ga_snippet_head .= "
-            <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=14052021\"></script>     
+            <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=17062021\"></script>     
             ";            
        
             return $ga_snippet_head;   
@@ -764,16 +764,16 @@
 
                     $runjs_code .= '
                     <script type="text/javascript">
-    //document.addEventListener("DOMContentLoaded", function(event) {
+    document.addEventListener("DOMContentLoaded", function(event) {
         
-            jQuery(document).ready(function(){
+            //jQuery(document).ready(function(){
     
                             var NMBG = NewsmanAnalyticEnhancedECommerce;
 
                             ' . $js_code . '												
-                        });
+                        //});
         
-    //});
+    });
                     
                     </script>';
                 }
