@@ -763,18 +763,35 @@
                 if (!empty($js_code)) {
 
                     $runjs_code .= '
+                    
                     <script type="text/javascript">
+                    
     document.addEventListener("DOMContentLoaded", function(event) {
+        
+                     function cJ()
+                    {
+                        if (jLoadedNewsman) {
+                        
+                          var NMBG = NewsmanAnalyticEnhancedECommerce;
+    
+                          ' . $js_code . '
+                          
+                        }
+                        else{
+                            setTimeout(function(){
+                                    cJ();
+                                }, 1000);
+                        }
+                    }
         
             //jQuery(document).ready(function(){
     
-                            var NMBG = NewsmanAnalyticEnhancedECommerce;
-
-                            ' . $js_code . '												
+                            cJ();
+                            
                         //});
-        
-    });
-                    
+          
+                   });
+                     
                     </script>';
                 }
 

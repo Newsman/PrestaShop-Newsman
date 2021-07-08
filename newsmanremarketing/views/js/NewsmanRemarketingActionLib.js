@@ -26,6 +26,17 @@
 
 //jQuery(document).ready(function () {
 
+let jLoadedNewsman = false;
+let NewsmanAnalyticEnhancedECommerce = null;
+
+function cJNewsman()
+{
+  
+  if (window.jQuery) 
+  {
+      
+     jLoadedNewsman = true;
+     
   //default class name .product-container
   var currClass = ".product-container";
   //default class name .ajax-add-to-cart
@@ -300,7 +311,7 @@
 
 //});
 
-var NewsmanAnalyticEnhancedECommerce = {
+NewsmanAnalyticEnhancedECommerce = {
   add: function (Product, Order, Impression) {
     var Products = {};
     var Orders = {};
@@ -404,5 +415,16 @@ var NewsmanAnalyticEnhancedECommerce = {
   },
   addCheckout: function (Step) {},
 };
+
+}
+else{
+    setTimeout(function(){
+            cJNewsman();
+        }, 1000);
+}
+
+}
+
+cJNewsman();
 
 //});
