@@ -151,7 +151,10 @@ function cJNewsman()
                   name = $.trim(name);
                   var category = "";
                   var price = _c.find(".content_price span:first").text();
-                  price = $.trim(price);
+                  price = price.trim();
+                  price = price.split(' ').join('');
+                  price = price.split(',').join('.');
+                  price = price.split('lei').join('');
 
                   if (category == undefined) category = "All";
 
