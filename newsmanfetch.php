@@ -238,11 +238,11 @@
                 {
                     $startLimit = null;
 
-                    $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'product c LEFT JOIN ' . _DB_PREFIX_ . '`product_lang` `cg` ON cg.id_product=c.id_product WHERE c.id_product=' . $product_id . '';               
+                    $q = 'SELECT * FROM `' . _DB_PREFIX_ . 'product` c LEFT JOIN `' . _DB_PREFIX_ . 'product_lang` `cg` ON cg.id_product=c.id_product WHERE c.id_product=' . $product_id . '';               
                 }
                 else{                
-                    $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'product c LEFT JOIN ' . _DB_PREFIX_ . '`product_lang` `cg` ON cg.id_product=c.id_product ' . $startLimit;
-                }               
+                    $q = 'SELECT * FROM `' . _DB_PREFIX_ . 'product` c LEFT JOIN `' . _DB_PREFIX_ . 'product_lang` `cg` ON cg.id_product=c.id_product ' . $startLimit;
+                }          
  
                 $products = Db::getInstance()->executeS($q);
                 $productsJson = array();     
