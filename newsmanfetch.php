@@ -417,7 +417,9 @@
             switch($cron){
                 
                     case "newsletter":
-                        
+                    
+                    try {
+                    
                         if($cronLast)
                         {
                             //Get latest
@@ -466,6 +468,18 @@
                         header('Content-Type: application/json');
                         echo json_encode($status, JSON_PRETTY_PRINT); 
                         return;
+                        
+                    }
+                    catch(Exception $e)
+                    {
+                        $status = array(
+                           "status" => _DB_PREFIX_ . 'newsletter table doesn\'t exist'   
+                        );
+                        
+                        header('Content-Type: application/json');
+                        echo json_encode($status, JSON_PRETTY_PRINT); 
+                        return;
+                    }
 
                     break;
 
