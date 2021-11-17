@@ -404,7 +404,9 @@ function cJNewsman()
           }
 
           if (Impression) {
-            _nzm.run("ec:addImpression", Products);
+		if (newsmanVersion.indexOf("1.7") >= 0) {
+	           _nzm.run("ec:addImpression", Products);
+		}
           } else {
             _nzm.run("ec:addProduct", Products);
           }
