@@ -49,18 +49,46 @@
     if(!empty($start) && $start >= 0 && !empty($limit))
         $startLimit .= " LIMIT {$limit} OFFSET {$start}";
 
-    if (!empty($newsman) && !empty($apikey)) {
+    if (!empty($newsman) && !empty($apikey) || $newsman == "getCart.json") {
         $apikey = $_GET["apikey"];
         $currApiKey = $_apikey;
 
-        if ($apikey != $currApiKey) {
-            http_response_code(403);
-            header('Content-Type: application/json');
-            echo Tools::jsonEncode(403);
-            return;
+        if($newsman != "getCart.json")
+        {
+            if ($apikey != $currApiKey) {
+                http_response_code(403);
+                header('Content-Type: application/json');
+                echo Tools::jsonEncode(403);
+                return;
+            }
         }
 
         switch ($_GET["newsman"]) {
+            case "getCart.json":
+
+                if ((bool)$_POST["post"] == true) {                       
+
+                    $cart = Context::getContext()->cart->getProducts();                                           
+                                
+                    $prod = array();
+
+                    foreach ( $cart as $cart_item ) {                                 
+                   
+                            $prod[] = array(
+                                "id" => $cart_item["id_product"],
+                                "name" => $cart_item["name"],
+                                "price" => $cart_item["price"],						
+                                "quantity" => $cart_item["cart_quantity"]
+                            );							
+                                                
+                        }		                        
+
+                        header('Content-Type: application/json');
+                        echo json_encode($prod, JSON_PRETTY_PRINT);  
+                    return;
+                }
+
+            break;
             case "orders.json":
 
                 $ordersObj = array();   
