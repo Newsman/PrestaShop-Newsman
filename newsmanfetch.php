@@ -66,7 +66,7 @@
         switch ($_GET["newsman"]) {
             case "getCart.json":
 
-                if ((bool)$_POST["post"] == true) {                       
+                //if ((bool)$_POST["post"] == true) {                       
 
                     $cart = Context::getContext()->cart->getProducts();                                           
                                 
@@ -85,8 +85,9 @@
 
                         header('Content-Type: application/json');
                         echo json_encode($prod, JSON_PRETTY_PRINT);  
+                        exit;
                     return;
-                }
+                //}
 
             break;
             case "orders.json":
