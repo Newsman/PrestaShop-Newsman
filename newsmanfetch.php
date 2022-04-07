@@ -275,9 +275,15 @@
                 
                 $products = Db::getInstance()->executeS($q);
                 $productsJson = array();     
+		$productsDuplicatedId = array();
 
                 foreach ($products as $prod) {
         
+		    if(in_array($prod["id_product"], $productsDuplicatedId))
+			continue;
+
+       		    $productsDuplicatedId[] = $prod["id_product"];
+
                     $url = Context::getContext()->link->getProductLink($prod["id_product"]);                       
 
                     $link = new Link();
@@ -327,7 +333,7 @@
                     if($price_old == $price)
                     {
                         $price_old = 0;
-                    }
+                    }		    
                     
                     $productsJson[] = array(
                         "id" => $prod["id_product"],
@@ -338,6 +344,12 @@
                         "image_url" => $image_url,
                         "url" => $url
                     );
+
+                    if(!empty($product_id))
+                    {
+			break;
+		    }				
+
                 }
 
                 header('Content-Type: application/json');
