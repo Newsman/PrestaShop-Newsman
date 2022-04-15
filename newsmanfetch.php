@@ -297,10 +297,10 @@
 
                     $_prod = new Product((int)$prod["id_product"]);
                     $price = $_prod->getPrice();			
-                    $price = ceil($price);	
+                    $price = number_format($price, 2);	
                     
                     $price_old = $_prod->getPrice();
-                    $price_old = ceil($price_old);
+                    $price_old = number_format($price_old, 2);
                                 
                     $discount = 0;
                     $reduction_type = null;
