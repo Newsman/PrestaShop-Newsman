@@ -265,17 +265,9 @@
             let newsmanVersion = '" . _PS_VERSION_ . "';
             </script>
             ";
-            if (version_compare(_PS_VERSION_, '1.7', '>=')) {                
-                if(Configuration::get('NEWSMAN_JQUERY') == "on")
-                {                
-                    /*$ga_snippet_head .= "                
-                    <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/jquery-1.12.4.min.js\"></script>
-                    ";*/
-                }
-            }
             
             $ga_snippet_head .= "
-            <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=02022022\"></script>     
+            <script type=\"text/javascript\" src=\"/modules/newsmanremarketing/views/js/NewsmanRemarketingActionLib.js?t=27072022\"></script>     
             ";            
        
             return $ga_snippet_head;   

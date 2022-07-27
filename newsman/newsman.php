@@ -112,17 +112,6 @@ class Newsman extends Module
                 'options' => array('query' => array())
             ),        
             array(
-                'type' => 'checkbox',
-                'label' => $this->l('Use jQuery'),
-                'name' => 'jquery_',
-                'values' => array(
-                    'query' => '',
-                    'id' => 'id',
-                    'name' => 'jquery__',
-                    'value' => '1'
-                )
-            ),
-            array(
                 'type' => 'html',
                 'name' => 'unused',
                 'html_content' => $this->l('              
@@ -363,9 +352,7 @@ class Newsman extends Module
     {	
         require_once dirname(__FILE__) . '/lib/Client.php';
         
-        $client = new Newsman_Client(Configuration::get('NEWSMAN_USER_ID'), Configuration::get('NEWSMAN_API_KEY'));
-
-        $jquery = Tools::getValue('jquery');     
+        $client = new Newsman_Client(Configuration::get('NEWSMAN_USER_ID'), Configuration::get('NEWSMAN_API_KEY')); 
 
         $mapping = Tools::getValue('mapping');    
 
@@ -374,16 +361,16 @@ class Newsman extends Module
         $list = $list["list"];
         $url = Context::getContext()->shop->getBaseURL(true) . "newsmanfetch.php?newsman=products.json&apikey=" . Configuration::get('NEWSMAN_API_KEY');		      
 	
-try{
-        $ret = $client->feeds->setFeedOnList($list, $url, Context::getContext()->shop->getBaseURL(true), "NewsMAN");	
-}
-catch(Exception $e)
-{
+        try{
+            $ret = $client->feeds->setFeedOnList($list, $url, Context::getContext()->shop->getBaseURL(true), "NewsMAN");
+        }
+        catch(Exception $e)
+        {
 
-}
+        }
 
         Configuration::updateValue('NEWSMAN_MAPPING', $mapping);
-        Configuration::updateValue('NEWSMAN_JQUERY', $jquery);
+
         $this->jsonOut(true);
     }
 
