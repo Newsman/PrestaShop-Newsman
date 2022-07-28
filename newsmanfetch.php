@@ -483,24 +483,28 @@
                         $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'newsletter WHERE active=1' . $startLimit;
                 
                         $wp_subscribers = Db::getInstance()->executeS($q);
-            
+
                         $subs = array();
             
-                        foreach ($wp_subscribers as $users) {
-                            $subs[] = array(
-                                "email" => $users["email"],
-                                "firstname" => $users["firstname"],
-                                "lastname" => $users["lastname"]
-                            );
+                        if(!empty($wp_subscribers))
+                        {
+                            die('not empty');
+                            foreach ($wp_subscribers as $users) {
+                                $subs[] = array(
+                                    "email" => $users["email"],
+                                    "firstname" => $users["firstname"],
+                                    "lastname" => $users["lastname"]
+                                );
 
-                            if ((count($subs) % $batchSize) == 0) {
+                                if ((count($subs) % $batchSize) == 0) {
+                                    _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                                }
+                                
+                            }
+
+                            if (count($subs) > 0) {
                                 _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
                             }
-                            
-                        }
-
-                        if (count($subs) > 0) {
-                            _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
                         }
 
                         //emailsubscription
@@ -526,22 +530,25 @@
                         $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'emailsubscription WHERE active=1' . $startLimit;
               
                         $wp_subscribers = Db::getInstance()->executeS($q);
-            
-                        $subs = array();
-            
-                        foreach ($wp_subscribers as $users) {
-                            $subs[] = array(
-                                "email" => $users["email"]
-                            );
 
-                            if ((count($subs) % $batchSize) == 0) {
+                        if(!empty($wp_subscribers))
+                        {
+                            $subs = array();
+                
+                            foreach ($wp_subscribers as $users) {
+                                $subs[] = array(
+                                    "email" => $users["email"]
+                                );
+
+                                if ((count($subs) % $batchSize) == 0) {
+                                    _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                                }
+                                
+                            }
+
+                            if (count($subs) > 0) {
                                 _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
                             }
-                            
-                        }
-
-                        if (count($subs) > 0) {
-                            _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
                         }
 
                         //emailsubscription
