@@ -452,13 +452,14 @@
                     
             $_mapping = array(json_decode($_mapping));
             $list_id = $_mapping[0]->list;
+            $segment_id = !empty($_mapping[0]->segment) ? array($_mapping[0]->segment) : null;
 
             $client = new Newsman_Client($_userId, $apikey);
 
             switch($cron){
                 
                     case "newsletter":
-                    
+                
                     try {
                     
                         if($cronLast)
@@ -473,7 +474,7 @@
 
                             if($start < 1)
                             {
-                                $start = 1;
+                                $start = 0;
                             }                    
 
                             $startLimit = " LIMIT {$limit} OFFSET {$start}";                   
@@ -493,14 +494,57 @@
                             );
 
                             if ((count($subs) % $batchSize) == 0) {
-                                _importData($subs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                                _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
                             }
                             
                         }
 
                         if (count($subs) > 0) {
-                            _importData($subs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                            _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
                         }
+
+                        //emailsubscription
+
+                        if($cronLast)
+                        {
+                            //Get latest
+                            $q = 'SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'emailsubscription WHERE active=1';
+
+                            $data = Db::getInstance()->executeS($q);            
+                            $newsletter = $data[0]["COUNT(*)"];
+
+                            $start = $newsletter - $limit;
+
+                            if($start < 1)
+                            {
+                                $start = 0;
+                            }                    
+
+                            $startLimit = " LIMIT {$limit} OFFSET {$start}";                   
+                        }
+                        
+                        $q = 'SELECT * FROM ' . _DB_PREFIX_ . 'emailsubscription WHERE active=1' . $startLimit;
+              
+                        $wp_subscribers = Db::getInstance()->executeS($q);
+            
+                        $subs = array();
+            
+                        foreach ($wp_subscribers as $users) {
+                            $subs[] = array(
+                                "email" => $users["email"]
+                            );
+
+                            if ((count($subs) % $batchSize) == 0) {
+                                _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                            }
+                            
+                        }
+
+                        if (count($subs) > 0) {
+                            _importData($subs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " newsletter active", "newsletter");
+                        }
+
+                        //emailsubscription
                 
                         $status = array(
                             "status" => "success"
@@ -514,7 +558,7 @@
                     catch(Exception $e)
                     {
                         $status = array(
-                           "status" => _DB_PREFIX_ . 'newsletter table doesn\'t exist'   
+                           "status" => _DB_PREFIX_ . 'newsletter or emailsubscription table doesn\'t exist, successfully imported'   
                         );
                         
                         header('Content-Type: application/json');
@@ -559,13 +603,13 @@
                             );
 
                             if ((count($custs) % $batchSize) == 0) {
-                            _importData($custs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
+                            _importData($custs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
                             }
                             
                         }                
                     
                         if (count($custs) > 0) {
-                            _importData($custs, $list_id, null, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
+                            _importData($custs, $list_id, $segment_id, $client, "CRON Sync prestashop " . _PS_VERSION_ . " customers with newsletter", "customers_newsletter");
                         }                                       
 
                         $status = array(
