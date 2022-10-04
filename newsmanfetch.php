@@ -50,11 +50,13 @@
         $startLimit .= " LIMIT {$limit} OFFSET {$start}";
 
     if (!empty($newsman) && !empty($apikey) || $newsman == "getCart.json") {
-        $apikey = $_GET["apikey"];
+        $apikey = "";
         $currApiKey = $_apikey;
 
         if($newsman != "getCart.json")
         {
+            $apikey = $_GET["apikey"];
+
             if ($apikey != $currApiKey) {
                 http_response_code(403);
                 header('Content-Type: application/json');
