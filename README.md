@@ -57,3 +57,4 @@ Admin -> Module Manager -> Upload a module -> add "newsmanremarketing.zip".
 
 2. Enable and click save
 
+After the plugin is installed, you will also have: feed products, events (product impressions, AddToCart, purchase) automatically implemented.
