@@ -9,13 +9,11 @@ Generate an API KEY in your [Newsman](https://www.newsmanapp.com) account, insta
 ## Prestashop 1.6x
 
 Manual installation:
-Copy the "newsman" directory from this repository to your "modules" shop directory.
-Copy "newsmanfetch.php" to your root directory.
+Copy the "newsmanapp" directory from this repository "src/install" to your "modules" shop directory.
 
 ## Prestashop 1.7x
 
-Admin -> Module Manager -> Upload a module -> add "newsman.zip".
-Copy "newsmanfetch.php" to your root directory.
+Admin -> Module Manager -> Upload a module -> add "newsmanapp.zip" from "src/install".
 
 # Setup
 1. Fill in your Newsman API KEY and User ID and click connect
@@ -39,17 +37,6 @@ For the automatic synchronization to work, you need to have the "native" "Cron t
 - Customers with Newsletter: email, firstname, lastname, gender, birthday, source
 
 # Newsman Remarketing
-
-# Installation
-
-## Prestashop 1.6x
-
-Manual installation:
-Copy the "newsmanremarketing" directory from this repository to your "modules" shop directory.
-
-## Prestashop 1.7x
-
-Admin -> Module Manager -> Upload a module -> add "newsmanremarketing.zip".
 
 ## Setup
 1. Fill in your Newsman Remarketing Tracking ID
