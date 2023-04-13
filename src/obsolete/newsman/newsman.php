@@ -23,7 +23,7 @@
  */
 class Newsman extends Module
 {
-    const API_URL = 'https://ssl.newsman.ro/api/1.2/xmlrpc/';
+    public const API_URL = 'https://ssl.newsman.ro/api/1.2/xmlrpc/';
 
     public function __construct()
     {
@@ -32,14 +32,14 @@ class Newsman extends Module
         $this->version = '1.0.0';
         $this->author = 'NewsmanApp Developers';
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.4', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = ['min' => '1.4', 'max' => _PS_VERSION_];
         $this->module_key = 'bb46dd134d42c2936ece1d3322d3a384';
 
         $this->bootstrap = true;
         parent::__construct();
 
         $this->displayName = $this->l('Newsman');
-        //TODO detailed description (in config.xml too)
+        // TODO detailed description (in config.xml too)
         $this->description = $this->l(
             'The official Newsman module for PrestaShop. Manage your Newsman subscriber lists, map your shop groups to the Newsman segments.'
         );
@@ -66,14 +66,14 @@ class Newsman extends Module
 
         // Module, token and currentIndex
         $helper->module = $this;
-        //$helper->table = $this->table;
+        // $helper->table = $this->table;
         $helper->name_controller = $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
         $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
 
         // Language
         // Get default Language
-        $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
+        $default_lang = (int) Configuration::get('PS_LANG_DEFAULT');
         $helper->default_form_language = $default_lang;
         $helper->allow_employee_form_lang = $default_lang;
 
@@ -87,73 +87,73 @@ class Newsman extends Module
         $helper->fields_value['api_key'] = Configuration::get('NEWSMAN_API_KEY');
         $helper->fields_value['user_id'] = Configuration::get('NEWSMAN_USER_ID');
 
-        if(Configuration::get('NEWSMAN_JQUERY') == "on")
-        {
+        if (Configuration::get('NEWSMAN_JQUERY') == 'on') {
             $helper->fields_value['jquery__'] = true;
-        }
-        else{
+        } else {
             $helper->fields_value['jquery__'] = false;
         }
 
         $helper->fields_value['cron_url'] = $this->context->shop->getBaseURL() . 'modules/newsman/cron_task.php';
         $helper->fields_value['cron_option'] = Configuration::get('NEWSMAN_CRON');
 
-        $mappingSection = array(
-            array(
+        $mappingSection = [
+            [
                 'type' => 'select',
                 'label' => 'Newsman list',
                 'name' => 'sel_list',
-                'options' => array('query' => array())
-            ),    
-            array(
+                'options' => ['query' => []],
+            ],
+            [
                 'type' => 'select',
                 'label' => 'Newsman segment',
                 'name' => 'sel_segment',
-                'options' => array('query' => array())
-            ),        
-            array(
+                'options' => ['query' => []],
+            ],
+            [
                 'type' => 'html',
                 'name' => 'unused',
                 'html_content' => $this->l('              
                 SYNC via CRON
-                ')
-            ),
-            array(
+                '),
+            ],
+            [
                 'type' => 'html',
                 'name' => 'unused',
                 'html_content' => $this->l('              
                 {{limit}} = Sync with newsman from latest number of records (ex: 2000)
-                ')
-            ),
-            array(
+                '),
+            ],
+            [
                 'type' => 'html',
                 'name' => 'unused',
                 'html_content' => $this->l('              
                 CRON Sync newsletter subscribers:
-                ')
-            ),
-            array(
+                '),
+            ],
+            [
                 'type' => 'html',
                 'name' => 'unused',
                 'html_content' => $this->l(
-                 $this->context->shop->getBaseURL() . 'newsmanfetch.php?newsman=cron.json&cron=newsletter&apikey=' . $helper->fields_value['api_key'] . '&start=1&limit=2000&cronlast=true
-                ')
-            ),
-            array(
+                    $this->context->shop->getBaseURL() . 'newsmanfetch.php?newsman=cron.json&cron=newsletter&apikey=' . $helper->fields_value['api_key'] . '&start=1&limit=2000&cronlast=true
+                '
+                ),
+            ],
+            [
                 'type' => 'html',
                 'name' => 'unused',
                 'html_content' => $this->l('              
                 CRON Sync customers with newsletter:
-                ')
-            ),
-            array(
+                '),
+            ],
+            [
                 'type' => 'html',
                 'name' => 'unused',
                 'html_content' => $this->l(
                     $this->context->shop->getBaseURL() . 'newsmanfetch.php?newsman=cron.json&cron=customers_newsletter&apikey=' . $helper->fields_value['api_key'] . '&start=1&limit=2000&cronlast=true
-                ')
-            )
-        );
+                '
+                ),
+            ],
+        ];
 
         /*
         //check for newsletter module
@@ -182,56 +182,56 @@ class Newsman extends Module
         */
 
         $out = '<div id="newsman-msg"></div>';
-        $out .= $helper->generateForm(array(
-            array('form' => array(
-                'legend' => array(
+        $out .= $helper->generateForm([
+            ['form' => [
+                'legend' => [
                     'title' => $this->l('API Settings'),
-                    'icon' => 'icon-cogs'
-                ),
-                'input' => array(
-                    array(
+                    'icon' => 'icon-cogs',
+                ],
+                'input' => [
+                    [
                         'type' => 'text',
                         'label' => $this->l('API KEY'),
                         'name' => 'api_key',
                         'size' => 40,
-                        'required' => true
-                    ),
-                    array(
+                        'required' => true,
+                    ],
+                    [
                         'type' => 'text',
                         'label' => $this->l('User ID'),
                         'name' => 'user_id',
                         'size' => 40,
-                        'required' => true
-                    )
-                ),
-                'buttons' => array(
-                    array(
+                        'required' => true,
+                    ],
+                ],
+                'buttons' => [
+                    [
                         'title' => 'Connect',
                         'class' => 'pull-right',
                         'icon' => $connected ? 'process-icon-ok' : 'process-icon-next',
-                        'js' => 'connectAPI(this)'
-                    )
-                )
-            )),
-            array('form' => array(
-                'legend' => array(
-                    'title' => $this->l('Synchronization mapping')
-                ),
+                        'js' => 'connectAPI(this)',
+                    ],
+                ],
+            ]],
+            ['form' => [
+                'legend' => [
+                    'title' => $this->l('Synchronization mapping'),
+                ],
                 'input' => $mappingSection,
-                'buttons' => array(
-                    array(
+                'buttons' => [
+                    [
                         'title' => $this->l('Save mapping'),
                         'class' => 'pull-right',
                         'icon' => 'process-icon-save',
-                        'js' => 'saveMapping(this)'
-                    ),
-                    array(
+                        'js' => 'saveMapping(this)',
+                    ],
+                    [
                         'title' => $this->l('Refresh segments'),
                         'icon' => 'process-icon-refresh',
-                        'js' => 'connectAPI(this)'
-                    )
-                )
-            )),
+                        'js' => 'connectAPI(this)',
+                    ],
+                ],
+            ]],
 
             /*
             array('form' => array(
@@ -270,31 +270,30 @@ class Newsman extends Module
                 )
             ))
            */
+        ]);
 
-        ));
-
-        //the script
+        // the script
         $this->context->controller->addJS($this->_path . 'views/js/newsman.js');
 
         $ajaxURL = $this->context->link->getAdminLink('AdminModules') . '&configure=' . $this->name;
 
-        $mapExtra = array(
-            //array('', $this->l('Do not import')),
-            //array('none', $this->l('Import, no segment'))
-        );
+        $mapExtra = [
+            // array('', $this->l('Do not import')),
+            // array('none', $this->l('Import, no segment'))
+        ];
         $data = Configuration::get('NEWSMAN_DATA');
-        $mapping = Configuration::get('NEWSMAN_MAPPING');        
+        $mapping = Configuration::get('NEWSMAN_MAPPING');
 
-        $out .= '<script>var newsman=' . Tools::jsonEncode(array(
+        $out .= '<script>var newsman=' . Tools::jsonEncode([
                 'data' => $data ? Tools::jsonDecode($data) : false,
                 'mapExtra' => $mapExtra,
                 'mapping' => $mapping ? Tools::jsonDecode($mapping) : false,
                 'ajaxURL' => $ajaxURL,
-                'strings' => array(
+                'strings' => [
                     'needConnect' => $this->l('You need to connect to Newsman first!'),
-                    'needMapping' => $this->l('You need to save mapping first!')
-                )
-            )) . '</script>';
+                    'needMapping' => $this->l('You need to save mapping first!'),
+                ],
+            ]) . '</script>';
 
         return $out;
     }
@@ -307,7 +306,7 @@ class Newsman extends Module
 
     public function ajaxProcessConnect()
     {
-        $output = array();
+        $output = [];
         Configuration::updateValue('NEWSMAN_CONNECTED', 0);
         Configuration::deleteByName('NEWSMAN_DATA');
         $api_key = Tools::getValue('api_key');
@@ -328,19 +327,19 @@ class Newsman extends Module
                 Configuration::updateValue('NEWSMAN_CONNECTED', 1);
                 $output['msg'][] = $this->displayConfirmation($this->l('Connected. Please choose the synchronization details below.'));
                 $output['ok'] = true;
-                //get segments for the first list
+                // get segments for the first list
                 $list_id = $output['lists'][0]['list_id'];
                 $client->query('segment.all', $list_id);
                 $output['segments'] = $client->getResponse();
-                //save lists and segments
+                // save lists and segments
                 Configuration::updateValue(
                     'NEWSMAN_DATA',
-                    Tools::jsonEncode(array('lists' => $output['lists'], 'segments' => $output['segments']))
+                    Tools::jsonEncode(['lists' => $output['lists'], 'segments' => $output['segments']])
                 );
                 $output['saved'] = 'saved';
             } else {
                 $output['msg'][] = $this->displayError(
-                    $this->l('Error connecting. Please check your API KEY and user ID.') . "<br>" .
+                    $this->l('Error connecting. Please check your API KEY and user ID.') . '<br>' .
                     $client->getErrorMessage()
                 );
             }
@@ -349,24 +348,21 @@ class Newsman extends Module
     }
 
     public function ajaxProcessSaveMapping()
-    {	
+    {
         require_once dirname(__FILE__) . '/lib/Client.php';
-        
-        $client = new Newsman_Client(Configuration::get('NEWSMAN_USER_ID'), Configuration::get('NEWSMAN_API_KEY')); 
 
-        $mapping = Tools::getValue('mapping');    
+        $client = new Newsman_Client(Configuration::get('NEWSMAN_USER_ID'), Configuration::get('NEWSMAN_API_KEY'));
 
-        //Generate feed        
-        $list = (array)json_decode($mapping);
-        $list = $list["list"];
-        $url = Context::getContext()->shop->getBaseURL(true) . "newsmanfetch.php?newsman=products.json&apikey=" . Configuration::get('NEWSMAN_API_KEY');		      
-	
-        try{
-            $ret = $client->feeds->setFeedOnList($list, $url, Context::getContext()->shop->getBaseURL(true), "NewsMAN");
-        }
-        catch(Exception $e)
-        {
+        $mapping = Tools::getValue('mapping');
 
+        // Generate feed
+        $list = (array) json_decode($mapping);
+        $list = $list['list'];
+        $url = Context::getContext()->shop->getBaseURL(true) . 'newsmanfetch.php?newsman=products.json&apikey=' . Configuration::get('NEWSMAN_API_KEY');
+
+        try {
+            $ret = $client->feeds->setFeedOnList($list, $url, Context::getContext()->shop->getBaseURL(true), 'NewsMAN');
+        } catch (Exception $e) {
         }
 
         Configuration::updateValue('NEWSMAN_MAPPING', $mapping);
@@ -377,6 +373,7 @@ class Newsman extends Module
     private function getClient($user_id, $api_key)
     {
         require_once dirname(__FILE__) . '/lib/XMLRPC.php';
+
         return new XMLRPC_Client(self::API_URL . "$user_id/$api_key");
     }
 
@@ -385,28 +382,27 @@ class Newsman extends Module
         $x = $this->doSynchronize();
 
         if ($x == 0) {
-            $this->jsonOut(array('msg' =>
-                $this->displayError($this->l('Make sure you have a SEGMENT created in Newsman, after that make sure you SAVE MAPPING with your SEGMENT'))));
+            $this->jsonOut(['msg' => $this->displayError($this->l('Make sure you have a SEGMENT created in Newsman, after that make sure you SAVE MAPPING with your SEGMENT'))]);
+
             return;
         } else {
-            $this->jsonOut(array('msg' =>
-                $this->displayConfirmation($this->l('Users uploaded and scheduled for import. It might take a few minutes until they show up in your Newsman lists.'))));
+            $this->jsonOut(['msg' => $this->displayConfirmation($this->l('Users uploaded and scheduled for import. It might take a few minutes until they show up in your Newsman lists.'))]);
         }
     }
 
     public function ajaxProcessListChanged()
-    {      
+    {
         $list_id = Tools::getValue('list_id');
         $client = $this->getClient(Configuration::get('NEWSMAN_USER_ID'), Configuration::get('NEWSMAN_API_KEY'));
         $client->query('segment.all', $list_id);
-        $output = array();
+        $output = [];
         $output['segments'] = $client->getResponse();
 
         $client->query('list.all');
         $output['lists'] = $client->getResponse();
         Configuration::updateValue(
             'NEWSMAN_DATA',
-            Tools::jsonEncode(array('lists' => $output['lists'], 'segments' => $output['segments']))
+            Tools::jsonEncode(['lists' => $output['lists'], 'segments' => $output['segments']])
         );
 
         $this->jsonOut($output);
@@ -416,7 +412,7 @@ class Newsman extends Module
     {
         $option = Tools::getValue('option');
         if (!$option || Module::isInstalled('cronjobs') && function_exists('curl_init')) {
-            $this->jsonOut(array('msg' => $this->displayConfirmation($this->l('Automatic synchronization option saved.'))));
+            $this->jsonOut(['msg' => $this->displayConfirmation($this->l('Automatic synchronization option saved.'))]);
             Configuration::updateValue('NEWSMAN_CRON', $option);
             if ($option) {
                 $this->registerHook('actionCronJob');
@@ -427,15 +423,15 @@ class Newsman extends Module
             $this->unregisterHook('actionCronJob');
             Configuration::updateValue('NEWSMAN_CRON', '');
             $this->jsonOut(
-                array(
+                [
                     'fail' => true,
                     'msg' => $this->displayError(
                         $this->l(
                             'To enable automatic synchronization you need to install ' .
                             'and configure "Cron tasks manager" module from PrestaShop.'
                         )
-                    )
-                )
+                    ),
+                ]
             );
         }
     }
@@ -443,12 +439,13 @@ class Newsman extends Module
     public function getCronFrequency()
     {
         $option = Configuration::get('NEWSMAN_CRON');
-        return array(
+
+        return [
             'hour' => '1',
             'day' => '-1',
             'month' => '-1',
-            'day_of_week' => $option == 'd' ? '-1' : '1'
-        );
+            'day_of_week' => $option == 'd' ? '-1' : '1',
+        ];
     }
 
     public function actionCronJob()
@@ -472,55 +469,55 @@ class Newsman extends Module
 
         $value = $mapping['map_newsletter'];
         if (Module::isInstalled('blocknewsletter')) {
-            //search on blocknewsletter module
+            // search on blocknewsletter module
             $dbq = new DbQuery();
             $q = $dbq->select('`email`')
                 ->from('newsletter')
                 ->where('`active` = 1');
             $ret = Db::getInstance()->executeS($q->build());
             $count += count($ret);
-            $header = "email,prestashop_source";
-            $lines = array();
+            $header = 'email,prestashop_source';
+            $lines = [];
             foreach ($ret as $row) {
                 $lines[] = "{$row['email']},newsletter";
             }
-            //upload from newsletter
+            // upload from newsletter
             $segment_id = Tools::substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? Tools::substr($mapping['map_newsletter'], 4) : null;
             if ($segment_id != null) {
-                array($segment_id);
+                [$segment_id];
             } else {
-                $segment_id = array();
+                $segment_id = [];
             }
 
             $this->exportCSV($client, $list_id, $segment_id, $header, $lines);
         }
 
-        if (Module::isInstalled('ps_emailsubscription') || Module::isInstalled("emailsubscription")) {
-            //search on emailsubscription module
+        if (Module::isInstalled('ps_emailsubscription') || Module::isInstalled('emailsubscription')) {
+            // search on emailsubscription module
             $dbq = new DbQuery();
             $q = $dbq->select('`email`, `newsletter_date_add`')
                 ->from('emailsubscription')
                 ->where('`active` = 1');
             $ret = Db::getInstance()->executeS($q->build());
             $count += count($ret);
-            $header = "email, newsletter_date_add, source";
-            $lines = array();
+            $header = 'email, newsletter_date_add, source';
+            $lines = [];
             foreach ($ret as $row) {
-                $lines[] = "{$row['email']}, {$row["newsletter_date_add"]}, prestashop 1.6-1.7 plugin newsletter active";
+                $lines[] = "{$row['email']}, {$row['newsletter_date_add']}, prestashop 1.6-1.7 plugin newsletter active";
             }
-            //upload from newsletter
+            // upload from newsletter
             $segment_id = Tools::substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? Tools::substr($mapping['map_newsletter'], 4) : null;
             if ($segment_id != null) {
-                array($segment_id);
+                [$segment_id];
             } else {
-                $segment_id = array();
+                $segment_id = [];
             }
 
             $this->exportCSV($client, $list_id, $segment_id, $header, $lines);
         }
 
         if ($value) {
-            //search on customer
+            // search on customer
             $dbq = new DbQuery();
             $q = $dbq->select('`email`, `firstname`, `lastname`, `id_gender`, `birthday`')
                 ->from('customer')
@@ -529,16 +526,15 @@ class Newsman extends Module
 
             $count += count($ret);
 
-            $header = "email,firstname,lastname,gender,birthday,source";
-            $lines = array();
+            $header = 'email,firstname,lastname,gender,birthday,source';
+            $lines = [];
             foreach ($ret as $row) {
+                $gender = ($row['gender'] == '1') ? 'Barbat' : 'Femeie';
 
-                $gender = ($row["gender"] == "1") ? "Barbat" : "Femeie";
-
-                $lines[] = "{$row['email']},{$row['firstname']},{$row['lastname']}, {$gender}, {$row["birthday"]}, prestashop 1.6-1.7 plugin customer with newsletter";
+                $lines[] = "{$row['email']},{$row['firstname']},{$row['lastname']}, {$gender}, {$row['birthday']}, prestashop 1.6-1.7 plugin customer with newsletter";
             }
             $segment_id = Tools::substr($mapping['map_newsletter'], 0, 4) == 'seg_' ? Tools::substr($mapping['map_newsletter'], 4) : null;
-            $this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
+            $this->exportCSV($client, $list_id, [$segment_id], $header, $lines);
         }
 
         foreach ($mapping as $key => $value) {
@@ -548,7 +544,7 @@ class Newsman extends Module
             if (Tools::substr($key, 0, 10) !== 'map_group_') {
                 continue;
             }
-            $id_group = (int)(Tools::substr($key, 10));
+            $id_group = (int) Tools::substr($key, 10);
             $dbq = new DbQuery();
             $q = $dbq->select('c.email, c.firstname, c.lastname, c.id_gender, c.birthday')
                 ->from('customer', 'c')
@@ -561,24 +557,23 @@ class Newsman extends Module
             if (count($ret)) {
                 $count += count($ret);
                 $cols = array_keys($ret[0]);
-                //rename id_gender
-                $cols[3] = "gender";
+                // rename id_gender
+                $cols[3] = 'gender';
 
-                $header = join(',', $cols) . ",prestashop 1.6-1.7 plugin customers with newsletter by prestashop groups";
+                $header = join(',', $cols) . ',prestashop 1.6-1.7 plugin customers with newsletter by prestashop groups';
 
-                //rename gender again to be filtered
-                $cols[3] = "id_gender";
+                // rename gender again to be filtered
+                $cols[3] = 'id_gender';
 
-                $lines = array();
+                $lines = [];
                 foreach ($ret as $row) {
                     $line = '';
                     foreach ($cols as $col) {
-
-                        if ($col == "id_gender") {
-                            if ($row[$col] == "1") {
-                                $row[$col] = "Barbat";
-                            } else if ($row[$col] == "2") {
-                                $row[$col] = "Femeie";
+                        if ($col == 'id_gender') {
+                            if ($row[$col] == '1') {
+                                $row[$col] = 'Barbat';
+                            } elseif ($row[$col] == '2') {
+                                $row[$col] = 'Femeie';
                             }
                         }
 
@@ -587,18 +582,19 @@ class Newsman extends Module
                     $lines[] = "$line,group_{$id_group}";
                 }
 
-                //upload group
+                // upload group
                 $segment_id = Tools::substr($value, 0, 4) == 'seg_' ? Tools::substr($value, 4) : null;
 
-                $this->exportCSV($client, $list_id, array($segment_id), $header, $lines);
+                $this->exportCSV($client, $list_id, [$segment_id], $header, $lines);
             }
         }
+
         return $count;
     }
 
     private function exportCSV($client, $list_id, $segments, $header, $lines)
     {
-        //clear segments
+        // clear segments
         /*if (!empty($segments))
         {
             $ret = $client->query('segment.clear', $segments[0]);
@@ -608,7 +604,7 @@ class Newsman extends Module
         for ($i = 0; $i < count($lines); $i += $max) {
             $a = array_slice($lines, $i, $max);
             array_unshift($a, $header);
-            //$ret = $client->query('import.schedulecsv', $list_id, $segments, join("\n", $a), 600);
+            // $ret = $client->query('import.schedulecsv', $list_id, $segments, join("\n", $a), 600);
             $ret = $client->query('import.csv', $list_id, $segments, join("\n", $a));
         }
     }

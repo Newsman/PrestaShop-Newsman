@@ -1,8 +1,5 @@
 <?php
 /**
- *
- *
- *
  * IXR - The Incutio XML-RPC Library
  *
  * Copyright (c) 2010, Incutio Ltd.
@@ -38,14 +35,12 @@
  * Original author: Simon Willison
  * Modified by Victor Dramba 2015
  */
-
-
 class XMLRPC_Value
 {
-    var $data;
-    var $type;
+    public $data;
+    public $type;
 
-    function XMLRPC_Value($data, $type = false)
+    public function XMLRPC_Value($data, $type = false)
     {
         $this->data = $data;
         if (!$type) {
@@ -59,13 +54,13 @@ class XMLRPC_Value
             }
         }
         if ($type == 'array') {
-            for ($i = 0, $j = count($this->data); $i < $j; $i++) {
+            for ($i = 0, $j = count($this->data); $i < $j; ++$i) {
                 $this->data[$i] = new XMLRPC_Value($this->data[$i]);
             }
         }
     }
 
-    function calculateType()
+    public function calculateType()
     {
         if ($this->data === true || $this->data === false) {
             return 'boolean';
@@ -88,6 +83,7 @@ class XMLRPC_Value
         // If it is a normal PHP object convert it in to a struct
         if (is_object($this->data)) {
             $this->data = get_object_vars($this->data);
+
             return 'struct';
         }
         if (!is_array($this->data)) {
@@ -102,7 +98,7 @@ class XMLRPC_Value
         }
     }
 
-    function getXml()
+    public function getXml()
     {
         // Return XML for this value
         switch ($this->type) {
@@ -124,6 +120,7 @@ class XMLRPC_Value
                     $return .= '  <value>' . $item->getXml() . "</value>\n";
                 }
                 $return .= '</data></array>';
+
                 return $return;
                 break;
             case 'struct':
@@ -133,6 +130,7 @@ class XMLRPC_Value
                     $return .= $value->getXml() . "</value></member>\n";
                 }
                 $return .= '</struct>';
+
                 return $return;
                 break;
             case 'date':
@@ -140,6 +138,7 @@ class XMLRPC_Value
                 return $this->data->getXml();
                 break;
         }
+
         return false;
     }
 
@@ -147,17 +146,19 @@ class XMLRPC_Value
      * Checks whether or not the supplied array is a struct or not
      *
      * @param unknown_type $array
-     * @return boolean
+     *
+     * @return bool
      */
-    function isStruct($array)
+    public function isStruct($array)
     {
         $expected = 0;
         foreach ($array as $key => $value) {
-            if ((string)$key != (string)$expected) {
+            if ((string) $key != (string) $expected) {
                 return true;
             }
-            $expected++;
+            ++$expected;
         }
+
         return false;
     }
 }
@@ -165,40 +166,38 @@ class XMLRPC_Value
 /**
  * XMLRPC_MESSAGE
  *
- * @package IXR
  * @since 1.5
- *
  */
 class XMLRPC_Message
 {
-    var $message;
-    var $messageType;  // methodCall / methodResponse / fault
-    var $faultCode;
-    var $faultString;
-    var $methodName;
-    var $params;
+    public $message;
+    public $messageType;  // methodCall / methodResponse / fault
+    public $faultCode;
+    public $faultString;
+    public $methodName;
+    public $params;
 
     // Current variable stacks
-    var $_arraystructs = array();   // The stack used to keep track of the current array/struct
-    var $_arraystructstypes = array(); // Stack keeping track of if things are structs or array
-    var $_currentStructName = array();  // A stack as well
-    var $_param;
-    var $_value;
-    var $_currentTag;
-    var $_currentTagContents;
+    public $_arraystructs = [];   // The stack used to keep track of the current array/struct
+    public $_arraystructstypes = []; // Stack keeping track of if things are structs or array
+    public $_currentStructName = [];  // A stack as well
+    public $_param;
+    public $_value;
+    public $_currentTag;
+    public $_currentTagContents;
     // The XML parser
-    var $_parser;
+    public $_parser;
 
-    function XMLRPC_Message($message)
+    public function XMLRPC_Message($message)
     {
-        $this->message =& $message;
+        $this->message = &$message;
     }
 
-    function parse()
+    public function parse()
     {
         // first remove the XML declaration
         // merged from WP #10698 - this method avoids the RAM usage of preg_replace on very large messages
-        $header = preg_replace('/<\?xml.*?\?' . '>/', '', substr($this->message, 0, 100), 1);
+        $header = preg_replace('/<\?xml.*?\?>/', '', substr($this->message, 0, 100), 1);
         $this->message = substr_replace($this->message, $header, 0, 100);
         if (trim($this->message) == '') {
             return false;
@@ -211,7 +210,7 @@ class XMLRPC_Message
         xml_set_element_handler($this->_parser, 'tag_open', 'tag_close');
         xml_set_character_data_handler($this->_parser, 'cdata');
         $chunk_size = 262144; // 256Kb, parse in chunks to avoid the RAM usage on very large messages
-        do {
+        while (true) {
             if (strlen($this->message) <= $chunk_size) {
                 $final = true;
             }
@@ -223,7 +222,7 @@ class XMLRPC_Message
             if ($final) {
                 break;
             }
-        } while (true);
+        }
         xml_parser_free($this->_parser);
 
         // Grab the error messages, if any
@@ -231,10 +230,11 @@ class XMLRPC_Message
             $this->faultCode = $this->params[0]['faultCode'];
             $this->faultString = $this->params[0]['faultString'];
         }
+
         return true;
     }
 
-    function tag_open($parser, $tag, $attr)
+    public function tag_open($parser, $tag, $attr)
     {
         $this->_currentTagContents = '';
         $this->currentTag = $tag;
@@ -244,38 +244,38 @@ class XMLRPC_Message
             case 'fault':
                 $this->messageType = $tag;
                 break;
-            /* Deal with stacks of arrays and structs */
+                /* Deal with stacks of arrays and structs */
             case 'data':    // data is to all intents and puposes more interesting than array
                 $this->_arraystructstypes[] = 'array';
-                $this->_arraystructs[] = array();
+                $this->_arraystructs[] = [];
                 break;
             case 'struct':
                 $this->_arraystructstypes[] = 'struct';
-                $this->_arraystructs[] = array();
+                $this->_arraystructs[] = [];
                 break;
         }
     }
 
-    function cdata($parser, $cdata)
+    public function cdata($parser, $cdata)
     {
         $this->_currentTagContents .= $cdata;
     }
 
-    function tag_close($parser, $tag)
+    public function tag_close($parser, $tag)
     {
         $valueFlag = false;
         switch ($tag) {
             case 'int':
             case 'i4':
-                $value = (int)trim($this->_currentTagContents);
+                $value = (int) trim($this->_currentTagContents);
                 $valueFlag = true;
                 break;
             case 'double':
-                $value = (double)trim($this->_currentTagContents);
+                $value = (float) trim($this->_currentTagContents);
                 $valueFlag = true;
                 break;
             case 'string':
-                $value = (string)trim($this->_currentTagContents);
+                $value = (string) trim($this->_currentTagContents);
                 $valueFlag = true;
                 break;
             case 'dateTime.iso8601':
@@ -285,19 +285,19 @@ class XMLRPC_Message
             case 'value':
                 // "If no type is indicated, the type is string."
                 if (trim($this->_currentTagContents) != '') {
-                    $value = (string)$this->_currentTagContents;
+                    $value = (string) $this->_currentTagContents;
                     $valueFlag = true;
                 }
                 break;
             case 'boolean':
-                $value = (boolean)trim($this->_currentTagContents);
+                $value = (bool) trim($this->_currentTagContents);
                 $valueFlag = true;
                 break;
             case 'base64':
                 $value = base64_decode($this->_currentTagContents);
                 $valueFlag = true;
                 break;
-            /* Deal with stacks of arrays and structs */
+                /* Deal with stacks of arrays and structs */
             case 'data':
             case 'struct':
                 $value = array_pop($this->_arraystructs);
@@ -337,16 +337,15 @@ class XMLRPC_Message
 /**
  * XMLRPC_Request
  *
- * @package IXR
  * @since 1.5
  */
 class XMLRPC_Request
 {
-    var $method;
-    var $args;
-    var $xml;
+    public $method;
+    public $args;
+    public $xml;
 
-    function XMLRPC_Request($method, $args)
+    public function XMLRPC_Request($method, $args)
     {
         $this->method = $method;
         $this->args = $args;
@@ -366,12 +365,12 @@ EOD;
         $this->xml .= '</params></methodCall>';
     }
 
-    function getLength()
+    public function getLength()
     {
         return strlen($this->xml);
     }
 
-    function getXml()
+    public function getXml()
     {
         return $this->xml;
     }
@@ -384,27 +383,27 @@ class XMLRPC_LibraryMissingException extends Exception
 /**
  * XMLRPC_Client
  *
- * @package IXR
  * @since 1.5
- *
  */
 class XMLRPC_Client
 {
-    var $url;
-    var $response;
-    var $message = false;
-    var $debug = false;
-    var $timeout;
+    public $url;
+    public $response;
+    public $message = false;
+    public $debug = false;
+    public $timeout;
 
     // Storage place for an error message
-    var $error = false;
+    public $error = false;
 
-    function XMLRPC_Client($url, $timeout = 15)
+    public function XMLRPC_Client($url, $timeout = 15)
     {
-        if (!$this->httpsWrapperEnabled() && !function_exists('curl_init'))
+        if (!$this->httpsWrapperEnabled() && !function_exists('curl_init')) {
             throw new XMLRPC_LibraryMissingException('You need either php_curl extension or php_openssl and allow_url_fopen=on');
-        if (substr($url, 0, 8) !== 'https://')
+        }
+        if (substr($url, 0, 8) !== 'https://') {
             throw new Exception('The URL must begin with https://');
+        }
 
         $this->url = $url;
         $this->timeout = $timeout;
@@ -415,7 +414,7 @@ class XMLRPC_Client
         return in_array('https', stream_get_wrappers()) && extension_loaded('openssl');
     }
 
-    function query()
+    public function query()
     {
         $args = func_get_args();
         $method = array_shift($args);
@@ -424,7 +423,7 @@ class XMLRPC_Client
         $xml = $request->getXml();
 
         $header = "Content-type: text/xml\r\nContent-length: $length\r\n";
-        //choose transport
+        // choose transport
         /*if ($this->httpsWrapperEnabled()) {
             $opts = array(
                 'http' => array(
@@ -448,23 +447,25 @@ class XMLRPC_Client
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_URL, $this->url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: text/xml'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-type: text/xml']);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
         $contents = curl_exec($ch);
         curl_close($ch);
-        //}
+        // }
 
         // Now parse what we've got back
         $this->message = new XMLRPC_Message($contents);
         if (!$this->message->parse()) {
             // XML error
             $this->error = new XMLRPC_Error(-32700, 'parse error. not well formed');
+
             return false;
         }
 
         // Is the message a fault?
         if ($this->message->messageType == 'fault') {
             $this->error = new XMLRPC_Error($this->message->faultCode, $this->message->faultString);
+
             return $this->error;
         }
 
@@ -472,47 +473,45 @@ class XMLRPC_Client
         return true;
     }
 
-    function getResponse()
+    public function getResponse()
     {
         // methodResponses can only have one param - return that
         return $this->message->params[0];
     }
 
-    function isError()
+    public function isError()
     {
-        return (is_object($this->error));
+        return is_object($this->error);
     }
 
-    function getErrorCode()
+    public function getErrorCode()
     {
         return $this->error->code;
     }
 
-    function getErrorMessage()
+    public function getErrorMessage()
     {
         return $this->error->message;
     }
 }
 
-
 /**
  * XMLRPC_Error
  *
- * @package IXR
  * @since 1.5
  */
 class XMLRPC_Error
 {
-    var $code;
-    var $message;
+    public $code;
+    public $message;
 
-    function XMLRPC_Error($code, $message)
+    public function XMLRPC_Error($code, $message)
     {
         $this->code = $code;
         $this->message = htmlspecialchars($message);
     }
 
-    function getXml()
+    public function getXml()
     {
         $xml = <<<EOD
 <methodResponse>
@@ -533,6 +532,7 @@ class XMLRPC_Error
 </methodResponse>
 
 EOD;
+
         return $xml;
     }
 }
@@ -540,20 +540,19 @@ EOD;
 /**
  * XMLRPC_Date
  *
- * @package IXR
  * @since 1.5
  */
 class XMLRPC_Date
 {
-    var $year;
-    var $month;
-    var $day;
-    var $hour;
-    var $minute;
-    var $second;
-    var $timezone;
+    public $year;
+    public $month;
+    public $day;
+    public $hour;
+    public $minute;
+    public $second;
+    public $timezone;
 
-    function XMLRPC_Date($time)
+    public function XMLRPC_Date($time)
     {
         // $time can be a PHP timestamp or an ISO one
         if (is_numeric($time)) {
@@ -563,7 +562,7 @@ class XMLRPC_Date
         }
     }
 
-    function parseTimestamp($timestamp)
+    public function parseTimestamp($timestamp)
     {
         $this->year = date('Y', $timestamp);
         $this->month = date('m', $timestamp);
@@ -574,7 +573,7 @@ class XMLRPC_Date
         $this->timezone = '';
     }
 
-    function parseIso($iso)
+    public function parseIso($iso)
     {
         $this->year = substr($iso, 0, 4);
         $this->month = substr($iso, 4, 2);
@@ -585,17 +584,17 @@ class XMLRPC_Date
         $this->timezone = substr($iso, 17);
     }
 
-    function getIso()
+    public function getIso()
     {
         return $this->year . $this->month . $this->day . 'T' . $this->hour . ':' . $this->minute . ':' . $this->second . $this->timezone;
     }
 
-    function getXml()
+    public function getXml()
     {
         return '<dateTime.iso8601>' . $this->getIso() . '</dateTime.iso8601>';
     }
 
-    function getTimestamp()
+    public function getTimestamp()
     {
         return mktime($this->hour, $this->minute, $this->second, $this->month, $this->day, $this->year);
     }
@@ -604,21 +603,19 @@ class XMLRPC_Date
 /**
  * XMLRPC_Base64
  *
- * @package IXR
  * @since 1.5
  */
 class XMLRPC_Base64
 {
-    var $data;
+    public $data;
 
-    function XMLRPC_Base64($data)
+    public function XMLRPC_Base64($data)
     {
         $this->data = $data;
     }
 
-    function getXml()
+    public function getXml()
     {
         return '<base64>' . base64_encode($this->data) . '</base64>';
     }
 }
-

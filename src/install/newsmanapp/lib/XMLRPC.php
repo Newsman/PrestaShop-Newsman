@@ -33,6 +33,7 @@
  * This library is based on Incutio XMLRPC library version 1.7.4 7th September 2010
  * It retains only the client code with some changes
  * Modified by Victor Dramba 2015
+ *
  *  @author    Simon Willison
  *  @copyright Simon Willison
  *  @license   http://www.apache.org/licenses/LICENSE-2.0
@@ -85,6 +86,7 @@ class XMLRPC_Value
         // If it is a normal PHP object convert it in to a struct
         if (is_object($this->data)) {
             $this->data = get_object_vars($this->data);
+
             return 'struct';
         }
         if (!is_array($this->data)) {
@@ -121,6 +123,7 @@ class XMLRPC_Value
                     $return .= '  <value>' . $item->getXml() . '</value>\n';
                 }
                 $return .= '</data></array>';
+
                 return $return;
                 break;
             case 'struct':
@@ -130,6 +133,7 @@ class XMLRPC_Value
                     $return .= $value->getXml() . '</value></member>\n';
                 }
                 $return .= '</struct>';
+
                 return $return;
                 break;
             case 'date':
@@ -137,6 +141,7 @@ class XMLRPC_Value
                 return $this->data->getXml();
                 break;
         }
+
         return false;
     }
 
@@ -144,6 +149,7 @@ class XMLRPC_Value
      * Checks whether or not the supplied array is a struct or not
      *
      * @param unknown_type $array
+     *
      * @return bool
      */
     public function isStruct($array)
@@ -155,6 +161,7 @@ class XMLRPC_Value
             }
             ++$expected;
         }
+
         return false;
     }
 }
@@ -460,12 +467,14 @@ class XMLRPC_Client
         if (!$this->message->parse()) {
             // XML error
             $this->error = new XMLRPC_Error(-32700, 'parse error. not well formed');
+
             return false;
         }
 
         // Is the message a fault?
         if ($this->message->messageType == 'fault') {
             $this->error = new XMLRPC_Error($this->message->faultCode, $this->message->faultString);
+
             return $this->error;
         }
 
@@ -530,6 +539,7 @@ class XMLRPC_Error
 </methodResponse>
 
 EOD;
+
         return $xml;
     }
 }

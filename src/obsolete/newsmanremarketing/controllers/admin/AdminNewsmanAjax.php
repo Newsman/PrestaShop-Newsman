@@ -22,19 +22,18 @@
  */
 class AdminNewsmanAjaxController extends ModuleAdminController
 {
-	public $ssl = true;
+    public $ssl = true;
 
-	public function init()
-	{
-		$order = new Order((int)Tools::getValue('orderid'));
-		$context = Context::getContext();
-		if (Validate::isLoadedObject($order) && (isset($context->employee->id) && $context->employee->id))
-		{
-			/*
-			Db::getInstance()->execute('UPDATE `'._DB_PREFIX_.'newsmanremarketing` SET sent = 1, date_add = NOW() WHERE id_order = '.(int)Tools::getValue('orderid'));
-			*/
-			die('OK');
-		}
-		die('KO');
-	}
+    public function init()
+    {
+        $order = new Order((int) Tools::getValue('orderid'));
+        $context = Context::getContext();
+        if (Validate::isLoadedObject($order) && (isset($context->employee->id) && $context->employee->id)) {
+            /*
+            Db::getInstance()->execute('UPDATE `'._DB_PREFIX_.'newsmanremarketing` SET sent = 1, date_add = NOW() WHERE id_order = '.(int)Tools::getValue('orderid'));
+            */
+            exit('OK');
+        }
+        exit('KO');
+    }
 }

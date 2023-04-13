@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = array();
+$_MODULE = [];
 
 $_MODULE['<{ganalytics}prestashop>ganalytics_7510f8b22dd3e10476096425f78d4239'] = 'You have not yet set your Google Analytics ID';
 $_MODULE['<{ganalytics}prestashop>ganalytics_aba1a7971f85c725ba4aed21343eeb4b'] = 'Integrate Google Analytics script into your shop';
@@ -49,6 +49,5 @@ $_MODULE['<{ganalytics}prestashop>ganalytics_3bab28a0105361c49ca261ca08a19bf7'] 
 $_MODULE['<{ganalytics}prestashop>ganalytics_9bfb6e6af6e6793bfa9387e728187c87'] = '(required)';
 $_MODULE['<{ganalytics}prestashop>ganalytics_6a47891ae07f45802bc948d2618e36f5'] = 'Check the \'Case sensitive\' option';
 $_MODULE['<{ganalytics}prestashop>ganalytics_d2d0c38d112e1d775057388122ae7545'] = 'Save this new goal';
-
 
 return $_MODULE;

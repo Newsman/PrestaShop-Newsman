@@ -1,6 +1,7 @@
 <?php
 /**
  * The API Client for Newsman service
+ *
  *  @author    Newsman App - newsman.app <info@newsman.com>
  *  @copyright 2004 Newsman App - newsman.app
  *  @license   MIT License
@@ -9,48 +10,56 @@ class Newsman_Client
 {
     /**
      * The API URL
+     *
      * @var string
      */
     protected $api_url = 'https://ssl.newsman.app/api';
 
     /**
      * The user ID
+     *
      * @var string
      */
     protected $user_id;
 
     /**
      * The API key
+     *
      * @var string
      */
     protected $api_key;
 
     /**
      * The API version: only 1.2 for now
+     *
      * @var string
      */
     protected $api_version = '1.2';
 
     /**
      * Output format: json or ser (php serialize)
+     *
      * @var string
      */
     protected $output_format = 'json';
 
     /**
      * The method namespace
+     *
      * @var string
      */
     protected $method_namespace = null;
 
     /**
      * The method name
+     *
      * @var string
      */
     protected $method_name = null;
 
     /**
      * Newsman V2 REST API - Client
+     *
      * @param $user_id string
      * @param $api_key string
      */
@@ -75,6 +84,7 @@ class Newsman_Client
 
     /**
      * Deprecated
+     *
      * @param string $transport
      */
     public function setTransport($transport)
@@ -83,6 +93,7 @@ class Newsman_Client
 
     /**
      * Deprecated
+     *
      * @param string $call_type
      */
     public function setCallType($call_type)
@@ -91,6 +102,7 @@ class Newsman_Client
 
     /**
      * Updates the API URL - no trailing slash please
+     *
      * @param string $api_url
      */
     public function setApiUrl($api_url)
@@ -106,6 +118,7 @@ class Newsman_Client
 
     /**
      * Updates the API version
+     *
      * @param string $api_version
      */
     public function setApiVersion($api_version)
@@ -130,6 +143,7 @@ class Newsman_Client
 
     /**
      * Set the namespace
+     *
      * @param string $output_format
      */
     public function setNamespace($namespace)
@@ -139,8 +153,10 @@ class Newsman_Client
 
     /**
      * Makes the call to the endpoint
+     *
      * @param string $name
      * @param string[] $params
+     *
      * @return string[] Return array of values
      */
     public function __call($name, $params)
