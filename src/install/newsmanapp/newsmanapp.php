@@ -114,182 +114,6 @@ class Newsmanapp extends Module
         $mapping = Configuration::get('NEWSMAN_MAPPING');
         $mappingDecoded = json_decode($mapping, true);
 
-        $helper->fields_value['api_key'] = Configuration::get(
-            'NEWSMAN_API_KEY'
-        );
-        $helper->fields_value['user_id'] = Configuration::get(
-            'NEWSMAN_USER_ID'
-        );
-        $helper->fields_value['newsman_userid'] =
-            $mappingDecoded['remarketingenabled'];
-        $helper->fields_value['newsman_account_id'] =
-            $mappingDecoded['remarketingid'];
-
-        if (Configuration::get('NEWSMAN_JQUERY') == 'on') {
-            $helper->fields_value['jquery__'] = true;
-        } else {
-            $helper->fields_value['jquery__'] = false;
-        }
-
-        $helper->fields_value['cron_url'] =
-            $this->context->shop->getBaseURL() .
-            'modules/newsman/cron_task.php';
-        $helper->fields_value['cron_option'] = Configuration::get(
-            'NEWSMAN_CRON'
-        );
-
-        $mappingSection = [
-            [
-                'type' => 'text',
-                'label' => $this->l('Newsman Remarketing Tracking ID'),
-                'name' => 'newsman_account_id',
-                'size' => 20,
-                'required' => false,
-                'hint' => $this->l(
-                    'This information is available in your Newsman Remarketing account'
-                ),
-            ],
-            [
-                'type' => 'radio',
-                'label' => $this->l('Newsman Remarketing User ID'),
-                'name' => 'newsman_userid',
-                'hint' => $this->l(
-                    'The User ID is set at the property level. To find a property go to your newsman account'
-                ),
-                'values' => [
-                    [
-                        'id' => 'newsman_userid_enabled',
-                        'value' => 1,
-                        'label' => $this->l('Enabled'),
-                    ],
-                    [
-                        'id' => 'newsman_userid_disabled',
-                        'value' => 0,
-                        'label' => $this->l('Disabled'),
-                    ],
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => 'Newsman list',
-                'name' => 'sel_list',
-                'options' => ['query' => []],
-            ],
-            [
-                'type' => 'select',
-                'label' => 'Newsman segment',
-                'name' => 'sel_segment',
-                'options' => ['query' => []],
-            ],
-            [
-                'type' => 'html',
-                'name' => 'unused',
-                'html_content' => $this->l('SYNC via CRON'),
-            ],
-            [
-                'type' => 'html',
-                'name' => 'unused',
-                'html_content' => $this->l(
-                    '{{limit}} = Sync with newsman from latest number of records (ex: 2000)'
-                ),
-            ],
-            [
-                'type' => 'html',
-                'name' => 'unused',
-                'html_content' => $this->l(
-                    'CRON Sync newsletter subscribers: '
-                ),
-            ],
-            [
-                'type' => 'html',
-                'name' => 'unused',
-                'html_content' => $this->l(
-                    $this->context->shop->getBaseURL() .
-                        'napi?newsman=cron.json&cron=newsletter&apikey=' .
-                        $helper->fields_value['api_key'] .
-                        '&start=1&limit=2000&cronlast=true'
-                ),
-            ],
-            [
-                'type' => 'html',
-                'name' => 'unused',
-                'html_content' => $this->l(
-                    'CRON Sync customers with newsletter:'
-                ),
-            ],
-            [
-                'type' => 'html',
-                'name' => 'unused',
-                'html_content' => $this->l(
-                    $this->context->shop->getBaseURL() .
-                        'napi?newsman=cron.json&cron=customers_newsletter&apikey=' .
-                        $helper->fields_value['api_key'] .
-                        '&start=1&limit=2000&cronlast=true'
-                ),
-            ],
-        ];
-
-        $out = '<div id="newsman-msg"></div>';
-        $out .= $helper->generateForm([
-            [
-                'form' => [
-                    'legend' => [
-                        'title' => $this->l('API Settings'),
-                        'icon' => 'icon-cogs',
-                    ],
-                    'input' => [
-                        [
-                            'type' => 'text',
-                            'label' => $this->l('API KEY'),
-                            'name' => 'api_key',
-                            'size' => 40,
-                            'required' => true,
-                        ],
-                        [
-                            'type' => 'text',
-                            'label' => $this->l('User ID'),
-                            'name' => 'user_id',
-                            'size' => 40,
-                            'required' => true,
-                        ],
-                    ],
-                    'buttons' => [
-                        [
-                            'title' => 'Connect',
-                            'class' => 'pull-right',
-                            'icon' => $connected
-                                ? 'process-icon-ok'
-                                : 'process-icon-next',
-                            'js' => 'connectAPI(this)',
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'form' => [
-                    'legend' => [
-                        'title' => $this->l(
-                            'Synchronization mapping / Remarketing'
-                        ),
-                    ],
-                    'input' => $mappingSection,
-                    'buttons' => [
-                        [
-                            'title' => $this->l('Save mapping'),
-                            'class' => 'pull-right',
-                            'icon' => 'process-icon-save',
-                            'js' => 'saveMapping(this)',
-                        ],
-                        [
-                            'title' => $this->l('Refresh segments'),
-                            'icon' => 'process-icon-refresh',
-                            'js' => 'connectAPI(this)',
-                        ],
-                    ],
-                ],
-            ],
-        ]);
-
         // the script
         $this->context->controller->addJS($this->_path . 'views/js/newsman.js');
 
@@ -301,8 +125,7 @@ class Newsmanapp extends Module
         $mapExtra = [];
         $data = Configuration::get('NEWSMAN_DATA');
 
-        $out .=
-            '<script>var newsman=' .
+        $js = 'var newsman=' .
             json_encode([
                 'data' => $data ? json_decode($data) : false,
                 'mapExtra' => $mapExtra,
@@ -316,10 +139,23 @@ class Newsmanapp extends Module
                         'You need to save mapping first!'
                     ),
                 ],
-            ]) .
-            '</script>';
+            ]);
 
-        return $out;
+        $frontend = [
+            'js' => $js,
+            'list' => $mappingDecoded['list'],
+            'segment' => $mappingDecoded['segment'],
+            'remarketingid' => $mappingDecoded['remarketingid'],
+            'remarketingenabled' => $mappingDecoded['remarketingenabled'],
+            'apikey' => Configuration::get('NEWSMAN_API_KEY'),
+            'userid' => Configuration::get('NEWSMAN_USER_ID'),
+            'cron1' => $this->context->shop->getBaseURL() . 'napi?newsman=cron.json&cron=customers_newsletter&apikey=' . Configuration::get('NEWSMAN_API_KEY') . '&start=1&limit=2000&cronlast=true',
+            'cron2' => $this->context->shop->getBaseURL() . 'napi?newsman=cron.json&cron=newsletter&apikey=' . Configuration::get('NEWSMAN_API_KEY') . '&start=1&limit=2000&cronlast=true',
+        ];
+
+        $this->smarty->assign('newsmanapp', $frontend);
+
+        return $this->display(__FILE__, 'views/templates/admin/configuration.tpl');
     }
 
     private function jsonOut($output)
