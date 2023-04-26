@@ -72,7 +72,7 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
         $startLimit = '';
         $order_id = empty(Tools::getValue('order_id'))
             ? ''
-            : " WHERE id_order='" . Tools::getValue('order_id') . "'";
+            : Tools::getValue('order_id');
         $product_id = empty(Tools::getValue('product_id'))
             ? ''
             : Tools::getValue('product_id');
@@ -134,7 +134,7 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
                         'SELECT * FROM ' .
                             _DB_PREFIX_ .
                             'orders' .
-                            $order_id .
+                            " WHERE id_order='" . pSQL($order_id) . "'" .
                             $startLimit
                     );
 
@@ -318,7 +318,7 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
                             'product` c LEFT JOIN `' .
                             _DB_PREFIX_ .
                             'product_lang` `cg` ON cg.id_product=c.id_product WHERE c.id_product=' .
-                            $product_id .
+                            pSQL($product_id) .
                             '';
                     } else {
                         $q =

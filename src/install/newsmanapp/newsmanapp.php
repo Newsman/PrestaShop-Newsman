@@ -225,6 +225,12 @@ class Newsmanapp extends Module
     {
         require_once dirname(__FILE__) . '/lib/Client.php';
 
+        $msg = $this->displayConfirmation(
+            $this->l(
+                'Mapping saved successfully.'
+            )
+        );
+
         $client = new Newsman_Client(
             Configuration::get('NEWSMAN_USER_ID'),
             Configuration::get('NEWSMAN_API_KEY')
@@ -236,8 +242,7 @@ class Newsmanapp extends Module
         $mappingDecoded = json_decode($mapping, true);
 
         $list = $mappingDecoded['list'];
-        $url =
-            Context::getContext()->shop->getBaseURL(true) .
+        $url = Context::getContext()->shop->getBaseURL(true) .
             'newsmanfetch.php?newsman=products.json&apikey=' .
             Configuration::get('NEWSMAN_API_KEY');
 
@@ -253,7 +258,7 @@ class Newsmanapp extends Module
 
         Configuration::updateValue('NEWSMAN_MAPPING', $mapping);
 
-        $this->jsonOut(true);
+        $this->jsonOut($msg);
     }
 
     private function getClient($user_id, $api_key)

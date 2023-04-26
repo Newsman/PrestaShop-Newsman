@@ -133,6 +133,22 @@
    </div>
 </form>
 
+<div class="modal" id="notificationsM" tabindex="-1">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Newsmanapp notifications</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="notificationsMMessage"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
     {$newsmanapp.js}
 </script>

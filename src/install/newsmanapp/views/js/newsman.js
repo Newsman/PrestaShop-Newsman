@@ -51,6 +51,10 @@
             });
         }
 
+        $('#notificationsM .close').on('click', function(){
+            $('#notificationsM').hide();
+        });
+
         $('#sel_list').change(function () {        
             var $me = $(this);
             var $ld = $('<i class="process-icon-loading" style="display: inline-block"/>');
@@ -110,10 +114,19 @@
         }, function (ret) {
             debug(ret);
             icn.className = ret.ok ? 'process-icon-ok' : 'process-icon-next';
-            $('#newsman-msg').html(ret.msg);
+            notification(ret.msg);
             data = {lists: ret.lists, segments: ret.segments};
             updateSelects();
         });
+    }
+
+    function notification(msg){
+        $('#notificationsMMessage').html(msg);
+        $('#notificationsM').show();
+
+        setTimeout(function(){
+            $('#notificationsM').hide();
+        }, 4000);
     }
 
     function saveMapping(btn) {
@@ -133,6 +146,7 @@
 
         ajaxCall('SaveMapping', {mapping: JSON.stringify(mapping)}, function (ret) {
             icn.className = 'process-icon-ok';            
+            notification(ret);
         });
     }
 
