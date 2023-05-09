@@ -45,7 +45,7 @@ class Newsmanapp extends Module
 
         $this->displayName = $this->l('NewsmanApp');
         $this->description = $this->l(
-            'The official NewsmanApp module for PrestaShop. Manage your Newsman subscriber lists, map your shop groups to the NewsmanApp segments.'
+            'The official NewsmanApp module for PrestaShop. Manage your Newsman subscriber lists, map your shop groups to NewsmanApp segments.'
         );
 
         $this->confirmUninstall = $this->l(
@@ -92,7 +92,6 @@ class Newsmanapp extends Module
 
         // Module, token and currentIndex
         $helper->module = $this;
-        // $helper->table = $this->table;
         $helper->name_controller = $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
         $helper->currentIndex =
@@ -182,10 +181,19 @@ class Newsmanapp extends Module
             if ($client->query('list.all')) {
                 $output['lists'] = $client->getResponse();
 
+                $connected = 1;
+                $message = 'Connected. Please choose the synchronization details below.';
+
+                if(array_key_exists("faultString", $output["lists"]))
+                {
+                    $message = $output["lists"]["faultString"];
+                    $connected = 0;
+                }
+
                 Configuration::updateValue('NEWSMAN_API_KEY', $api_key);
                 Configuration::updateValue('NEWSMAN_USER_ID', $user_id);
-                Configuration::updateValue('NEWSMAN_CONNECTED', 1);
-                $output['msg'][] = 'Connected. Please choose the synchronization details below.';
+                Configuration::updateValue('NEWSMAN_CONNECTED', $connected);
+                $output['msg'][] = $message;
                 $output['ok'] = true;
                 // get segments for the first list
                 $list_id = $output['lists'][0]['list_id'];
@@ -217,6 +225,13 @@ class Newsmanapp extends Module
             Configuration::get('NEWSMAN_USER_ID'),
             Configuration::get('NEWSMAN_API_KEY')
         );
+
+        $connected = Configuration::get('NEWSMAN_CONNECTED');
+        if($connected == 0)
+        {
+            $this->jsonOut("Newsman credentials User id & Api key are incorrect.");
+            return;
+        }
 
         $mapping = Tools::getValue('mapping');
 
@@ -1024,12 +1039,12 @@ class Newsmanapp extends Module
 
         if (version_compare(_PS_VERSION_, '1.7', '>=')) {
             if (isset($product['price_amount'])) {
-                $price = number_format($product['price'], '2');
+                $price = number_format((float)$product['price'], '2');
             } else {
-                $price = number_format($product['price_amount'], '2');
+                $price = number_format((float)$product['price_amount'], '2');
             }
         } else {
-            $price = number_format($product['price'], '2');
+            $price = number_format((float)$product['price'], '2');
         }
 
         $price = str_replace(',', '', $price);
@@ -1099,7 +1114,6 @@ class Newsmanapp extends Module
             $js .= 'NMBG.add(' . json_encode($product) . ",'',true);";
         }
 
-        // $js .= '_nzm.run(\'send\', \'pageview\');';
         return $js;
     }
 
@@ -1220,16 +1234,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
                 if (strpos($controller_name, 'Admin') !== false) {
                     return $runjs_code;
-                }
-
-                if (
-                    $controller_name != 'order' &&
-                    $controller_name != 'product'
-                ) {
-                    $runjs_code .= '
-                <script type="text/javascript">
-                    //_nzm.run(\'send\', \'pageview\');
-                </script>';
                 }
             }
 

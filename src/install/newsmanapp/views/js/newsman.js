@@ -69,10 +69,16 @@
     });
 
     function updateSelects() {
-        //list select
-        $('#sel_list').empty().append(data.lists.map(function (item) {
-            return $('<option/>').attr('value', item.list_id).text(item.list_name);
-        }));      
+        //list selectf
+        if(data.lists != null)
+        {
+            if(data.lists.hasOwnProperty("faultCode")){
+                return;
+            }
+            $('#sel_list').empty().append(data.lists.map(function (item) {
+                return $('<option/>').attr('value', item.list_id).text(item.list_name);
+            }));     
+        } 
 
         if(data.segments != null)
         {
