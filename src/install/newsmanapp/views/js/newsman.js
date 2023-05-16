@@ -60,15 +60,15 @@
             var $ld = $('<i class="process-icon-loading" style="display: inline-block"/>');
             $me.css({display: 'inline-block'}).after($ld);
             mapping.list = $me.val();
-            ajaxCall('ListChanged', {list_id: mapping.list}, function (ret) {
+            ajaxCall('ListChanged', {list_id: $me.val()}, function (ret) {
                 data.segments = ret.segments;
-                updateSelects();
+                updateSelects($me.val());
                 $ld.remove();
             });
         })
     });
 
-    function updateSelects() {
+    function updateSelects(list_id) {
         //list selectf
         if(data.lists != null)
         {
@@ -78,6 +78,9 @@
             $('#sel_list').empty().append(data.lists.map(function (item) {
                 return $('<option/>').attr('value', item.list_id).text(item.list_name);
             }));     
+
+            if(list_id != null)
+                $('#sel_list').val(list_id);
         } 
 
         if(data.segments != null)
@@ -89,6 +92,9 @@
                     return $('<option/>').attr('value', item.segment_id).text(item.segment_name);
                 }));
             }
+        }
+        else{
+            $('#sel_segment').empty();
         }
 
         $('.id-map-select').each(function () {

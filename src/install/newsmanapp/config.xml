@@ -3,7 +3,7 @@
 	<name>newsmanapp</name>
 	<displayName><![CDATA[NewsmanApp]]></displayName>
 	<version><![CDATA[1.0.0]]></version>
-	<description><![CDATA[The official NewsmanApp module for PrestaShop. Manage your Newsman subscriber lists, map your shop groups to the NewsmanApp segments.]]></description>
+	<description><![CDATA[The official NewsmanApp module for PrestaShop. Manage your Newsman subscriber lists, map your shop groups to NewsmanApp segments.]]></description>
 	<author><![CDATA[NewsmanApp Developers]]></author>
 	<tab><![CDATA[advertising_marketing]]></tab>
 	<confirmUninstall>Are you sure you want to uninstall NewsmanApp module?</confirmUninstall>

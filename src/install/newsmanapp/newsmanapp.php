@@ -142,10 +142,10 @@ class Newsmanapp extends Module
 
         $frontend = [
             'js' => $js,
-            'list' => $mappingDecoded['list'],
-            'segment' => $mappingDecoded['segment'],
-            'remarketingid' => $mappingDecoded['remarketingid'],
-            'remarketingenabled' => $mappingDecoded['remarketingenabled'],
+            'list' => $mappingDecoded['list'] ?? '',
+            'segment' => $mappingDecoded['segment'] ?? '',
+            'remarketingid' => $mappingDecoded['remarketingid'] ?? '',
+            'remarketingenabled' => $mappingDecoded['remarketingenabled'] ?? '',
             'apikey' => Configuration::get('NEWSMAN_API_KEY'),
             'userid' => Configuration::get('NEWSMAN_USER_ID'),
             'cron1' => $this->context->shop->getBaseURL() . 'napi?newsman=cron.json&cron=customers_newsletter&apikey=' . Configuration::get('NEWSMAN_API_KEY') . '&start=1&limit=2000&cronlast=true',
@@ -184,9 +184,8 @@ class Newsmanapp extends Module
                 $connected = 1;
                 $message = 'Connected. Please choose the synchronization details below.';
 
-                if(array_key_exists("faultString", $output["lists"]))
-                {
-                    $message = $output["lists"]["faultString"];
+                if (array_key_exists('faultString', $output['lists'])) {
+                    $message = $output['lists']['faultString'];
                     $connected = 0;
                 }
 
@@ -227,9 +226,9 @@ class Newsmanapp extends Module
         );
 
         $connected = Configuration::get('NEWSMAN_CONNECTED');
-        if($connected == 0)
-        {
-            $this->jsonOut("Newsman credentials User id & Api key are incorrect.");
+        if ($connected == 0) {
+            $this->jsonOut('Newsman credentials User id & Api key are incorrect.');
+
             return;
         }
 
@@ -1039,12 +1038,12 @@ class Newsmanapp extends Module
 
         if (version_compare(_PS_VERSION_, '1.7', '>=')) {
             if (isset($product['price_amount'])) {
-                $price = number_format((float)$product['price'], '2');
+                $price = number_format((float) $product['price'], '2');
             } else {
-                $price = number_format((float)$product['price_amount'], '2');
+                $price = number_format((float) $product['price_amount'], '2');
             }
         } else {
-            $price = number_format((float)$product['price'], '2');
+            $price = number_format((float) $product['price'], '2');
         }
 
         $price = str_replace(',', '', $price);
