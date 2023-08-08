@@ -583,7 +583,7 @@ class Newsmanapp extends Module
             //Newsman remarketing tracking code REPLACEABLE
 
             var remarketingid = '$ga_id';
-            var _nzmPluginInfo = '1.1:prestashop';
+            var _nzmPluginInfo = '1.2:prestashop';
             
             //Newsman remarketing tracking code REPLACEABLE
     
