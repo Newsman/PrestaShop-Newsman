@@ -230,7 +230,7 @@ var ajaxurl = 'https://' + document.location.hostname + '/napi?newsman=getCart.j
 
 		//Newsman remarketing auto events
 
-		var isProd = false;
+		var isProd = true;
 		let lastCart = sessionStorage.getItem('lastCart');
 		if (lastCart === null)
 			lastCart = {};
