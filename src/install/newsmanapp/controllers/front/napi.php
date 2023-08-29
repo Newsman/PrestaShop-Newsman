@@ -315,18 +315,18 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
                         $q =
                             'SELECT * FROM `' .
                             _DB_PREFIX_ .
-                            'product` c LEFT JOIN `' .
+                            'product` c INNER JOIN `' .
                             _DB_PREFIX_ .
-                            'product_lang` `cg` ON cg.id_product=c.id_product WHERE c.id_product=' .
-                            pSQL($product_id) .
-                            '';
+                            'product_lang` `cg` ON cg.id_product=c.id_product ' .
+                            'WHERE c.id_product=' . pSQL($product_id) .
+                            '  AND cg.name!=\'\'';
                     } else {
                         $q =
                             'SELECT * FROM `' .
                             _DB_PREFIX_ .
                             'product` c LEFT JOIN `' .
                             _DB_PREFIX_ .
-                            'product_lang` `cg` ON cg.id_product=c.id_product ' .
+                            'product_lang` `cg` ON cg.id_product=c.id_product WHERE cg.name!=\'\'' .
                             $startLimit;
                     }
 
