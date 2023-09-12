@@ -45,7 +45,7 @@ class Newsmanapp extends Module
 
         $this->displayName = $this->l('NewsmanApp');
         $this->description = $this->l(
-            'The official NewsmanApp module for PrestaShop. Manage your Newsman subscriber lists, map your shop groups to NewsmanApp segments.'
+            'The official NewsmanApp module for PrestaShop. Manage your Newsman subscriber lists, map your shop groups to the NewsmanApp segments.'
         );
 
         $this->confirmUninstall = $this->l(
@@ -92,6 +92,7 @@ class Newsmanapp extends Module
 
         // Module, token and currentIndex
         $helper->module = $this;
+        // $helper->table = $this->table;
         $helper->name_controller = $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
         $helper->currentIndex =
@@ -142,10 +143,10 @@ class Newsmanapp extends Module
 
         $frontend = [
             'js' => $js,
-            'list' => $mappingDecoded['list'] ?? '',
-            'segment' => $mappingDecoded['segment'] ?? '',
-            'remarketingid' => $mappingDecoded['remarketingid'] ?? '',
-            'remarketingenabled' => $mappingDecoded['remarketingenabled'] ?? '',
+            'list' => $mappingDecoded['list'],
+            'segment' => $mappingDecoded['segment'],
+            'remarketingid' => $mappingDecoded['remarketingid'],
+            'remarketingenabled' => $mappingDecoded['remarketingenabled'],
             'apikey' => Configuration::get('NEWSMAN_API_KEY'),
             'userid' => Configuration::get('NEWSMAN_USER_ID'),
             'cron1' => $this->context->shop->getBaseURL() . 'napi?newsman=cron.json&cron=customers_newsletter&apikey=' . Configuration::get('NEWSMAN_API_KEY') . '&start=1&limit=2000&cronlast=true',
@@ -171,28 +172,28 @@ class Newsmanapp extends Module
         $api_key = Tools::getValue('api_key');
         $user_id = Tools::getValue('user_id');
         if (!Validate::isGenericName($api_key) || $api_key == '') {
-            $output['msg'][] = 'Invalid value for API KEY';
+            $output['msg'][] = $this->displayError(
+                $this->l('Invalid value for API KEY')
+            );
         }
         if (!Validate::isInt($user_id)) {
-            $output['msg'][] = 'Invalid value for UserID';
+            $output['msg'][] = $this->displayError(
+                $this->l('Invalid value for UserID')
+            );
         }
         if (!isset($output['msg']) || !count($output['msg'])) {
             $client = $this->getClient($user_id, $api_key);
             if ($client->query('list.all')) {
                 $output['lists'] = $client->getResponse();
 
-                $connected = 1;
-                $message = 'Connected. Please choose the synchronization details below.';
-
-                if (array_key_exists('faultString', $output['lists'])) {
-                    $message = $output['lists']['faultString'];
-                    $connected = 0;
-                }
-
                 Configuration::updateValue('NEWSMAN_API_KEY', $api_key);
                 Configuration::updateValue('NEWSMAN_USER_ID', $user_id);
-                Configuration::updateValue('NEWSMAN_CONNECTED', $connected);
-                $output['msg'][] = $message;
+                Configuration::updateValue('NEWSMAN_CONNECTED', 1);
+                $output['msg'][] = $this->displayConfirmation(
+                    $this->l(
+                        'Connected. Please choose the synchronization details below.'
+                    )
+                );
                 $output['ok'] = true;
                 // get segments for the first list
                 $list_id = $output['lists'][0]['list_id'];
@@ -208,7 +209,13 @@ class Newsmanapp extends Module
                 );
                 $output['saved'] = 'saved';
             } else {
-                $output['msg'][] = 'Error connecting. Please check your API KEY and user ID.' . $client->getErrorMessage();
+                $output['msg'][] = $this->displayError(
+                    $this->l(
+                        'Error connecting. Please check your API KEY and user ID.'
+                    ) .
+                        '<br>' .
+                        $client->getErrorMessage()
+                );
             }
         }
         $this->jsonOut($output);
@@ -218,19 +225,16 @@ class Newsmanapp extends Module
     {
         require_once dirname(__FILE__) . '/lib/Client.php';
 
-        $msg = 'Mapping saved successfully.';
+        $msg = $this->displayConfirmation(
+            $this->l(
+                'Mapping saved successfully.'
+            )
+        );
 
         $client = new Newsman_Client(
             Configuration::get('NEWSMAN_USER_ID'),
             Configuration::get('NEWSMAN_API_KEY')
         );
-
-        $connected = Configuration::get('NEWSMAN_CONNECTED');
-        if ($connected == 0) {
-            $this->jsonOut('Newsman credentials User id & Api key are incorrect.');
-
-            return;
-        }
 
         $mapping = Tools::getValue('mapping');
 
@@ -266,17 +270,25 @@ class Newsmanapp extends Module
 
     public function ajaxProcessSynchronize()
     {
-        $res = $this->doSynchronize();
+        $x = $this->doSynchronize();
 
-        if ($res == 0) {
+        if ($x == 0) {
             $this->jsonOut([
-                'msg' => 'Make sure you have a SEGMENT created in Newsman, after that make sure you SAVE MAPPING with your SEGMENT',
+                'msg' => $this->displayError(
+                    $this->l(
+                        'Make sure you have a SEGMENT created in Newsman, after that make sure you SAVE MAPPING with your SEGMENT'
+                    )
+                ),
             ]);
 
             return;
         } else {
             $this->jsonOut([
-                'msg' => 'Users uploaded and scheduled for import. It might take a few minutes until they show up in your Newsman lists.',
+                'msg' => $this->displayConfirmation(
+                    $this->l(
+                        'Users uploaded and scheduled for import. It might take a few minutes until they show up in your Newsman lists.'
+                    )
+                ),
             ]);
         }
     }
@@ -313,7 +325,9 @@ class Newsmanapp extends Module
             (Module::isInstalled('cronjobs') && function_exists('curl_init'))
         ) {
             $this->jsonOut([
-                'msg' => 'Automatic synchronization option saved.',
+                'msg' => $this->displayConfirmation(
+                    $this->l('Automatic synchronization option saved.')
+                ),
             ]);
             Configuration::updateValue('NEWSMAN_CRON', $option);
             if ($option) {
@@ -328,8 +342,12 @@ class Newsmanapp extends Module
 
             $this->jsonOut([
                 'fail' => true,
-                'msg' => 'To enable automatic synchronization you need to install ' .
-                'and configure "Cron tasks manager" module from PrestaShop.',
+                'msg' => $this->displayError(
+                    $this->l(
+                        'To enable automatic synchronization you need to install ' .
+                            'and configure "Cron tasks manager" module from PrestaShop.'
+                    )
+                ),
             ]);
         }
     }
@@ -583,7 +601,7 @@ class Newsmanapp extends Module
             //Newsman remarketing tracking code REPLACEABLE
 
             var remarketingid = '$ga_id';
-            var _nzmPluginInfo = '1.2:prestashop';
+            var _nzmPluginInfo = '1.0:prestashop';
             
             //Newsman remarketing tracking code REPLACEABLE
     
@@ -632,7 +650,7 @@ class Newsmanapp extends Module
         ";
 
         $ga_snippet_head .= '
-        <script type="text/javascript" src="/modules/newsmanapp/views/js/NewsmanRemarketingActionLib.js?t=' . time() . '"></script>     
+        <script type="text/javascript" src="/modules/newsmanapp/views/js/NewsmanRemarketingActionLib.js?t=27072022"></script>     
         ';
 
         return $ga_snippet_head;
@@ -643,7 +661,7 @@ class Newsmanapp extends Module
         $mapping = Configuration::get('NEWSMAN_MAPPING');
         $mappingDecoded = json_decode($mapping, true);
 
-        if ($mappingDecoded['remarketingenabled'] == '1') {
+        if (isset($mappingDecoded) && array_key_exists("remarketingenabled", $mappingDecoded) && $mappingDecoded['remarketingenabled'] == '1') {
             $nzm = $this->_getGoogleAnalyticsTag();
 
             return $nzm;
@@ -1027,6 +1045,10 @@ class Newsmanapp extends Module
             }
         }
 
+        if (!empty($product['id_product_attribute'])) {
+            // $product_id .= '-' . $product['id_product_attribute'];
+        }
+
         $product_type = 'typical';
         if (isset($product['pack']) && $product['pack'] == 1) {
             $product_type = 'pack';
@@ -1035,15 +1057,17 @@ class Newsmanapp extends Module
         }
 
         $price = 0;
+        $formatPrice = ($product['price'] != null) ? (float)$product["price"] : 0;
+        $formatAmount = ($product['price_amount'] != null) ? (float)$product['price_amount'] : 0;
 
         if (version_compare(_PS_VERSION_, '1.7', '>=')) {
             if (isset($product['price_amount'])) {
-                $price = number_format((float) $product['price'], '2');
+                $price = number_format($formatPrice, '2');
             } else {
-                $price = number_format((float) $product['price_amount'], '2');
+                $price = number_format($formatAmount, '2');
             }
         } else {
-            $price = number_format((float) $product['price'], '2');
+            $price = number_format($formatPrice, '2');
         }
 
         $price = str_replace(',', '', $price);
@@ -1113,6 +1137,7 @@ class Newsmanapp extends Module
             $js .= 'NMBG.add(' . json_encode($product) . ",'',true);";
         }
 
+        // $js .= '_nzm.run(\'send\', \'pageview\');';
         return $js;
     }
 
@@ -1155,6 +1180,8 @@ class Newsmanapp extends Module
             } else {
                 $paramProd = (array) $params['product'];
             }
+
+            // Add product view
 
             $category = new Category(
                 (int) $paramProd['id_category_default'],
@@ -1220,8 +1247,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
                             }, 1000);
                     }
                 }
+    
+        //jQuery(document).ready(function(){
 
-                cJ();
+                        cJ();
+                        
+                    //});
       
                });
                  
@@ -1234,9 +1265,32 @@ document.addEventListener("DOMContentLoaded", function(event) {
                 if (strpos($controller_name, 'Admin') !== false) {
                     return $runjs_code;
                 }
+
+                if (
+                    $controller_name != 'order' &&
+                    $controller_name != 'product'
+                ) {
+                    $runjs_code .= '
+                <script type="text/javascript">
+                    //_nzm.run(\'send\', \'pageview\');
+                </script>';
+                }
             }
 
             return $runjs_code;
         }
+    }
+
+    protected function _debugLog($function, $log)
+    {
+        if (!$this->_debug) {
+            return true;
+        }
+
+        $myFile = _PS_MODULE_DIR_ . $this->name . '/logs/analytics.log';
+        $fh = fopen($myFile, 'a');
+        fwrite($fh, date('F j, Y, g:i a') . ' ' . $function . "\n");
+        fwrite($fh, print_r($log, true) . "\n\n");
+        fclose($fh);
     }
 }
