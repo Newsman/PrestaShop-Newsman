@@ -178,8 +178,9 @@ class Newsmanapp extends Module
         }
         if (!isset($output['msg']) || !count($output['msg'])) {
             $client = $this->getClient($user_id, $api_key);
-            if ($client->query('list.all')) {
-                $output['lists'] = $client->getResponse();
+            $lists = $client->list->all();
+            if (!empty($lists)) {       
+                $output['lists'] = $lists;
 
                 $connected = 1;
                 $message = 'Connected. Please choose the synchronization details below.';
@@ -196,8 +197,7 @@ class Newsmanapp extends Module
                 $output['ok'] = true;
                 // get segments for the first list
                 $list_id = $output['lists'][0]['list_id'];
-                $client->query('segment.all', $list_id);
-                $output['segments'] = $client->getResponse();
+                $output['segments'] = $client->segment->all($list_id);
                 // save lists and segments
                 Configuration::updateValue(
                     'NEWSMAN_DATA',
@@ -208,7 +208,7 @@ class Newsmanapp extends Module
                 );
                 $output['saved'] = 'saved';
             } else {
-                $output['msg'][] = 'Error connecting. Please check your API KEY and user ID.' . $client->getErrorMessage();
+                $output['msg'][] = 'Error connecting. Please check your API KEY and user ID.';
             }
         }
         $this->jsonOut($output);
@@ -259,9 +259,16 @@ class Newsmanapp extends Module
 
     private function getClient($user_id, $api_key)
     {
-        require_once dirname(__FILE__) . '/lib/XMLRPC.php';
+        //require_once dirname(__FILE__) . '/lib/XMLRPC.php';
 
-        return new XMLRPC_Client(self::API_URL . "$user_id/$api_key");
+        //return new XMLRPC_Client(self::API_URL . "$user_id/$api_key");
+        
+        require_once dirname(__FILE__) . '/lib/Client.php';
+        
+        return new Newsman_Client(
+        $user_id,
+        $api_key
+        );
     }
 
     public function ajaxProcessSynchronize()
@@ -288,12 +295,11 @@ class Newsmanapp extends Module
             Configuration::get('NEWSMAN_USER_ID'),
             Configuration::get('NEWSMAN_API_KEY')
         );
-        $client->query('segment.all', $list_id);
+        
         $output = [];
-        $output['segments'] = $client->getResponse();
+        $output['segments'] = $client->segment->all($list_id);
 
-        $client->query('list.all');
-        $output['lists'] = $client->getResponse();
+        $output['lists'] = $client->list->all();
         Configuration::updateValue(
             'NEWSMAN_DATA',
             json_encode([
