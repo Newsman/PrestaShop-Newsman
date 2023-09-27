@@ -290,26 +290,26 @@ if (
             $dbq = new DbQuery();
             $q = null;
 
-            if (!empty($product_id)) {
-                $startLimit = null;
+                    if (!empty($product_id)) {
+                        $startLimit = null;
 
-                $q =
-                    'SELECT * FROM `' .
-                    _DB_PREFIX_ .
-                    'product` c INNER JOIN `' .
-                    _DB_PREFIX_ .
-                    'product_lang` `cg` ON cg.id_product=c.id_product ' .
-                    'WHERE c.id_product=' . pSQL($product_id) .
-                    '  AND cg.name!=\'\'';
-            } else {
-                $q =
-                    'SELECT * FROM `' .
-                    _DB_PREFIX_ .
-                    'product` c LEFT JOIN `' .
-                    _DB_PREFIX_ .
-                    'product_lang` `cg` ON cg.id_product=c.id_product WHERE cg.name!=\'\'' .
-                    $startLimit;
-            }
+                        $q =
+                            'SELECT * FROM `' .
+                            _DB_PREFIX_ .
+                            'product` c INNER JOIN `' .
+                            _DB_PREFIX_ .
+                            'product_lang` `cg` ON cg.id_product=c.id_product ' .
+                            'WHERE c.id_product=' . pSQL($product_id) .
+                            '  AND cg.name!=\'\' AND active=\'1\'';
+                    } else {
+                        $q =
+                            'SELECT * FROM `' .
+                            _DB_PREFIX_ .
+                            'product` c LEFT JOIN `' .
+                            _DB_PREFIX_ .
+                            'product_lang` `cg` ON cg.id_product=c.id_product WHERE cg.name!=\'\' AND active=\'1\'' .
+                            $startLimit;
+                    }
 
             $products = Db::getInstance()->executeS($q);
             $productsJson = [];
