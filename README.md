@@ -12,7 +12,7 @@ Manual installation:
 Copy the "newsmanapp" directory from this repository "src/install" to your "modules" shop directory.
 Copy `newsmanfetch.php` from `../install/newsmanfetch.php` to root of your prestashop installation
 
-## Prestashop 1.7x, 1.8.x
+## Prestashop 1.7x, 8.x
 
 Admin -> Module Manager -> Upload a module -> add "newsmanapp.zip" from "src/install".
 Copy `newsmanfetch.php` from `../install/newsmanfetch.php` to root of your prestashop installation
