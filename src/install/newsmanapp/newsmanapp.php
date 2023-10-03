@@ -1049,6 +1049,9 @@ class Newsmanapp extends Module
                 $price = number_format($formatPrice, '2');
             } else {
                 $price = number_format($formatAmount, '2');
+
+                if($price == "0.00")
+                    $price = number_format($formatPrice, '2');
             }
         } else {
             $price = number_format($formatPrice, '2');
