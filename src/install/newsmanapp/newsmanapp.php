@@ -239,7 +239,7 @@ class Newsmanapp extends Module
 
         $list = $mappingDecoded['list'];
         $url = Context::getContext()->shop->getBaseURL(true) .
-            'newsmanfetch.php?newsman=products.json&apikey=' .
+            'napi?newsman=products.json&apikey=' .
             Configuration::get('NEWSMAN_API_KEY');
 
         try {
