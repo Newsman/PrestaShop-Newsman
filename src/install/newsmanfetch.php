@@ -162,6 +162,10 @@ if (
                         $image->getExistingImgPath() .
                         '.jpg';
 
+                        //new image scrapping
+                        $link = new Link();
+                        $image_url = 'https://' . $link->getImageLink($prod['link_rewrite'], $imageC['id_image'], 'home_default');
+
                     $qty = Product::getQuantity($prod['product_id']);
 
                     $_prod = new Product((int) $prod['product_id']);
