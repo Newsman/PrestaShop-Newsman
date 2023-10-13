@@ -80,6 +80,7 @@ class Newsmanapp extends Module
             $this->registerHook('productfooter') &&
             $this->registerHook('orderConfirmation') &&
             $this->registerHook('displayOrderConfirmation') &&
+            $this->registerHook('actionOrderStatusUpdate') &&
             $this->registerHook('displayFooter') &&
             $this->registerHook('displayFooterCategory');
     }
@@ -741,6 +742,38 @@ class Newsmanapp extends Module
         }
     }
 
+    public function hookActionOrderStatusUpdate($params)
+    {
+        require_once dirname(__FILE__) . '/lib/Client.php';
+
+        $client = new Newsman_Client(
+            Configuration::get('NEWSMAN_USER_ID'),
+            Configuration::get('NEWSMAN_API_KEY')
+        );
+
+        $mapping = Configuration::get('NEWSMAN_MAPPING');
+
+        // Generate feed
+        $mappingDecoded = json_decode($mapping, true);
+
+        if(!empty($mappingDecoded))
+        {
+            $list = (array_key_exists("list", $mappingDecoded)) ? $mappingDecoded["list"] : "";
+            
+            if(!empty($list))
+            {
+                try {
+                        $ret = $client->remarketing->setPurchaseStatus(
+                            $list,
+                            $order->id,
+                            $params['newOrderStatus']->name
+                        );
+                    } catch (Exception $e) {
+                }
+            }
+        }
+    }
+
     public function hookDisplayOrderConfirmation($params)
     {
         $order = null;
@@ -1041,8 +1074,8 @@ class Newsmanapp extends Module
         }
 
         $price = 0;
-        $formatPrice = ($product['price'] != null) ? (float)$product["price"] : 0;
-        $formatAmount = ($product['price_amount'] != null) ? (float)$product['price_amount'] : 0;
+        $formatPrice = (array_key_exists("price", $product)) ? (float)$product["price"] : 0;
+        $formatAmount = (array_key_exists("price_amount", $product)) ? (float)$product['price_amount'] : 0;
 
         if (version_compare(_PS_VERSION_, '1.7', '>=')) {
             if (isset($product['price_amount'])) {
