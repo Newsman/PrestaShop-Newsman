@@ -1162,12 +1162,9 @@ class Newsmanapp extends Module
 
         if (version_compare(_PS_VERSION_, '1.7', '>=') && version_compare(_PS_VERSION_, '8', '<')) {
             if (isset($product['price_amount'])) {
-                $price = number_format($formatPrice, '2');
-            } else {
                 $price = number_format($formatAmount, '2');
-
-                if($price == "0.00")
-                    $price = number_format($formatPrice, '2');
+            } else {
+                $price = number_format($formatPrice, '2');
             }
         }
 
