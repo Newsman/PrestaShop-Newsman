@@ -73,20 +73,31 @@ class Newsmanapp extends Module
             Shop::setContext(Shop::CONTEXT_ALL);
         }
 
-        return parent::install() &&
+        if(version_compare(_PS_VERSION_, '1.5', '>=') && version_compare(_PS_VERSION_, '8', '<'))
+        {
+            return parent::install() &&
             $this->registerHook('moduleRoutes') &&
             $this->registerHook('header') &&
             $this->registerHook('footer') &&
             $this->registerHook('productfooter') &&
             $this->registerHook('orderConfirmation') &&
             $this->registerHook('displayOrderConfirmation') &&
-            $this->registerHook('actionOrderStatusUpdate') &&
+            $this->registerHook('actionOrderStatusUpdate');
+        }
+        elseif(version_compare(_PS_VERSION_, '8', '>=')){
+            return parent::install() &&
+            $this->registerHook('moduleRoutes') &&
+            $this->registerHook('displayHeader') &&
             $this->registerHook('displayFooter') &&
-            $this->registerHook('displayFooterCategory');
+            $this->registerHook('displayFooterProduct') &&
+            $this->registerHook('orderConfirmation') &&
+            $this->registerHook('displayOrderConfirmation') &&
+            $this->registerHook('actionOrderStatusUpdate');
+        }
     }
 
     public function getContent()
-    {
+    {   
         $connected = Configuration::get('NEWSMAN_CONNECTED');
 
         $helper = new HelperForm();
@@ -657,6 +668,18 @@ class Newsmanapp extends Module
         }
     }
 
+    public function hookDisplayHeader()
+    {
+        $mapping = Configuration::get('NEWSMAN_MAPPING');
+        $mappingDecoded = json_decode($mapping, true);
+
+        if (isset($mappingDecoded) && array_key_exists("remarketingenabled", $mappingDecoded) && $mappingDecoded['remarketingenabled'] == '1') {
+            $nzm = $this->_getGoogleAnalyticsTag();
+
+            return $nzm;
+        }
+    }
+
     /**
      * Return a detailed transaction for Newsman Remarketing
      */
@@ -829,6 +852,66 @@ class Newsmanapp extends Module
      * hook footer to load JS script for standards actions such as product clicks
      */
     public function hookFooter()
+    {
+        $ga_scripts = '';
+        $this->js_state = 0;
+
+        if (isset($this->context->cookie->ga_cart)) {
+            $this->filterable = 0;
+
+            $gacarts = unserialize($this->context->cookie->ga_cart);
+            foreach ($gacarts as $gacart) {
+                if ($gacart['quantity'] > 0) {
+                } elseif ($gacart['quantity'] < 0) {
+                    $gacart['quantity'] = abs($gacart['quantity']);
+                }
+            }
+            unset($this->context->cookie->ga_cart);
+        }
+
+        $controller_name = Tools::getValue('controller');
+        $products = $this->wrapProducts(
+            $this->context->smarty->getTemplateVars('products'),
+            [],
+            true
+        );
+
+        if ($controller_name == 'order' || $controller_name == 'orderopc') {
+            $this->eligible = 1;
+            $step = Tools::getValue('step');
+            if (empty($step)) {
+                $step = 0;
+            }
+        }
+
+        if (version_compare(_PS_VERSION_, '1.5', '<')) {
+            if ($controller_name == 'orderconfirmation') {
+                $this->eligible = 1;
+            }
+        } else {
+            $confirmation_hook_id = (int) Hook::getIdByName(
+                'orderConfirmation'
+            );
+            if (isset(Hook::$executed_hooks[$confirmation_hook_id])) {
+                $this->eligible = 1;
+            }
+        }
+
+        if (
+            isset($products) &&
+            count($products) &&
+            $controller_name != 'index'
+        ) {
+            if ($this->eligible == 0) {
+                $ga_scripts .= $this->addProductImpression($products);
+            }
+            $ga_scripts .= $this->addProductClick($products);
+        }
+
+        return $this->_runJs($ga_scripts);
+    }
+
+    public function hookDisplayFooter()
     {
         $ga_scripts = '';
         $this->js_state = 0;
@@ -1074,10 +1157,10 @@ class Newsmanapp extends Module
         }
 
         $price = 0;
-        $formatPrice = (array_key_exists("price", $product)) ? (float)$product["price"] : 0;
-        $formatAmount = (array_key_exists("price_amount", $product)) ? (float)$product['price_amount'] : 0;
+        $formatPrice = (isset($product["price"])) ? $product["price"] : 0;
+        $formatAmount = (isset($product["price_amount"])) ? $product['price_amount'] : 0;
 
-        if (version_compare(_PS_VERSION_, '1.7', '>=')) {
+        if (version_compare(_PS_VERSION_, '1.7', '>=') && version_compare(_PS_VERSION_, '8', '<')) {
             if (isset($product['price_amount'])) {
                 $price = number_format($formatPrice, '2');
             } else {
@@ -1086,8 +1169,10 @@ class Newsmanapp extends Module
                 if($price == "0.00")
                     $price = number_format($formatPrice, '2');
             }
-        } else {
-            $price = number_format($formatPrice, '2');
+        }
+
+        if (version_compare(_PS_VERSION_, '8', '>=')) {
+            $price = number_format($formatAmount, '2');
         }
 
         $price = str_replace(',', '', $price);
@@ -1189,6 +1274,47 @@ class Newsmanapp extends Module
      * hook product page footer to load JS for product details view
      */
     public function hookProductFooter($params)
+    {
+        $controller_name = Tools::getValue('controller');
+        if ($controller_name == 'product') {
+            $paramProd = null;
+
+            if (version_compare(_PS_VERSION_, '1.7', '>=')) {
+                $paramProd = $params['product'];
+            } else {
+                $paramProd = (array) $params['product'];
+            }
+
+            $category = new Category(
+                (int) $paramProd['id_category_default'],
+                (int) $this->context->language->id
+            );
+            $paramProd['category_name'] = $category->name;
+
+            $ga_product = $this->wrapProduct($paramProd, null, 0, true);
+            $js =
+                'NMBG.addProductDetailView(' .
+                json_encode($ga_product) .
+                ');';
+
+            if (
+                isset($_SERVER['HTTP_REFERER']) &&
+                strpos($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST']) > 0
+            ) {
+                if ($this->context->cookie->prodclick != $ga_product['name']) {
+                    $this->context->cookie->prodclick = $ga_product['name'];
+
+                    $js .= $this->addProductClickByHttpReferal([$ga_product]);
+                }
+            }
+
+            $this->js_state = 1;
+
+            return $this->_runJs($js);
+        }
+    }
+
+    public function hookDisplayFooterProduct($params)
     {
         $controller_name = Tools::getValue('controller');
         if ($controller_name == 'product') {
