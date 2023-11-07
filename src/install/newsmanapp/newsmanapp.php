@@ -767,7 +767,7 @@ class Newsmanapp extends Module
 
     public function hookActionOrderStatusUpdate($params)
     {
-        require_once dirname(__FILE__) . '/lib/Client.php';
+        require_once(dirname(__FILE__) . '/lib/Client.php');
 
         $client = new Newsman_Client(
             Configuration::get('NEWSMAN_USER_ID'),
@@ -788,7 +788,7 @@ class Newsmanapp extends Module
                 try {
                         $ret = $client->remarketing->setPurchaseStatus(
                             $list,
-                            $order->id,
+                            $params["id_order"],
                             $params['newOrderStatus']->name
                         );
                     } catch (Exception $e) {
