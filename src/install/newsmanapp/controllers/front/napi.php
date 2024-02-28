@@ -112,10 +112,17 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
                     $prod = [];
 
                     foreach ($cart as $cart_item) {
+
+                        $price = $cart_item['price'];
+
+                        if(array_key_exists("total_wt", $cart_item)){
+                            $price = $cart_item['total_wt'];
+                        }    
+
                         $prod[] = [
                             'id' => $cart_item['id_product'],
                             'name' => $cart_item['name'],
-                            'price' => $cart_item['price'],
+                            'price' => $price,
                             'quantity' => $cart_item['cart_quantity'],
                         ];
                     }
@@ -368,7 +375,7 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
 
                         $_prod = new Product((int) $prod['id_product']);
                         $price = $_prod->getPrice();
-                        $price = number_format($price, 2);
+                        $price = number_format($price, 2, '.', '');
 
                         $price_old = $_prod->getPrice();
                         $price_old = number_format($price_old, 2);
@@ -410,8 +417,8 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
                             'id' => $prod['id_product'],
                             'name' => $prod['name'],
                             'stock_quantity' => $qty,
-                            'price' => $price,
-                            'price_old' => $price_old,
+                            'price' => (float)$price,
+                            'price_old' => (float)$price_old,
                             'image_url' => $image_url,
                             'url' => $url,
                         ];
