@@ -27,6 +27,7 @@ let NewsmanAnalyticEnhancedECommerce = null;
 
 function cJNewsman()
 {
+    
     if (window.jQuery) 
     {
       setTimeout(function(){    
@@ -222,11 +223,11 @@ function cJNewsman()
 
 cJNewsman();
 
-//Newsman remarketing auto events REPLACEABLE
+		//Newsman remarketing auto events REPLACEABLE
 
-var ajaxurl = 'https://' + document.location.hostname + '/napi?newsman=getCart.json';
+		var ajaxurl = 'https://' + document.location.hostname + '/napi?newsman=getCart.json';
 
-//Newsman remarketing auto events REPLACEABLE
+		//Newsman remarketing auto events REPLACEABLE
 
 		//Newsman remarketing auto events
 
@@ -436,7 +437,7 @@ var ajaxurl = 'https://' + document.location.hostname + '/napi?newsman=getCart.j
 					}
 					var msClickPassed = new Date();
 					var timeDiff = msClickPassed.getTime() - msClick.getTime();
-					if (timeDiff > 1000) {
+					if (timeDiff > 5000) {
 						validate = false;
 					} else {
 						timeValidate = true;

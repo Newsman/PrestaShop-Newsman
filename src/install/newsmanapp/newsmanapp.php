@@ -595,21 +595,28 @@ class Newsmanapp extends Module
             return '';
         }
 
+        $currency_id = Context::getContext()->currency->id;
+
+        $currency = new Currency($currency_id);
+
+        $currency_name = $currency->name;
+        $currency_iso_code = $currency->iso_code;
+
         $ga_snippet_head =
             "
             <script type=\"text/javascript\">
             //Newsman remarketing tracking code REPLACEABLE
 
             var remarketingid = '$ga_id';
-            var _nzmPluginInfo = '1.2:prestashop';
+            var _nzmPluginInfo = '1.3:prestashop';
             
             //Newsman remarketing tracking code REPLACEABLE
     
             //Newsman remarketing tracking code  
-    
+
             var endpoint = 'https://retargeting.newsmanapp.com';
             var remarketingEndpoint = endpoint + '/js/retargeting/track.js';
-    
+
             var _nzm = _nzm || [];
             var _nzm_config = _nzm_config || [];
             _nzm_config['disable_datalayer'] = 1;
@@ -631,7 +638,7 @@ class Newsmanapp extends Module
                 script_dom.id = 'nzm-tracker';
                 script_dom.setAttribute('data-site-id', remarketingid);
                 script_dom.src = remarketingEndpoint;
-                //check for engine name
+
                 if (_nzmPluginInfo.indexOf('shopify') !== -1) {
                     script_dom.onload = function(){
                         if (typeof newsmanRemarketingLoad === 'function')
@@ -641,8 +648,10 @@ class Newsmanapp extends Module
                 s.parentNode.insertBefore(script_dom, s);
             })();
             _nzm.run('require', 'ec');
-    
-            //Newsman remarketing tracking code   
+            _nzm.run( 'set', 'currencyCode', '$currency_iso_code' );
+            
+            //Newsman remarketing tracking code
+
         let newsmanVersion = '" .
             _PS_VERSION_ .
             "';
