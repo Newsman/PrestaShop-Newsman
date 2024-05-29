@@ -513,6 +513,90 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
                     echo json_encode($version, JSON_PRETTY_PRINT);
                     exit;
 
+                case "coupons.json":
+
+                    try {
+                        $discountType = Tools::getValue('type', -1);
+                        $value = Tools::getValue('value', -1);
+                        $batch_size = Tools::getValue('batch_size', 1);
+                        $prefix = Tools::getValue('prefix', '');
+                        $expire_date = Tools::getValue('expire_date', null);
+                        $min_amount = Tools::getValue('min_amount', -1);
+                        $currency = Tools::getValue('currency', '');
+                    
+                        if ($discountType == -1) {
+                            die(json_encode(array(
+                                "status" => 0,
+                                "msg" => "Missing type param"
+                            )));
+                        }
+                        if ($value == -1) {
+                            die(json_encode(array(
+                                "status" => 0,
+                                "msg" => "Missing value param"
+                            )));
+                        }
+                    
+                        $couponsList = array();
+                    
+                        for ($int = 0; $int < $batch_size; $int++) {
+                            $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                            $coupon_code = '';
+                    
+                            do {
+                                $coupon_code = '';
+                                for ($i = 0; $i < 8; $i++) {
+                                    $coupon_code .= $characters[rand(0, strlen($characters) - 1)];
+                                }
+                                $full_coupon_code = $prefix . $coupon_code;
+                                $existing_coupon_id = (bool)Db::getInstance()->getValue('SELECT id_cart_rule FROM ' . _DB_PREFIX_ . 'cart_rule WHERE code = \'' . pSQL($full_coupon_code) . '\'');
+                            } while ($existing_coupon_id);
+                    
+                            $cartRule = new CartRule();
+                            $cartRule->name = array((int)Configuration::get('PS_LANG_DEFAULT') => 'Generated Coupon ' . $full_coupon_code);
+                            $cartRule->code = $full_coupon_code;
+                            $cartRule->quantity = 1;
+                            $cartRule->quantity_per_user = 1;
+                            $cartRule->date_from = date('Y-m-d H:i:s'); // Set the start date to now
+                    
+                            if ($discountType == 1) {
+                                $cartRule->reduction_percent = $value;
+                            } elseif ($discountType == 0) {
+                                $cartRule->reduction_amount = $value;
+                                $cartRule->reduction_tax = true; // Include tax if applicable
+                            }
+                    
+                            if ($expire_date != null) {
+                                $formatted_expire_date = date('Y-m-d H:i:s', strtotime($expire_date));
+                                $cartRule->date_to = $formatted_expire_date;
+                            } else {
+                                $cartRule->date_to = '9999-12-31 23:59:59';
+                            }
+                    
+                            if ($min_amount != -1) {
+                                $cartRule->minimum_amount = $min_amount;
+                            }
+                    
+                            $cartRule->active = 1;
+                    
+                            if ($cartRule->add()) {
+                                $couponsList[] = $full_coupon_code;
+                            }
+                        }
+                    
+                        die(json_encode(array(
+                            "status" => 1,
+                            "codes" => $couponsList
+                        )));
+                    } catch (Exception $exception) {
+                        die(json_encode(array(
+                            "status" => 0,
+                            "msg" => $exception->getMessage()
+                        )));
+                    }
+
+                    exit;
+
                 case 'cron.json':
                     $cron = Tools::getValue('cron');
 
