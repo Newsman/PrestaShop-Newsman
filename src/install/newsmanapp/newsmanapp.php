@@ -160,8 +160,8 @@ class Newsmanapp extends Module
             'remarketingenabled' => $mappingDecoded['remarketingenabled'] ?? '',
             'apikey' => Configuration::get('NEWSMAN_API_KEY'),
             'userid' => Configuration::get('NEWSMAN_USER_ID'),
-            'cron1' => $this->context->shop->getBaseURL() . 'napi?newsman=cron.json&cron=customers_newsletter&apikey=' . Configuration::get('NEWSMAN_API_KEY') . '&start=1&limit=2000&cronlast=true',
-            'cron2' => $this->context->shop->getBaseURL() . 'napi?newsman=cron.json&cron=newsletter&apikey=' . Configuration::get('NEWSMAN_API_KEY') . '&start=1&limit=2000&cronlast=true',
+            'cron1' => $this->context->shop->getBaseURL() . 'napi?newsman=cron.json&cron=customers_newsletter&nzmhash=' . Configuration::get('NEWSMAN_API_KEY') . '&start=1&limit=2000&cronlast=true',
+            'cron2' => $this->context->shop->getBaseURL() . 'napi?newsman=cron.json&cron=newsletter&nzmhash=' . Configuration::get('NEWSMAN_API_KEY') . '&start=1&limit=2000&cronlast=true',
         ];
 
         $this->smarty->assign('newsmanapp', $frontend);
@@ -251,7 +251,7 @@ class Newsmanapp extends Module
 
         $list = $mappingDecoded['list'];
         $url = Context::getContext()->shop->getBaseURL(true) .
-            'napi?newsman=products.json&apikey=' .
+            'napi?newsman=products.json&nzmhash=' .
             Configuration::get('NEWSMAN_API_KEY');
 
         try {

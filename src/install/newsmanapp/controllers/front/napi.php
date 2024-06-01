@@ -39,9 +39,13 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
             exit;
         }
 
-        $apikey = empty(Tools::getValue('apikey'))
+        $apikey = empty(Tools::getValue('nzmhash'))
             ? ''
-            : Tools::getValue('apikey');
+            : Tools::getValue('nzmhash');
+        $authorizationHeader = isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '';
+        if (strpos($authorizationHeader, 'Bearer') !== false) {
+            $apikey = trim(str_replace('Bearer', '', $authorizationHeader));
+        }
         $newsman = empty(Tools::getValue('newsman'))
             ? ''
             : Tools::getValue('newsman');
@@ -91,12 +95,9 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
             (!empty($newsman) && !empty($apikey)) ||
             $newsman == 'getCart.json'
         ) {
-            $apikey = '';
             $currApiKey = $_apikey;
 
             if ($newsman != 'getCart.json') {
-                $apikey = Tools::getValue('apikey');
-
                 if ($apikey != $currApiKey) {
                     http_response_code(403);
                     header('Content-Type: application/json');
