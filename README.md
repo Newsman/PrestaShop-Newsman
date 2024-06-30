@@ -1,8 +1,5 @@
-# PrestaShop-Newsman
-[Newsman](https://www.newsmanapp.com) plugin for PrestaShop. Sync your PrestaShop customers / subscribers to Newsman list / segments.
-
-This is the easiest way to connect your Shop with [Newsman](https://www.newsmanapp.com).
-Generate an API KEY in your [Newsman](https://www.newsmanapp.com) account, install this plugin and you will be able to sync your shop customers and newsletter subscribers with Newsman list / segments.
+# PrestaShop-NewsMAN 1.6.x-1.7.x-1.8.x
+Presenting the [NewsMAN](https://www.newsman.com) plugin designed for PrestaShop. Effortlessly synchronize your PrestaShop customers/subscribers with the NewsMAN list/segments. This offers the most straightforward way to integrate your store with NewsMAN. Generate an API KEY within your NewsMAN account, install the plugin, and efficiently synchronize your store's customers and newsletter subscribers with NewsMAN list/segments.
 
 # Installation
 
@@ -18,20 +15,16 @@ Admin -> Module Manager -> Upload a module -> add "newsmanapp.zip" from "src/ins
 Copy `newsmanfetch.php` from `../install/newsmanfetch.php` to root of your prestashop installation
 
 # Setup
-1. Fill in your Newsman API KEY and User ID and click connect
+1. Input your Newsman API KEY and User ID, and proceed by clicking the "Connect" button:
 ![](https://raw.githubusercontent.com/Newsman/PrestaShop-Newsman/master/assets/api-setup-screen.png)
 
-2. Choose destination segments for your newsletter subscribers and customer groups
-All your groups will be listed and you can select the Newsman Segment to map to.
-You can also choose to ignore the group or to upload the group members but include them in any segment.
-For the segments to show up in this form, you need to set them up in your Newsman account first.
+2. Pick the destination segments for your newsletter subscribers and customer groups. Your various groups will be presented, enabling you to designate the appropriate NewsMAN Segment for alignment. Alternatively, you can opt to exclude the group or upload its members while still incorporating them into any segment. To have these segments appear in this form, make sure to set them up within your NewsMAN account beforehand. 
 ![](https://raw.githubusercontent.com/Newsman/PrestaShop-Newsman/master/assets/mapping-screen.png)
 
-3. Choose how often you want your lists to get uploaded to Newsman
-You can also do a manual synchronization by clicking "Synchronize now".
+3. Select the frequency at which you prefer your lists to be uploaded to NewsMAN. Additionally, you have the option to manually synchronize by clicking "Synchronize now."
 ![](https://raw.githubusercontent.com/Newsman/PrestaShop-Newsman/master/assets/sync-screen.png)
 
-For the automatic synchronization to work, you need to have the "native" "Cron tasks manager" (cronjobs) module installed and configured.
+To enable automated synchronization, make sure you have the "native" "Cron tasks manager" (cronjobs) module installed and configured appropriately.
 
 # Sync Segmentation
 
@@ -46,4 +39,37 @@ For the automatic synchronization to work, you need to have the "native" "Cron t
 
 2. Enable and click save
 
-After the plugin is installed, you will also have: feed products, events (product impressions, AddToCart, purchase) automatically implemented.
+Once the plugin is installed, you will also experience automatic implementation of feed products and events such as product impressions, AddToCart, and purchases.
+
+# Plugin Description Features
+
+## Subscription Forms & Pop-ups
+- Craft visually appealing forms and pop-ups to engage potential leads through embedded newsletter signups or exit-intent popups.
+- Maintain uniformity across devices for a seamless user experience.
+- Integrate forms with automations to ensure swift responses and the delivery of welcoming emails.
+
+## Contact Lists & Segments
+- Efficiently import and synchronize contact lists from diverse sources to streamline data management.
+- Apply segmentation techniques to precisely target audience segments based on demographics or behavior.
+
+## Email & SMS Marketing Campaigns
+- Effortlessly send out mass campaigns, newsletters, or promotions to a broad subscriber base.
+- Customize campaigns for individual subscribers by incorporating their names and suggesting relevant products.
+- Re-engage subscribers by reissuing campaigns to those who haven't opened the initial email.
+
+## Email & SMS Marketing Automation
+- Automate personalized product recommendations, follow-up emails, and strategies to address cart abandonment.
+- Strategically tackle cart abandonment or highlight related products to encourage completed purchases.
+- Collect post-purchase feedback to gauge customer satisfaction.
+
+## Ecommerce Remarketing
+- Reconnect with subscribers through targeted offers based on past interactions.
+- Personalize interactions with exclusive offers or reminders based on user behavior or preferences.
+
+## SMTP Transactional Emails
+- Ensure the timely and reliable delivery of crucial messages, such as order confirmations or shipping notifications, through SMTP.
+
+## Extended Email and SMS Statistics
+- Gain comprehensive insights into open rates, click-through rates, conversion rates, and overall campaign performance for well-informed decision-making.
+
+The NewsMAN Plugin for PrestaShop simplifies your marketing efforts without hassle, enabling seamless communication with your audience.
