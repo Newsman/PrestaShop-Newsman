@@ -21,6 +21,79 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0
  -->
 <div id="configuration_form" class="defaultForm form-horizontal newsmanapp">
+
+{if $newsmanapp.isOauth}
+    <div id="contentOauth" style="margin: 20px;">
+        <!--oauth step-->
+       {if $newsmanapp.oauthStep == 1}
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="newsman_oauth" value="Y" />
+            <input type="hidden" name="step" value="1" />
+            <table class="form-table newsmanTable newsmanTblFixed newsmanOauth">
+                <tr>
+                    <td>
+                        <p class="description"><b>Connect your site with NewsMAN for:</b></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p class="description">- Subscribers Sync</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p class="description">- Ecommerce Remarketing</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p class="description">- Create and manage forms</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p class="description">- Create and manage popups</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p class="description">- Connect your forms to automation</p>
+                    </td>
+                </tr>
+            </table>
+            <div style="padding-top: 5px;">
+                <a style="background: #ad0100" href="{$newsmanapp.oauthUrl}"
+                    class="button button-primary btn btn-primary">Login with NewsMAN</a>
+            </div>
+        </form>
+        <!--List step-->
+       {elseif $newsmanapp.oauthStep == 2}
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="oauthstep2" value="Y" />
+            <input type="hidden" name="step" value="1" />
+            <input type="hidden" name="creds" value="{$newsmanapp.creds|escape:'html'}" />
+            <table class="form-table newsmanTable newsmanTblFixed newsmanOauth">
+                <tr>
+                    <td>
+                        <select name="newsman_list" id="">
+                            <option value="0">-- select list --</option>
+                            {foreach from=$newsmanapp.dataLists item=l}
+                                <option value="{$l.list_id}">
+                                    {$l.list_name}
+                                </option>
+                            {/foreach}
+                        </select>
+                    </td>
+                </tr>
+            </table>
+
+            <div style="padding-top: 5px;">
+                <button type="submit" style="background: #ad0100" class="button button-primary btn btn-primary">Save</button>
+            </div>
+        </form>
+       {/if}
+    </div>
+{else}
    <div class="panel" id="fieldset_0">
       <div class="panel-heading">
         <i class="icon-cogs"></i>API Settings
@@ -132,6 +205,7 @@
       </div>
    </div>
 </form>
+{/if}
 
 <div class="modal" id="notificationsM" tabindex="-1">
   <div class="modal-dialog" role="document">

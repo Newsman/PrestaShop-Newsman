@@ -102,6 +102,8 @@ class Newsmanapp extends Module
 
         $helper = new HelperForm();
 
+        $dataOauth = array();
+
         // Module, token and currentIndex
         $helper->module = $this;
         $helper->name_controller = $this->name;
@@ -121,6 +123,9 @@ class Newsmanapp extends Module
         $helper->toolbar_scroll = true; // yes - > Toolbar is always visible on the top of the screen.
         $helper->submit_action = 'submit' . $this->name;
 
+        //set oauth variables before getting them
+        $this->isOauth($dataOauth);
+
         // Load current value
         $mapping = Configuration::get('NEWSMAN_MAPPING');
         $mappingDecoded = json_decode($mapping, true);
@@ -138,7 +143,7 @@ class Newsmanapp extends Module
 
         $js = 'var newsman=' .
             json_encode([
-                'data' => $data ? json_decode($data) : false,
+                'data' => is_string($data) ? json_decode($data) : false,
                 'mapExtra' => $mapExtra,
                 'mapping' => $mapping ? json_decode($mapping) : false,
                 'ajaxURL' => $ajaxURL,
@@ -153,6 +158,11 @@ class Newsmanapp extends Module
             ]);
 
         $frontend = [
+            'oauthStep' => isset($dataOauth["oauthStep"]) ? $dataOauth["oauthStep"] : null,
+            'dataLists' => empty($dataOauth["dataLists"]) ? "" : $dataOauth["dataLists"],
+            'creds' => empty($dataOauth["creds"]) ? "" : $dataOauth["creds"],
+            'isOauth' => isset($dataOauth["isOauth"]) ? $dataOauth["isOauth"] : null,
+            'oauthUrl' => isset($dataOauth["oauthUrl"]) ? $dataOauth["oauthUrl"] : null,
             'js' => $js,
             'list' => $mappingDecoded['list'] ?? '',
             'segment' => $mappingDecoded['segment'] ?? '',
@@ -168,6 +178,147 @@ class Newsmanapp extends Module
 
         return $this->display(__FILE__, 'views/templates/admin/configuration.tpl');
     }
+
+    public function isOauth(&$data, $checkOnlyIsOauth = false){
+        require_once dirname(__FILE__) . '/lib/Client.php';
+
+        if (!is_array($data)) {
+            $data = array();
+        }
+
+		$redirUri = urlencode("https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
+		$redirUri = str_replace("amp%3B", "", $redirUri);
+		$data["oauthUrl"] = "https://newsman.app/admin/oauth/authorize?response_type=code&client_id=nzmplugin&nzmplugin=Opencart&scope=api&redirect_uri=" . $redirUri;
+
+		//oauth processing
+
+		$error = "";
+		$dataLists = array();
+		$data["oauthStep"] = 1;
+		$viewState = array();
+
+		if(!empty($_GET["error"])){
+			switch($error){
+				case "access_denied":
+					$error = "Access is denied";
+					break;
+				case "missing_lists":
+					$error = "There are no lists in your NewsMAN account";
+					break;
+			}
+		}else if(!empty($_GET["code"])){
+
+			$authUrl = "https://newsman.app/admin/oauth/token";
+
+			$code = $_GET["code"];
+
+			$redirect = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+			$body = array(
+				"grant_type" => "authorization_code",
+				"code" => $code,
+				"client_id" => "nzmplugin",
+				"redirect_uri" => $redirect
+			);
+
+			$ch = curl_init($authUrl);
+
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+
+			$response = curl_exec($ch);
+
+			if (curl_errno($ch)) {
+				$error .= 'cURL error: ' . curl_error($ch);
+			}
+
+			curl_close($ch);
+
+			if ($response !== false) {
+
+				$response = json_decode($response);
+
+				$data["creds"] = json_encode(array(
+					"newsman_userid" => $response->user_id,
+					"newsman_apikey" => $response->access_token
+					)
+				);
+
+				foreach($response->lists_data as $list => $l){
+					$dataLists[] = array(
+						"list_id" => $l->list_id,
+						"list_name" => $l->name
+					);
+				}	
+
+				$data["dataLists"] = $dataLists;
+
+				$data["oauthStep"] = 2;
+			} else {
+				$error .= "Error sending cURL request.";
+			}  
+		}
+
+		if(!empty($_POST["oauthstep2"]) && $_POST['oauthstep2'] == 'Y')
+		{
+			if(empty($_POST["newsman_list"]) || $_POST["newsman_list"] == 0)
+			{
+				$step = 1;
+			}
+			else
+			{
+				$creds = stripslashes($_POST["creds"]);
+				$creds = html_entity_decode($creds);
+				$creds = json_decode($creds, true);
+
+				$client = new Newsman_Client($creds["newsman_userid"], $creds["newsman_apikey"]);
+				$ret = $client->remarketing->getSettings($_POST["newsman_list"]);
+
+				$remarketingId = $ret["site_id"] . "-" . $ret["list_id"] . "-" . $ret["form_id"] . "-" . $ret["control_list_hash"];
+
+				//set feed
+				$url = "https://" . $_SERVER['SERVER_NAME'] . "/index.php?route=module/newsman_import&newsman=products.json&apikey=" . $creds["newsman_apikey"];		
+
+				try{
+					$ret = $client->feeds->setFeedOnList($_POST["newsman_list"], $url, $_SERVER['SERVER_NAME'], "NewsMAN");	
+				}
+				catch(Exception $ex)
+				{			
+					//the feed already exists
+				}
+
+				$settings = array();
+				$settings['list_id'] = $_POST["newsman_list"];
+				$settings['NEWSMAN_API_KEY'] = $creds["newsman_apikey"];
+				$settings['NEWSMAN_USER_ID'] = $creds["newsman_userid"];
+
+				Configuration::updateValue('NEWSMAN_API_KEY', $settings['NEWSMAN_API_KEY']);
+				Configuration::updateValue('NEWSMAN_USER_ID', $settings['NEWSMAN_USER_ID']);
+				Configuration::updateValue(
+					'NEWSMAN_DATA',
+					json_encode(array('lists' => $dataLists, 'segments' => array()))
+				);
+				$mapping = array(
+					"list" => $settings["list_id"],
+                    "remarketingid" => $remarketingId,
+                    "remarketingenabled" => "1"
+				);
+				$mapping = json_encode($mapping);
+				Configuration::updateValue('NEWSMAN_MAPPING', $mapping);
+			}
+		}
+
+		$_apiKey = Configuration::get('NEWSMAN_API_KEY');
+
+		if(empty($_apiKey))
+		{
+			$data["isOauth"] = true;
+		}
+		else{
+			$data["isOauth"] = false;
+		}
+	}
 
     private function jsonOut($output)
     {
