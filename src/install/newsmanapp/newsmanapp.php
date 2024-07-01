@@ -188,7 +188,7 @@ class Newsmanapp extends Module
 
 		$redirUri = urlencode("https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
 		$redirUri = str_replace("amp%3B", "", $redirUri);
-		$data["oauthUrl"] = "https://newsman.app/admin/oauth/authorize?response_type=code&client_id=nzmplugin&nzmplugin=Opencart&scope=api&redirect_uri=" . $redirUri;
+		$data["oauthUrl"] = "https://newsman.app/admin/oauth/authorize?response_type=code&client_id=nzmplugin&nzmplugin=Prestashop&scope=api&redirect_uri=" . $redirUri;
 
 		//oauth processing
 
