@@ -1559,11 +1559,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
                 $controller_name = Tools::getValue('controller');
 
                 if (strpos($controller_name, 'Admin') !== false) {
-                    return $runjs_code;
+                    echo $runjs_code;
                 }
             }
 
-            return $runjs_code;
+            echo $runjs_code;
         }
     }
 }
