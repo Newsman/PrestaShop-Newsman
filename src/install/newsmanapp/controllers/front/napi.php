@@ -42,6 +42,10 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
         $apikey = empty(Tools::getValue('nzmhash'))
             ? ''
             : Tools::getValue('nzmhash');
+        if(empty($apikey))
+        {
+            $apikey = empty($_POST['nzmhash']) ? '' : $_POST['nzmhash'];
+        }	    
         $authorizationHeader = isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '';
         if (strpos($authorizationHeader, 'Bearer') !== false) {
             $apikey = trim(str_replace('Bearer', '', $authorizationHeader));
@@ -49,6 +53,10 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
         $newsman = empty(Tools::getValue('newsman'))
             ? ''
             : Tools::getValue('newsman');
+        if(empty($newsman))
+        {
+            $newsman = empty($_POST['newsman']) ? '' : $_POST['newsman'];
+        }	
         $start =
             !empty(Tools::getValue('start')) && Tools::getValue('start') >= 0
                 ? Tools::getValue('start')
@@ -518,12 +526,40 @@ class newsmanappnapiModuleFrontController extends ModuleFrontController
 
                     try {
                         $discountType = Tools::getValue('type', -1);
+		        if(empty($discountType))
+		        {
+		            $discountType = empty($_POST['type']) ? '' : $_POST['type'];
+		        }			    
                         $value = Tools::getValue('value', -1);
+		        if(empty($value))
+		        {
+		            $value = empty($_POST['value']) ? '' : $_POST['value'];
+		        }			    
                         $batch_size = Tools::getValue('batch_size', 1);
+		        if(empty($batch_size))
+		        {
+		            $batch_size = empty($_POST['batch_size']) ? '' : $_POST['batch_size'];
+		        }			    
                         $prefix = Tools::getValue('prefix', '');
+		        if(empty($prefix))
+		        {
+		            $prefix = empty($_POST['prefix']) ? '' : $_POST['prefix'];
+		        }			    
                         $expire_date = Tools::getValue('expire_date', null);
+		        if(empty($expire_date))
+		        {
+		            $expire_date = empty($_POST['expire_date']) ? '' : $_POST['expire_date'];
+		        }			    
                         $min_amount = Tools::getValue('min_amount', -1);
+		        if(empty($min_amount))
+		        {
+		            $min_amount = empty($_POST['min_amount']) ? '' : $_POST['min_amount'];
+		        }			    
                         $currency = Tools::getValue('currency', '');
+		        if(empty($currency))
+		        {
+		            $currency = empty($_POST['currency']) ? '' : $_POST['currency'];
+		        }			    
                     
                         if ($discountType == -1) {
                             die(json_encode(array(
