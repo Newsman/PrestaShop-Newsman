@@ -1,4 +1,4 @@
-# PrestaShop-NewsMAN 1.6.x-1.7.x-1.8.x
+# PrestaShop-NewsMAN 1.6.x-1.7.x
 Presenting the [NewsMAN](https://www.newsman.com) plugin designed for PrestaShop. Effortlessly synchronize your PrestaShop customers/subscribers with the NewsMAN list/segments. This offers the most straightforward way to integrate your store with NewsMAN. Generate an API KEY within your NewsMAN account, install the plugin, and efficiently synchronize your store's customers and newsletter subscribers with NewsMAN list/segments.
 
 # Installation
@@ -9,7 +9,7 @@ Manual installation:
 Copy the "newsmanapp" directory from this repository "src/install" to your "modules" shop directory.
 Copy `newsmanfetch.php` from `../install/newsmanfetch.php` to root of your prestashop installation
 
-## Prestashop 1.7x, 8.x
+## Prestashop 1.7x
 
 Admin -> Module Manager -> Upload a module -> add "newsmanapp.zip" from "src/install/zipChild or zipParent".
 Copy `newsmanfetch.php` from `../install/newsmanfetch.php` to root of your prestashop installation
